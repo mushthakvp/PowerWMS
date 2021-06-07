@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WMSAppBar extends AppBar {
-  WMSAppBar({Key key, PreferredSizeWidget bottom, @required BuildContext context})
+  WMSAppBar({Key? key, required PreferredSizeWidget bottom, required BuildContext context})
       : super(
           key: key,
           title: Row(

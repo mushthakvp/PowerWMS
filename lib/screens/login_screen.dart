@@ -1,18 +1,15 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
-import 'package:http/http.dart';
+import 'package:scanner/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   final _authData = {
-    'server': '',
     'username': '',
     'password': '',
   };
 
-  LoginScreen({Key key}) : super(key: key);
+  LoginScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +40,8 @@ class LoginScreen extends StatelessWidget {
                     return null;
                   },
                   onSaved: (value) {
-                    _authData['server'] = value;
+                    dio.options.baseUrl = '$value/api';
+                    SharedPreferences.getInstance().then((prefs) => prefs.setString('server', '$value/api'));
                   },
                 ),
                 TextFormField(
@@ -57,7 +55,7 @@ class LoginScreen extends StatelessWidget {
                     EmailValidator(errorText: 'Invalid email'),
                   ]),
                   onSaved: (value) {
-                    _authData['username'] = value;
+                    _authData['username'] = value ?? '';
                   },
                 ),
                 TextFormField(
@@ -74,7 +72,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ]),
                   onSaved: (value) {
-                    _authData['password'] = value;
+                    _authData['password'] = value ?? '';
                   },
                 ),
                 SizedBox(
@@ -88,25 +86,24 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
-                    if (_formKey.currentState.validate()) {
-                      _formKey.currentState.save();
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
                       try {
-                        final response = await post(
-                          Uri.parse('${_authData['server']}/api/account/token'),
-                          body: {
+                        final response = await dio.post(
+                          '/account/token',
+                          data: {
                             'email': _authData['username'],
                             'password': _authData['password']
                           },
                         );
-                        if (response.statusCode != 200) {
-                          throw ClientException('Invalid credentials');
-                        }
+                        dio.options.headers = {
+                          'authorization': 'Bearer ${response.data}',
+                        };
                         SharedPreferences prefs = await SharedPreferences.getInstance();
-                        prefs.setString('token', jsonDecode(response.body));
-                        prefs.setString('server', _authData['server']);
+                        prefs.setString('token', response.data);
                         Navigator.pushReplacementNamed(context, '/');
                       } catch (e) {
-                        _showErrorDialog(context, e.toString());
+                        _showErrorDialog(context, 'Invalid credentials');
                       }
                     }
                   },
@@ -139,52 +136,4 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-
-// Future<void> _submit() async {
-//   if (!_formKey.currentState.validate()) {
-//     // Invalid!
-//     return;
-//   }
-//   _formKey.currentState.save();
-//   setState(() {
-//     _isLoading = true;
-//   });
-//   try {
-//     if (_authMode == AuthMode.Login) {
-//       // Log user in
-//       // await Provider.of<Auth>(context, listen: false).login(
-//       //   _authData['email'],
-//       //   _authData['password'],
-//       // );
-//     } else {
-//       // Sign user up
-//       // await Provider.of<Auth>(context, listen: false).signup(
-//       //   _authData['email'],
-//       //   _authData['password'],
-//       // );
-//     }
-//     // } on HttpException catch (error) {
-//     //   var errorMessage = 'Authentication failed';
-//     //   if (error.toString().contains('EMAIL_EXISTS')) {
-//     //     errorMessage = 'This email address is already in use.';
-//     //   } else if (error.toString().contains('INVALID_EMAIL')) {
-//     //     errorMessage = 'This is not a valid email address';
-//     //   } else if (error.toString().contains('WEAK_PASSWORD')) {
-//     //     errorMessage = 'This password is too weak.';
-//     //   } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
-//     //     errorMessage = 'Could not find a user with that email.';
-//     //   } else if (error.toString().contains('INVALID_PASSWORD')) {
-//     //     errorMessage = 'Invalid password.';
-//     //   }
-//     //   _showErrorDialog(errorMessage);
-//   } catch (error) {
-//     const errorMessage =
-//         'Could not authenticate you. Please try again later.';
-//     _showErrorDialog(errorMessage);
-//   }
-//
-//   setState(() {
-//     _isLoading = false;
-//   });
-// }
 }

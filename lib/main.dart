@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:scanner/dio.dart';
 import 'package:scanner/screens/login_screen.dart';
-import 'package:scanner/screens/my_home_page.dart';
-import 'package:scanner/screens/picklist_screen.dart';
+import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -20,8 +20,12 @@ class MyApp extends StatelessWidget {
       home: FutureBuilder<SharedPreferences>(
         future: SharedPreferences.getInstance(),
         builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data.getString('token') != null) {
-            return PicklistScreen();//PicklistScreen();
+          if (snapshot.hasData && snapshot.data!.getString('token') != null && snapshot.data!.getString('server') != null) {
+            dio.options.baseUrl = snapshot.data!.getString('server')!;
+            dio.options.headers = {
+              'authorization': 'Bearer ${snapshot.data!.getString('token')}',
+            };
+            return PicklistsScreen();
           } else {
             return LoginScreen();
           }

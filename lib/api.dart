@@ -1,27 +1,22 @@
-import 'package:http/http.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
+import 'package:scanner/dio.dart';
 
-Future<Response> login(String username, String password) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return post(
-    Uri.parse('${prefs.getString('server')}/api/account/token'),
-    body: {
+Future login(String username, String password) {
+  return dio.post(
+    '/account/token',
+    data: {
       'email': username,
       'password': password,
     },
   );
 }
 
-Future<Response> getPicklists(String search) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return post(
-    Uri.parse('${prefs.getString('server')}/api/picklist/list'),
-    body: {
+Future<Response<Map<String, dynamic>>> getPicklists(String search) {
+  return dio.post(
+    '/picklist/list',
+    data: {
       'search': search,
-      'skipPaging': '1',
-    },
-    headers: {
-      'Authorization': 'Bearer ${prefs.getString('token')}',
+      'skipPaging': true,
     },
   );
 }
