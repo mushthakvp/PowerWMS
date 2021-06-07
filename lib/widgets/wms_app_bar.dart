@@ -1,0 +1,27 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class WMSAppBar extends AppBar {
+  WMSAppBar({Key key, PreferredSizeWidget bottom, @required BuildContext context})
+      : super(
+          key: key,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Image.asset('assets/images/logo_blue.png', height: 24),
+              const Text('Extracom WMS'),
+            ],
+          ),
+          bottom: bottom,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.clear();
+                Navigator.pushReplacementNamed(context, '/');
+              },
+            )
+          ],
+        );
+}
