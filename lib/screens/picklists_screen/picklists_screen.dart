@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:scanner/api.dart';
-import 'package:scanner/screens/picklist_screen/widgets/picklist_view.dart';
+import 'package:scanner/screens/picklists_screen/widgets/picklist_view.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -66,7 +66,6 @@ class _PicklistScreenState extends State<PicklistsScreen> {
             PicklistView(_future!, (element) => element.status == 4),
           ],
         ),
-        drawer: Drawer(),
       ),
     );
   }

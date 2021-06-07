@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
 import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,9 +14,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'ScanWMS',
+      title: 'Extracom WMS',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.grey,
+        scaffoldBackgroundColor: Color(0xFFEDF0F5),
+        appBarTheme: AppBarTheme(
+          // titleTextStyle: TextStyle(color: Colors.grey[800]),
+          backgroundColor: Colors.white,
+          iconTheme: IconThemeData(color: Colors.grey[500]),
+        ),
       ),
       home: FutureBuilder<SharedPreferences>(
         future: SharedPreferences.getInstance(),
@@ -25,12 +32,16 @@ class MyApp extends StatelessWidget {
             dio.options.headers = {
               'authorization': 'Bearer ${snapshot.data!.getString('token')}',
             };
-            return PicklistsScreen();
+            return HomeScreen();
           } else {
             return LoginScreen();
           }
         },
       ),
+      routes: {
+        // '/products':
+        '/picklists': (context) => PicklistsScreen(),
+      },
     );
   }
 }
