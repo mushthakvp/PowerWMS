@@ -6,7 +6,7 @@ final List<Map<String, dynamic>> items = [
   {
     'title': 'Producten',
     'icon': Icons.inventory_2,
-    'route': '/picklists',
+    'route': '/products',
   },
   {
     'title': 'Klanten',
@@ -65,7 +65,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-
         ],
       ),
       drawer: Drawer(),

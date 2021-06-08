@@ -3,6 +3,7 @@ import 'package:scanner/dio.dart';
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
 import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
+import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
         },
       ),
       routes: {
-        // '/products':
+        '/products': (context) => ProductsScreen(),
         '/picklists': (context) => PicklistsScreen(),
       },
     );
