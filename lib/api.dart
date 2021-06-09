@@ -23,6 +23,16 @@ Future<Response<Map<String, dynamic>>> getPicklists(String search) {
   );
 }
 
+Future<Response<Map<String, dynamic>>> getPicklistLines(int picklistId) {
+  return dio.post(
+    '/picklist/lines',
+    data: {
+      'picklistId': picklistId,
+      'skipPaging': true,
+    },
+  );
+}
+
 Future<Response<Map<String, dynamic>>> getProducts() {
   return dio.post(
     '/product/list',

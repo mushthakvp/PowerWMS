@@ -36,7 +36,9 @@ class PicklistView extends StatelessWidget {
                 .map((picklist) => Column(
                       children: [
                         ListTile(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.pushNamed(context, '/picklist', arguments: picklist);
+                          },
                           title: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

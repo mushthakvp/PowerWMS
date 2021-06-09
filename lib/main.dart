@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/models/picklist.dart';
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
+import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
 import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,6 +44,10 @@ class MyApp extends StatelessWidget {
       routes: {
         '/products': (context) => ProductsScreen(),
         '/picklists': (context) => PicklistsScreen(),
+        '/picklist': (context) {
+          final picklist = ModalRoute.of(context)!.settings.arguments as Picklist;
+          return PicklistScreen(picklist);
+        },
       },
     );
   }
