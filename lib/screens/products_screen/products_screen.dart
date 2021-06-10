@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,8 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:gs1_barcode_parser/gs1_barcode_parser.dart';
 import 'package:scanner/api.dart';
 import 'package:scanner/models/product.dart';
+import 'package:scanner/screens/products_screen/widgets/amount.dart';
+import 'package:scanner/widgets/product_image.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,7 +28,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   void initState() {
-    _future = getProducts().then((response) {
+    _future = getProducts(null).then((response) {
       return (response.data!['data'] as List<dynamic>)
           .map((json) => Product.fromJson(json))
           .toList();
@@ -96,32 +97,21 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     try {
                       final product = snapshot.data!
                           .firstWhere((product) => product.ean == _result);
+                      var headline6 = Theme.of(context).textTheme.headline6;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          FutureBuilder<Response<Uint8List>>(
-                            future: getProductImage(product.id),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                print(snapshot.error);
-                              }
-                              if (snapshot.hasData) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Image.memory(
-                                    snapshot.data!.data!,
-                                    width: double.infinity,
-                                  ),
-                                );
-                              }
-                              return Container();
-                            },
+                          Text(
+                            product.description,
+                            style: headline6,
                           ),
-                          Text(product.uid),
-                          Text(product.name),
-                          Text(product.description),
-                          Text(product.ean),
-                          Text(product.productGroupName),
+                          Text(
+                            '${product.ean} | ${product.uid}',
+                            style: headline6,
+                          ),
+                          ProductImage(product.id),
+                          Amount(),
+                          Divider(height: 1),
                         ],
                       );
                     } catch (e) {
@@ -134,6 +124,67 @@ class _ProductsScreenState extends State<ProductsScreen> {
               ),
             ),
           ),
+          FutureBuilder<List<Product>>(
+          future: _future,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              try {
+                final product = snapshot.data!
+                    .firstWhere((product) => product.ean == _result);
+                var headline5 = Theme
+                    .of(context)
+                    .textTheme
+                    .headline5;
+                return FutureBuilder<Response<Map<String, dynamic>>>(
+                  future: getProducts(product.uid),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final products = (snapshot.data!.data!['data']
+                      as List<dynamic>)
+                          .where((element) =>
+                      element['ean'] != product.ean).toList();
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                            final product = products[index];
+                            return Column(
+                              children: [
+                                ListTile(
+                                  title: Text(
+                                    product['unit'],
+                                    textAlign: TextAlign.center,
+                                    style: headline5,
+                                  ),
+                                  subtitle: Row(
+                                    children: [
+                                      ProductImage(
+                                        product['id'],
+                                        width: 60,
+                                      ),
+                                      SizedBox(width: 20),
+                                      Expanded(child: Amount()),
+                                    ],
+                                  ),
+                                ),
+                                Divider(height: 1),
+                              ],
+                            );
+                          },
+                          childCount: products.length,
+                        ),
+                      );
+                    }
+
+                    return SliverFillRemaining();
+                  },
+                );
+              } catch(e) {
+                print(e);
+              }
+            }
+
+            return SliverFillRemaining();
+          }),
         ],
       ),
     );
@@ -141,7 +192,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   _parse(String value) {
     setState(() {
-      print(value);
       try {
         var barcode = parser.parse(value);
         if (barcode.hasAI('01')) {

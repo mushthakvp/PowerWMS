@@ -19,6 +19,12 @@ class _BarcodeInputState extends State<BarcodeInput> {
   final controller = TextEditingController();
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
