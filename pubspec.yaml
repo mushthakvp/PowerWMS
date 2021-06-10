@@ -39,6 +39,8 @@ dependencies:
   gs1_barcode_parser: ^0.0.8
   flutter_barcode_scanner: ^2.0.0
 
+  assets_audio_player: ^3.0.3+3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -58,7 +60,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/
+    - assets/error.mp3
     - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see

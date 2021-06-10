@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist.dart';
+import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
 import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
 import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
+import 'package:scanner/screens/product_screen/product_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,6 +28,8 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.white,
           iconTheme: IconThemeData(color: Colors.grey[500]),
         ),
+        textTheme: TextTheme(button: TextStyle(color: Colors.blueAccent)),
+        textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.blueAccent)),
       ),
       home: FutureBuilder<SharedPreferences>(
         future: SharedPreferences.getInstance(),
@@ -43,6 +47,10 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         '/products': (context) => ProductsScreen(),
+        '/product': (context) {
+          final line = ModalRoute.of(context)!.settings.arguments as PicklistLine;
+          return ProductScreen(line);
+        },
         '/picklists': (context) => PicklistsScreen(),
         '/picklist': (context) {
           final picklist = ModalRoute.of(context)!.settings.arguments as Picklist;

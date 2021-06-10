@@ -25,6 +25,7 @@ class _PicklistScreenState extends State<PicklistScreen> {
     final _future = getPicklistLines(widget._picklist.id);
     return Scaffold(
       appBar: WMSAppBar(
+        widget._picklist.uid,
         context: context,
       ),
       body: FutureBuilder<Response<Map<String, dynamic>>>(
@@ -54,7 +55,9 @@ class _PicklistScreenState extends State<PicklistScreen> {
                     return Column(
                       children: [
                         ListTile(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.of(context).pushNamed('/product', arguments: line);
+                          },
                           leading: Container(
                             width: 60,
                             height: 60,

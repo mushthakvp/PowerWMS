@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WMSAppBar extends AppBar {
-  WMSAppBar({Key? key, PreferredSizeWidget? bottom, required BuildContext context})
+  WMSAppBar(title, {Key? key, PreferredSizeWidget? bottom, required BuildContext context})
       : super(
           key: key,
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Image.asset('assets/images/logo_blue.png', height: 24),
-              Text('Extracom', style: Theme.of(context).appBarTheme.titleTextStyle,),
+              Text(title, style: Theme.of(context).appBarTheme.titleTextStyle),
             ],
           ),
           bottom: bottom,

@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-// import 'package:scanner/models/packaging.dart';
+import 'package:scanner/models/packaging.dart';
 
 part 'product.g.dart';
 
@@ -17,7 +17,7 @@ class Product {
   final int status;
   final num stock;
   final bool hasImage;
-  // final List<Packaging> packagings;
+  final List<Packaging> packagings;
   final int id;
   final bool isNew;
 
@@ -34,7 +34,7 @@ class Product {
     required this.status,
     required this.stock,
     required this.hasImage,
-    // required this.packagings,
+    required this.packagings,
     required this.id,
     required this.isNew,
   });

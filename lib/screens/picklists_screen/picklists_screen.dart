@@ -30,6 +30,7 @@ class _PicklistScreenState extends State<PicklistsScreen> {
       length: 2,
       child: Scaffold(
         appBar: WMSAppBar(
+          'Extracom',
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(100),
             child: Column(

@@ -44,6 +44,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WMSAppBar(
+        'Producten',
         context: context,
       ),
       body: CustomScrollView(

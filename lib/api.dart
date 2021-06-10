@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/models/stock_mutation.dart';
 
 Future login(String username, String password) {
   return dio.post(
@@ -46,5 +47,12 @@ Future<Response<Uint8List>> getProductImage(int id) {
   return dio.get(
     '/product/image/$id',
     options: Options(responseType: ResponseType.bytes),
+  );
+}
+
+Future<Response<Map<String, dynamic>>> addStockMutation(StockMutation mutation) {
+  return dio.post(
+    '/StockMutation',
+    data: mutation.toJson(),
   );
 }
