@@ -12,6 +12,7 @@ import 'package:scanner/exceptions/domain_exception.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
+import 'package:scanner/screens/products_screen/widgets/amount.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 
 final audio = Audio('assets/error.mp3');
@@ -71,33 +72,22 @@ class _ProductViewState extends State<ProductView> {
                       return Container(width: 120);
                     },
                   ),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text('To pick'),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Text(
-                            '${mutation.pickAmount.round()}',
-                            style: TextStyle(
-                              fontSize: 50,
-                              color: mutation.pickAmount < 0
-                                  ? Colors.red
-                                  : Colors.black54,
-                            ),
-                          ),
-                        ),
-                        Text('(${line.product.unit})'),
-                      ],
-                    ),
+                  SizedBox(width: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Warehouse location'),
+                      Text('H01-S01-V02'),
+                      SizedBox(height: 10),
+                      Text('Trade unit amount'),
+                      Text('${mutation.defaultAmount} BOXES'),
+                    ],
                   ),
                 ],
               ),
             ),
             Divider(height: 1),
-            if (mutation.packaging != null) ..._packagingTile(mutation),
+            ..._pickTile(mutation),
             ListTile(
               visualDensity: VisualDensity.compact,
               title: Container(
@@ -161,7 +151,7 @@ class _ProductViewState extends State<ProductView> {
     );
   }
 
-  _packagingTile(StockMutation mutation) {
+  _pickTile(StockMutation mutation) {
     return [
       ListTile(
         visualDensity: VisualDensity.compact,
@@ -169,19 +159,33 @@ class _ProductViewState extends State<ProductView> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('Warehouse location'),
-                Text('H01-S01-V02'),
+                Text('To pick'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(
+                    '${mutation.pickAmount.round()}',
+                    style: TextStyle(
+                      fontSize: 50,
+                      color: mutation.pickAmount < 0
+                          ? Colors.red
+                          : Colors.black54,
+                    ),
+                  ),
+                ),
+                Text('(${mutation.line.product.unit})'),
               ],
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            SizedBox(width: 30),
+            Expanded(child: Column(
               children: [
-                Text('Trade unit amount'),
-                Text('${mutation.defaultAmount} BOXES'),
+                Text('Picked'),
+                Amount(),
+                Text('(${mutation.line.product.unit})'),
               ],
-            ),
+            )),
           ],
         ),
       ),
