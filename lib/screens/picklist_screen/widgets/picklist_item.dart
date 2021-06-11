@@ -22,6 +22,7 @@ class _PicklistItemState extends State<PicklistItem> {
         ListTile(
           onTap: _onTapHandler,
           title: Text(picklist.debtor.name),
+          leading: Icon(Icons.settings),
           trailing: IconButton(
             icon: Icon(_open ? Icons.expand_less : Icons.expand_more),
             onPressed: _onTapHandler,
