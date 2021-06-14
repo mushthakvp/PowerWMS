@@ -1,8 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:scanner/api.dart';
+import 'package:scanner/screens/resources/product_image_repository.dart';
+
+final productImageRepository = ProductImageRepository();
 
 class ProductImage extends StatelessWidget {
   final int productId;
@@ -12,8 +13,8 @@ class ProductImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Response<Uint8List>>(
-      future: getProductImage(productId),
+    return FutureBuilder<Uint8List?>(
+      future: productImageRepository.getImageFile(productId),
       builder: (context, snapshot) {
         var fallback = Container(width: width, height: width, color: Colors.grey[400]);
         if (snapshot.hasError) {
@@ -23,7 +24,7 @@ class ProductImage extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Image.memory(
-              snapshot.data!.data!,
+              snapshot.data!,
               width: width ?? double.infinity,
               errorBuilder: (context, error, _) => fallback,
             ),
