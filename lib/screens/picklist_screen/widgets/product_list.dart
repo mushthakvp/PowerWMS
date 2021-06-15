@@ -28,6 +28,11 @@ class _ProductListState extends State<ProductList> {
                     title: BarcodeInput((value, barcode) {
                       setState(() {
                         _ean = value;
+                        final lines =
+                        widget.lines.where((line) => _ean == '' || line.product.ean == _ean);
+                        if (lines.length == 1) {
+                          Navigator.of(context).pushNamed('/product', arguments: lines.first);
+                        }
                       });
                     }),
                   ),

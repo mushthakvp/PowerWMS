@@ -18,10 +18,10 @@ class _AmountState extends State<Amount> {
 
   @override
   void didChangeDependencies() {
+    controller.text = widget.value;
     controller.addListener(() {
       widget.onChange(controller.text);
     });
-    controller.text = widget.value;
     super.didChangeDependencies();
   }
 
