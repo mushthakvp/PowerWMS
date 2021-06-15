@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:scanner/models/picklist_line.dart';
 
 class LineInfo extends StatefulWidget {
@@ -45,38 +46,11 @@ class _ProductDescriptionState extends State<LineInfo> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('GTIN'),
-                Text(line.product.ean),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Product number'),
-                Text(line.product.uid),
-              ],
-            ),
-          ],
-        ),
-      ),
-      Divider(height: 1),
-      ListTile(
-        visualDensity: VisualDensity.compact,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Available'),
+                Text(
+                  'Warehouse stock',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Text('${line.available} x ${line.product.unit}'),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Amount orderline'),
-                Text('${line.pickAmount} x ${line.product.unit}'),
               ],
             ),
           ],

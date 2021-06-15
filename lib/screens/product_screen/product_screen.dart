@@ -13,7 +13,7 @@ class ProductScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WMSAppBar(
-        'Order line ${_line.line}',
+        _line.warehouse,
         context: context,
       ),
       body: CustomScrollView(

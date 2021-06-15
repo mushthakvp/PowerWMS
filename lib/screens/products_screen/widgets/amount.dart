@@ -4,14 +4,26 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class Amount extends StatefulWidget {
-  const Amount({Key? key}) : super(key: key);
+  final String value;
+  final void Function(String value) onChange;
+
+  const Amount(this.value, this.onChange, {Key? key}) : super(key: key);
 
   @override
   _AmountState createState() => _AmountState();
 }
 
 class _AmountState extends State<Amount> {
-  final controller = TextEditingController(text: '1');
+  final controller = TextEditingController(text: '');
+
+  @override
+  void setState(VoidCallback fn) {
+    controller.text = widget.value;
+    controller.addListener(() {
+      widget.onChange(controller.text);
+    });
+    super.setState(fn);
+  }
 
   @override
   void dispose() {

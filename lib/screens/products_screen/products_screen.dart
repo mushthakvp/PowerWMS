@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:gs1_barcode_parser/gs1_barcode_parser.dart';
 import 'package:scanner/api.dart';
 import 'package:scanner/models/product.dart';
@@ -110,7 +111,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             style: headline6,
                           ),
                           ProductImage(product.id),
-                          Amount(),
+                          Amount('1', (value) {}),
                           Divider(height: 1),
                         ],
                       );
@@ -162,7 +163,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                         width: 60,
                                       ),
                                       SizedBox(width: 20),
-                                      Expanded(child: Amount()),
+                                      Expanded(child: Amount('1', (value) {})),
                                     ],
                                   ),
                                 ),

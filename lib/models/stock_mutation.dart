@@ -22,7 +22,19 @@ class StockMutation {
           .toList();
     }
 
-    return StockMutation._(line, items);
+    final mutation = StockMutation._(line, items);
+    if (!mutation.needToScan()) {
+      mutation.items.add(StockMutationItem(
+        productId: mutation.line.product.id,
+        mutationAmount: mutation.toPickAmount,
+        batch: '',
+        productionDate: '',
+        expirationDate: '',
+        stickerCode: '',
+      ));
+    }
+
+    return mutation;
   }
 
   StockMutation._(this.line, this.items)
@@ -37,16 +49,34 @@ class StockMutation {
         'items': items.map((item) => item.toJson()).toList(),
       };
 
-  int get pickedAmount {
+  int get totalAmount {
     return items.fold<int>(0, (sum, item) => sum + item.mutationAmount);
   }
 
-  num get pickAmount {
-    return line.pickAmount - line.pickedAmount - pickedAmount;
+  int get toPickAmount {
+    return (line.pickAmount - line.pickedAmount - totalAmount).round();
   }
 
-  int get defaultAmount {
-    return packaging != null ? max((pickAmount / packaging!.defaultAmount).floor(), 0) : 0;
+  int get askedAmount {
+    return line.pickAmount.round();
+  }
+
+  int get toPickPackagingAmount {
+    return packaging != null
+        ? max((toPickAmount / packaging!.defaultAmount).floor(), 0)
+        : 0;
+  }
+
+  int get askedPackagingAmount {
+    return packaging != null
+        ? max((askedAmount / packaging!.defaultAmount).floor(), 0)
+        : 0;
+  }
+
+  needToScan() {
+    return line.product.productGroupBatchField > 0 ||
+        line.product.productGroupExpirationDateField > 0 ||
+        line.product.productGroupProductionDateField > 0;
   }
 
   addItem(StockMutationItem value) {
@@ -59,6 +89,15 @@ class StockMutation {
     _cacheData();
   }
 
+  replaceItem(StockMutationItem oldValue, StockMutationItem newValue) {
+    final index = items.indexOf(oldValue);
+    if (index != -1) {
+      items.replaceRange(index, index + 1, [newValue]);
+    } else {
+      items.add(newValue);
+    }
+  }
+
   clear() {
     items.clear();
     _cacheData();
@@ -66,6 +105,9 @@ class StockMutation {
 
   _cacheData() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('${line.id}', jsonEncode(items.map((item) => item.toJson()).toList()));
+    prefs.setString(
+      '${line.id}',
+      jsonEncode(items.map((item) => item.toJson()).toList()),
+    );
   }
 }

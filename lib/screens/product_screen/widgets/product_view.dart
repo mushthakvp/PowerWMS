@@ -1,7 +1,4 @@
-import 'dart:typed_data';
-
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -14,6 +11,7 @@ import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/screens/products_screen/widgets/amount.dart';
 import 'package:scanner/widgets/barcode_input.dart';
+import 'package:scanner/widgets/product_image.dart';
 
 final audio = Audio('assets/error.mp3');
 
@@ -54,35 +52,25 @@ class _ProductViewState extends State<ProductView> {
             ListTile(
               title: Row(
                 children: [
-                  FutureBuilder<Response<Uint8List>>(
-                    future: getProductImage(line.product.id),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        print(snapshot.error);
-                      }
-                      if (snapshot.hasData) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Image.memory(
-                            snapshot.data!.data!,
-                            width: 120,
-                          ),
-                        );
-                      }
-                      return Container(width: 120);
-                    },
-                  ),
-                  SizedBox(width: 20),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Warehouse location'),
-                      Text('H01-S01-V02'),
+                      Text(
+                        'Product number:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(mutation.line.product.uid),
                       SizedBox(height: 10),
-                      Text('Trade unit amount'),
-                      Text('${mutation.defaultAmount} BOXES'),
+                      Text(
+                        'GTIN / EAN:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(mutation.line.product.ean),
                     ],
                   ),
+                  Spacer(),
+                  // SizedBox(width: 20),
+                  ProductImage(line.product.id, width: 120),
                 ],
               ),
             ),
@@ -109,7 +97,7 @@ class _ProductViewState extends State<ProductView> {
             Divider(height: 1),
             ListTile(
               visualDensity: VisualDensity.compact,
-              trailing: TextButton(
+              trailing: ElevatedButton(
                 child: Text('PROCESS'),
                 onPressed: mutation.items.length > 0
                     ? () {
@@ -152,6 +140,7 @@ class _ProductViewState extends State<ProductView> {
   }
 
   _pickTile(StockMutation mutation) {
+    print(mutation.needToScan());
     return [
       ListTile(
         visualDensity: VisualDensity.compact,
@@ -162,34 +151,69 @@ class _ProductViewState extends State<ProductView> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('To pick'),
+                Text(
+                  'Amount asked (${mutation.line.product.unit})',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Text(
-                    '${mutation.pickAmount.round()}',
+                    '${mutation.askedAmount}',
                     style: TextStyle(
                       fontSize: 50,
-                      color: mutation.pickAmount < 0
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
+                Text('${mutation.askedPackagingAmount} BOXES'),
+              ],
+            ),
+            SizedBox(width: 30),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Amount to pick (${mutation.line.product.unit})',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(
+                    '${mutation.toPickAmount}',
+                    style: TextStyle(
+                      fontSize: 50,
+                      color: mutation.toPickAmount < 0
                           ? Colors.red
                           : Colors.black54,
                     ),
                   ),
                 ),
-                Text('(${mutation.line.product.unit})'),
+                Text('${mutation.toPickPackagingAmount} BOXES'),
               ],
             ),
-            SizedBox(width: 30),
-            Expanded(child: Column(
-              children: [
-                Text('Picked'),
-                Amount(),
-                Text('(${mutation.line.product.unit})'),
-              ],
-            )),
           ],
         ),
       ),
       Divider(height: 1),
+      if (!mutation.needToScan())
+        ..._amountInput(
+          mutation.line.product.unit,
+          mutation.items.first.mutationAmount.toString(),
+          (amount) {
+            var first = mutation.items.first;
+            mutation.replaceItem(
+                first,
+                StockMutationItem(
+                  productId: mutation.line.product.id,
+                  batch: first.batch,
+                  mutationAmount: int.parse(amount),
+                  productionDate: first.productionDate,
+                  expirationDate: first.expirationDate,
+                  stickerCode: first.stickerCode,
+                ));
+          },
+        ),
     ];
   }
 
@@ -221,15 +245,17 @@ class _ProductViewState extends State<ProductView> {
                 item.stickerCode == serial;
           },
         );
-        mutation.removeItem(item);
-        mutation.addItem(StockMutationItem(
-          productId: mutation.line.product.id,
-          batch: batch,
-          mutationAmount: amount + item.mutationAmount,
-          productionDate: productionDate,
-          expirationDate: expirationDate,
-          stickerCode: serial,
-        ));
+        mutation.replaceItem(
+          item,
+          StockMutationItem(
+            productId: mutation.line.product.id,
+            batch: batch,
+            mutationAmount: amount + item.mutationAmount,
+            productionDate: productionDate,
+            expirationDate: expirationDate,
+            stickerCode: serial,
+          ),
+        );
       } catch (e) {
         mutation.addItem(StockMutationItem(
           productId: mutation.line.product.id,
@@ -242,7 +268,7 @@ class _ProductViewState extends State<ProductView> {
       } finally {
         setState(() {});
       }
-      if (mutation.pickAmount <= 0 && mutation.allowBelowZero == null) {
+      if (mutation.toPickAmount <= 0 && mutation.allowBelowZero == null) {
         showDialog(
           context: context,
           builder: (BuildContext context) => AlertDialog(
@@ -291,5 +317,24 @@ class _ProductViewState extends State<ProductView> {
         }
       }
     });
+  }
+
+  _amountInput(
+      String unit, String value, void Function(String value) onChange) {
+    return [
+      ListTile(
+        visualDensity: VisualDensity.compact,
+        title: Column(
+          children: [
+            Text(
+              'Amount picked ($unit)',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Amount(value, onChange),
+          ],
+        ),
+      ),
+      Divider(height: 1),
+    ];
   }
 }
