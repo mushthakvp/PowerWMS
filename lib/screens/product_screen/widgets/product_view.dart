@@ -4,9 +4,11 @@ import 'package:flutter/widgets.dart';
 
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:gs1_barcode_parser/gs1_barcode_parser.dart';
+import 'package:provider/provider.dart';
 import 'package:scanner/api.dart';
 import 'package:scanner/exceptions/domain_exception.dart';
 import 'package:scanner/models/picklist_line.dart';
+import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/screens/products_screen/widgets/amount.dart';
@@ -107,32 +109,11 @@ class _ProductViewState extends State<ProductView> {
               ),
             ),
             Divider(height: 1),
-            ...mutation.items.map((item) => Dismissible(
-                  key: Key(item.batch),
-                  onDismissed: (direction) {
-                    setState(() {
-                      mutation.removeItem(item);
-                    });
-                  },
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: Icon(Icons.delete, color: Colors.white),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        title: Text(
-                          '${item.mutationAmount} x ${item.batch} | ${item.stickerCode}',
-                        ),
-                      ),
-                      Divider(height: 1),
-                    ],
-                  ),
-                ))
+            if (mutation.needToScan())
+              ..._itemsBuilder(
+                mutation.items,
+                (item) => mutation.removeItem(item),
+              ),
           ]),
         );
       },
@@ -140,7 +121,6 @@ class _ProductViewState extends State<ProductView> {
   }
 
   _pickTile(StockMutation mutation) {
-    print(mutation.needToScan());
     return [
       ListTile(
         visualDensity: VisualDensity.compact,
@@ -202,16 +182,18 @@ class _ProductViewState extends State<ProductView> {
           mutation.items.first.mutationAmount.toString(),
           (amount) {
             var first = mutation.items.first;
-            mutation.replaceItem(
-                first,
-                StockMutationItem(
-                  productId: mutation.line.product.id,
-                  batch: first.batch,
-                  mutationAmount: int.parse(amount),
-                  productionDate: first.productionDate,
-                  expirationDate: first.expirationDate,
-                  stickerCode: first.stickerCode,
-                ));
+            setState(() {
+              mutation.replaceItem(
+                  first,
+                  StockMutationItem(
+                    productId: mutation.line.product.id,
+                    batch: first.batch,
+                    mutationAmount: int.parse(amount),
+                    productionDate: first.productionDate,
+                    expirationDate: first.expirationDate,
+                    stickerCode: first.stickerCode,
+                  ));
+            });
           },
         ),
     ];
@@ -239,18 +221,22 @@ class _ProductViewState extends State<ProductView> {
       try {
         var item = mutation.items.firstWhere(
           (item) {
-            return item.batch == batch &&
-                item.productionDate == productionDate &&
-                item.expirationDate == expirationDate &&
-                item.stickerCode == serial;
+            return !mutation.needToScan() ||
+                (item.batch == batch &&
+                    item.productionDate == productionDate &&
+                    item.expirationDate == expirationDate &&
+                    item.stickerCode == serial);
           },
         );
+        final settings = context.read<ValueNotifier<Settings>>().value;
         mutation.replaceItem(
           item,
           StockMutationItem(
             productId: mutation.line.product.id,
             batch: batch,
-            mutationAmount: amount + item.mutationAmount,
+            mutationAmount: !mutation.needToScan() && settings.oneScanPickAll
+                ? mutation.toPickAmount
+                : amount + item.mutationAmount,
             productionDate: productionDate,
             expirationDate: expirationDate,
             stickerCode: serial,
@@ -336,5 +322,35 @@ class _ProductViewState extends State<ProductView> {
       ),
       Divider(height: 1),
     ];
+  }
+
+  _itemsBuilder(List<StockMutationItem> items,
+      void Function(StockMutationItem item) onRemove) {
+    return items.map((item) => Dismissible(
+          key: Key(item.batch),
+          onDismissed: (direction) {
+            setState(() {
+              onRemove(item);
+            });
+          },
+          background: Container(
+            color: Colors.red,
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: Icon(Icons.delete, color: Colors.white),
+            ),
+          ),
+          child: Column(
+            children: [
+              ListTile(
+                title: Text(
+                  '${item.mutationAmount} x ${item.batch} | ${item.stickerCode}',
+                ),
+              ),
+              Divider(height: 1),
+            ],
+          ),
+        ));
   }
 }

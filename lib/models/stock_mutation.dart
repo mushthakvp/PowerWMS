@@ -26,7 +26,7 @@ class StockMutation {
     if (!mutation.needToScan()) {
       mutation.items.add(StockMutationItem(
         productId: mutation.line.product.id,
-        mutationAmount: mutation.toPickAmount,
+        mutationAmount: mutation.maxAmountToPick,
         batch: '',
         productionDate: '',
         expirationDate: '',
@@ -51,6 +51,10 @@ class StockMutation {
 
   int get totalAmount {
     return items.fold<int>(0, (sum, item) => sum + item.mutationAmount);
+  }
+
+  int get maxAmountToPick {
+    return (line.pickAmount - line.pickedAmount).round();
   }
 
   int get toPickAmount {

@@ -14,15 +14,15 @@ class Amount extends StatefulWidget {
 }
 
 class _AmountState extends State<Amount> {
-  final controller = TextEditingController(text: '');
+  final controller = TextEditingController(text: '1');
 
   @override
-  void setState(VoidCallback fn) {
-    controller.text = widget.value;
+  void didChangeDependencies() {
     controller.addListener(() {
       widget.onChange(controller.text);
     });
-    super.setState(fn);
+    controller.text = widget.value;
+    super.didChangeDependencies();
   }
 
   @override
@@ -39,7 +39,7 @@ class _AmountState extends State<Amount> {
           child: Icon(Icons.remove),
           onPressed: () {
             controller.text =
-                max<int>(0, int.parse(controller.text) - 1).toString();
+                max<int>(0, (int.tryParse(controller.text) ?? 0) - 1).toString();
           },
         ),
         Expanded(
@@ -56,7 +56,7 @@ class _AmountState extends State<Amount> {
         ElevatedButton(
           child: Icon(Icons.add),
           onPressed: () {
-            controller.text = (int.parse(controller.text) + 1).toString();
+            controller.text = ((int.tryParse(controller.text) ?? 0) + 1).toString();
           },
         ),
       ],
