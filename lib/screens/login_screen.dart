@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:scanner/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,12 +42,15 @@ class LoginScreen extends StatelessWidget {
                   },
                   onSaved: (value) {
                     dio.options.baseUrl = '$value/api';
-                    SharedPreferences.getInstance().then((prefs) => prefs.setString('server', '$value/api'));
+                    SharedPreferences.getInstance().then(
+                        (prefs) => prefs.setString('server', '$value/api'));
                   },
                 ),
                 TextFormField(
                   decoration: InputDecoration(
-                    labelText: 'Username',
+                    labelText: AppLocalizations.of(context)!
+                        .loginUsernameLabel
+                        .toUpperCase(),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   initialValue: 'swagger@powerwms.nl',
@@ -60,7 +64,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 TextFormField(
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: AppLocalizations.of(context)!.loginPasswordLabel,
                   ),
                   obscureText: true,
                   initialValue: 'Sw@gger',
@@ -80,7 +84,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 TextButton(
                   child: Text(
-                    'Sign In',
+                    AppLocalizations.of(context)!.loginSignIn.toUpperCase(),
                     style: TextStyle(
                       color: Colors.blueAccent,
                     ),
@@ -99,7 +103,8 @@ class LoginScreen extends StatelessWidget {
                         dio.options.headers = {
                           'authorization': 'Bearer ${response.data}',
                         };
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
                         prefs.setString('token', response.data);
                         Navigator.pushReplacementNamed(context, '/');
                       } catch (e) {

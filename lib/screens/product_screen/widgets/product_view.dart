@@ -1,7 +1,7 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:gs1_barcode_parser/gs1_barcode_parser.dart';
 import 'package:provider/provider.dart';
@@ -58,12 +58,12 @@ class _ProductViewState extends State<ProductView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Product number:',
+                        '${AppLocalizations.of(context)!.productProductNumber}:',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(mutation.line.product.uid),
                       SizedBox(height: 10),
-                      Text(
+                      const Text(
                         'GTIN / EAN:',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
@@ -85,7 +85,11 @@ class _ProductViewState extends State<ProductView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(child: Text('ADD'), flex: 2),
+                    Flexible(
+                        child: Text(AppLocalizations.of(context)!
+                            .productAdd
+                            .toUpperCase()),
+                        flex: 2),
                     Flexible(
                       flex: 3,
                       child: BarcodeInput((value, barcode) {
@@ -100,7 +104,8 @@ class _ProductViewState extends State<ProductView> {
             ListTile(
               visualDensity: VisualDensity.compact,
               trailing: ElevatedButton(
-                child: Text('PROCESS'),
+                child: Text(
+                    AppLocalizations.of(context)!.productProcess.toUpperCase()),
                 onPressed: mutation.items.length > 0
                     ? () {
                         _onProcessHandler(mutation);
@@ -132,7 +137,8 @@ class _ProductViewState extends State<ProductView> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  'Amount asked (${mutation.line.product.unit})',
+                  AppLocalizations.of(context)!
+                      .productAmountAsked(mutation.line.product.unit),
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Padding(
@@ -145,7 +151,11 @@ class _ProductViewState extends State<ProductView> {
                     ),
                   ),
                 ),
-                Text('${mutation.askedPackagingAmount} BOXES'),
+                Text(
+                  AppLocalizations.of(context)!
+                      .productAmountBoxes(mutation.askedPackagingAmount)
+                      .toUpperCase(),
+                ),
               ],
             ),
             SizedBox(width: 30),
@@ -154,7 +164,8 @@ class _ProductViewState extends State<ProductView> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  'Amount to pick (${mutation.line.product.unit})',
+                  AppLocalizations.of(context)!
+                      .productAmountToPick(mutation.line.product.unit),
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Padding(
@@ -169,7 +180,11 @@ class _ProductViewState extends State<ProductView> {
                     ),
                   ),
                 ),
-                Text('${mutation.toPickPackagingAmount} BOXES'),
+                Text(
+                  AppLocalizations.of(context)!
+                      .productAmountBoxes(mutation.toPickPackagingAmount)
+                      .toUpperCase(),
+                ),
               ],
             ),
           ],
@@ -207,7 +222,9 @@ class _ProductViewState extends State<ProductView> {
       } else if (mutation.packaging != null && mutation.packaging!.uid == ean) {
         amount = mutation.packaging!.defaultAmount.round();
       } else {
-        throw new DomainException('product.wrong_product');
+        throw new DomainException(
+          AppLocalizations.of(context)!.productWrongProduct,
+        );
       }
       final serial = barcode?.getAIData('21');
       final batch = barcode?.getAIData('10');
@@ -216,7 +233,9 @@ class _ProductViewState extends State<ProductView> {
       if (barcode != null &&
           serial &&
           mutation.items.any((item) => item.stickerCode == serial)) {
-        throw new DomainException('product.already_scanned');
+        throw new DomainException(
+          AppLocalizations.of(context)!.productAlreadyScanned,
+        );
       }
       try {
         var item = mutation.items.firstWhere(
@@ -258,7 +277,9 @@ class _ProductViewState extends State<ProductView> {
         showDialog(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-            title: const Text('product.want_to_process'),
+            title: Text(
+              AppLocalizations.of(context)!.productWantToProcess,
+            ),
             // content: const Text('AlertDialog description'),
             actions: <Widget>[
               TextButton(
@@ -266,7 +287,7 @@ class _ProductViewState extends State<ProductView> {
                   mutation.allowBelowZero = false;
                   Navigator.pop(context, 'Cancel');
                 },
-                child: const Text('Cancel'),
+                child: Text(AppLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -274,7 +295,7 @@ class _ProductViewState extends State<ProductView> {
                   _onProcessHandler(mutation);
                   Navigator.pop(context, 'OK');
                 },
-                child: const Text('OK'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),
@@ -313,7 +334,7 @@ class _ProductViewState extends State<ProductView> {
         title: Column(
           children: [
             Text(
-              'Amount picked ($unit)',
+              AppLocalizations.of(context)!.productAmountPicked(unit),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Amount(value, onChange),

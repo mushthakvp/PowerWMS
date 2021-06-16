@@ -1,0 +1,67 @@
+{
+  "@@locale": "en",
+  "@productAmountAsked": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@productAmountBoxes": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@productAmountPicked": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@productAmountToPick": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "Back",
+  "barcode": "Barcode",
+  "barcodeHelp": "Scan a barcode to search for a product.",
+  "cancel": "Cancel",
+  "dashboard": "Dashboard",
+  "error": "Error",
+  "loginPasswordLabel": "Password",
+  "loginSignIn": "Sign In",
+  "loginUsernameLabel": "Username",
+  "ok": "OK",
+  "picklistsOpen": "Open",
+  "picklistsRevise": "Revise",
+  "picklistsSearch": "Search...",
+  "productAdd": "Add",
+  "productAlreadyScanned": "Item is already scanned",
+  "productAmountAsked": "Amount asked ({unit})",
+  "productAmountBoxes": "{count,plural, =1{{count} box} other{{count} boxes}}",
+  "productAmountPicked": "Amount picked ({unit})",
+  "productAmountToPick": "Amount to pick ({unit})",
+  "productAvailable": "Available",
+  "productConfirmDelete": "Are you sure you want to delete this item?",
+  "productDelete": "Delete",
+  "productNotFound": "Product is not found",
+  "productOrderline": "Order line",
+  "productProcess": "Process",
+  "productProductNumber": "Product number",
+  "productScanBarcode": "Scan barcode",
+  "productToPick": "To pick",
+  "productTradeUnitAmount": "Trade unit amount",
+  "productWantToProcess": "Do you want to process the scans?",
+  "productWarehouseLocation": "Warehouse location",
+  "productWarehouseStock": "Warehouse stock",
+  "productWrongProduct": "Wrong product scanned",
+  "products": "Products",
+  "warehouseReceipts": "Warehouse receipts"
+}

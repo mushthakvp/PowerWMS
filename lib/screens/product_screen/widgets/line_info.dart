@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scanner/models/picklist_line.dart';
 
 class LineInfo extends StatefulWidget {
@@ -47,7 +48,7 @@ class _ProductDescriptionState extends State<LineInfo> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Warehouse stock',
+                  AppLocalizations.of(context)!.productWarehouseStock,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text('${line.available} x ${line.product.unit}'),

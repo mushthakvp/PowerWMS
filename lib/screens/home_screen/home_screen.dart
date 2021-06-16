@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scanner/screens/home_screen/widgets/grid_item.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
 final List<Map<String, dynamic>> items = [
   {
-    'title': 'Producten',
+    'title': (context) => AppLocalizations.of(context)!.products,
     'icon': Icons.inventory_2,
     'route': '/products',
   },
@@ -19,7 +20,7 @@ final List<Map<String, dynamic>> items = [
     'route': '/picklists',
   },
   {
-    'title': 'Magazijnbonnen',
+    'title': (context) => AppLocalizations.of(context)!.warehouseReceipts,
     'icon': Icons.list_alt,
     'route': '/picklists',
   },
@@ -40,7 +41,7 @@ class HomeScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: Container(
               padding: EdgeInsets.all(20),
-              child: Text('Dashboard'),
+              child: Text(AppLocalizations.of(context)!.dashboard),
             ),
           ),
           SliverPadding(
@@ -55,7 +56,7 @@ class HomeScreen extends StatelessWidget {
                     (context, index) {
                   final item = items[index];
                   return GridItem(
-                    item['title'],
+                    item['title'](context),
                     item['icon'],
                     onTap: () {
                       Navigator.pushNamed(context, item['route']);

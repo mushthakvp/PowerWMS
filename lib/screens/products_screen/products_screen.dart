@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:gs1_barcode_parser/gs1_barcode_parser.dart';
 import 'package:scanner/api.dart';
@@ -46,7 +47,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WMSAppBar(
-        'Producten',
+        AppLocalizations.of(context)!.products,
         context: context,
       ),
       body: CustomScrollView(
@@ -61,7 +62,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     autofocus: true,
                     focusNode: focusNode,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(hintText: 'Barcode'),
+                    decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.barcode),
                   ),
                 ),
                 IconButton(
@@ -69,7 +71,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   onPressed: () async {
                     String value = await FlutterBarcodeScanner.scanBarcode(
                       "#ff6666",
-                      "Cancel",
+                      AppLocalizations.of(context)!.cancel,
                       false,
                       ScanMode.DEFAULT,
                     );
@@ -89,7 +91,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     print(snapshot.error);
                   }
                   if (_result == '') {
-                    return Text('Scan a barcode to search for a product.');
+                    return Text(AppLocalizations.of(context)!.barcodeHelp);
                   }
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -116,7 +118,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         ],
                       );
                     } catch (e) {
-                      return Text('Product is not found');
+                      return Text(
+                          AppLocalizations.of(context)!.productNotFound);
                     }
                   } else {
                     return Container();
@@ -126,66 +129,64 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ),
           ),
           FutureBuilder<List<Product>>(
-          future: _future,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              try {
-                final product = snapshot.data!
-                    .firstWhere((product) => product.ean == _result);
-                var headline5 = Theme
-                    .of(context)
-                    .textTheme
-                    .headline5;
-                return FutureBuilder<Response<Map<String, dynamic>>>(
-                  future: getProducts(product.uid),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      final products = (snapshot.data!.data!['data']
-                      as List<dynamic>)
-                          .where((element) =>
-                      element['ean'] != product.ean).toList();
-                      return SliverList(
-                        delegate: SliverChildBuilderDelegate(
+              future: _future,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  try {
+                    final product = snapshot.data!
+                        .firstWhere((product) => product.ean == _result);
+                    var headline5 = Theme.of(context).textTheme.headline5;
+                    return FutureBuilder<Response<Map<String, dynamic>>>(
+                      future: getProducts(product.uid),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final products = (snapshot.data!.data!['data']
+                                  as List<dynamic>)
+                              .where((element) => element['ean'] != product.ean)
+                              .toList();
+                          return SliverList(
+                            delegate: SliverChildBuilderDelegate(
                               (context, index) {
-                            final product = products[index];
-                            return Column(
-                              children: [
-                                ListTile(
-                                  title: Text(
-                                    product['unit'],
-                                    textAlign: TextAlign.center,
-                                    style: headline5,
-                                  ),
-                                  subtitle: Row(
-                                    children: [
-                                      ProductImage(
-                                        product['id'],
-                                        width: 60,
+                                final product = products[index];
+                                return Column(
+                                  children: [
+                                    ListTile(
+                                      title: Text(
+                                        product['unit'],
+                                        textAlign: TextAlign.center,
+                                        style: headline5,
                                       ),
-                                      SizedBox(width: 20),
-                                      Expanded(child: Amount('1', (value) {})),
-                                    ],
-                                  ),
-                                ),
-                                Divider(height: 1),
-                              ],
-                            );
-                          },
-                          childCount: products.length,
-                        ),
-                      );
-                    }
+                                      subtitle: Row(
+                                        children: [
+                                          ProductImage(
+                                            product['id'],
+                                            width: 60,
+                                          ),
+                                          SizedBox(width: 20),
+                                          Expanded(
+                                              child: Amount('1', (value) {})),
+                                        ],
+                                      ),
+                                    ),
+                                    Divider(height: 1),
+                                  ],
+                                );
+                              },
+                              childCount: products.length,
+                            ),
+                          );
+                        }
 
-                    return SliverFillRemaining();
-                  },
-                );
-              } catch(e) {
-                print(e);
-              }
-            }
+                        return SliverFillRemaining();
+                      },
+                    );
+                  } catch (e) {
+                    print(e);
+                  }
+                }
 
-            return SliverFillRemaining();
-          }),
+                return SliverFillRemaining();
+              }),
         ],
       ),
     );

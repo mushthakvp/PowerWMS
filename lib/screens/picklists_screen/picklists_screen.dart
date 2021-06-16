@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scanner/api.dart';
 import 'package:scanner/screens/picklists_screen/widgets/picklist_view.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
@@ -37,15 +38,23 @@ class _PicklistScreenState extends State<PicklistsScreen> {
               children: [
                 TabBar(
                   tabs: [
-                    Tab(text: 'OPEN'),
-                    Tab(text: 'REVISE'),
+                    Tab(
+                      text: AppLocalizations.of(context)!
+                          .picklistsOpen
+                          .toUpperCase(),
+                    ),
+                    Tab(
+                      text: AppLocalizations.of(context)!
+                          .picklistsRevise
+                          .toUpperCase(),
+                    ),
                   ],
                 ),
                 Container(
                   child: TextField(
                     onChanged: _onChangeHandler,
                     decoration: InputDecoration(
-                      hintText: 'Search...',
+                      hintText: AppLocalizations.of(context)!.picklistsSearch,
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -63,7 +72,8 @@ class _PicklistScreenState extends State<PicklistsScreen> {
         ),
         body: TabBarView(
           children: [
-            PicklistView(_future!, (element) => [1, 2].contains(element.status)),
+            PicklistView(
+                _future!, (element) => [1, 2].contains(element.status)),
             PicklistView(_future!, (element) => element.status == 4),
           ],
         ),

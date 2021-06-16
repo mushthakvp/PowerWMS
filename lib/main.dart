@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist.dart';
@@ -21,11 +23,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return FutureProvider(
       initialData: ValueNotifier<Settings>(Settings()),
-      create: (context) => Settings.fromMemory().then((value) => ValueNotifier<Settings>(value)),
+      create: (context) =>
+          Settings.fromMemory().then((value) => ValueNotifier<Settings>(value)),
       catchError: (context, error) => ValueNotifier<Settings>(Settings()),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Extracom WMS',
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: ThemeData(
           primarySwatch: Colors.grey,
           scaffoldBackgroundColor: Color(0xFFEDF0F5),
@@ -35,12 +45,15 @@ class MyApp extends StatelessWidget {
             iconTheme: IconThemeData(color: Colors.grey[500]),
           ),
           textTheme: TextTheme(button: TextStyle(color: Colors.blueAccent)),
-          textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colors.blueAccent)),
+          textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(primary: Colors.blueAccent)),
         ),
         home: FutureBuilder<SharedPreferences>(
           future: SharedPreferences.getInstance(),
           builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data!.getString('token') != null && snapshot.data!.getString('server') != null) {
+            if (snapshot.hasData &&
+                snapshot.data!.getString('token') != null &&
+                snapshot.data!.getString('server') != null) {
               dio.options.baseUrl = snapshot.data!.getString('server')!;
               dio.options.headers = {
                 'authorization': 'Bearer ${snapshot.data!.getString('token')}',
@@ -54,12 +67,14 @@ class MyApp extends StatelessWidget {
         routes: {
           '/products': (context) => ProductsScreen(),
           '/product': (context) {
-            final line = ModalRoute.of(context)!.settings.arguments as PicklistLine;
+            final line =
+                ModalRoute.of(context)!.settings.arguments as PicklistLine;
             return ProductScreen(line);
           },
           '/picklists': (context) => PicklistsScreen(),
           '/picklist': (context) {
-            final picklist = ModalRoute.of(context)!.settings.arguments as Picklist;
+            final picklist =
+                ModalRoute.of(context)!.settings.arguments as Picklist;
             return PicklistScreen(picklist);
           },
         },

@@ -1,0 +1,67 @@
+{
+  "@@locale": "nl",
+  "@productAmountAsked": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@productAmountBoxes": {
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@productAmountPicked": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@productAmountToPick": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "Terug",
+  "barcode": "Barcode",
+  "barcodeHelp": "Scan a barcode to search for a product.",
+  "cancel": "Cancel",
+  "dashboard": "Dashboard",
+  "error": "Fout",
+  "loginPasswordLabel": "Wachtwoord",
+  "loginSignIn": "Inloggen",
+  "loginUsernameLabel": "Gebruikersnaam",
+  "ok": "OK",
+  "picklistsOpen": "Onderhanden",
+  "picklistsRevise": "Controleren",
+  "picklistsSearch": "Zoeken...",
+  "productAdd": "Toevoegen",
+  "productAlreadyScanned": "Dit item is reeds gescand",
+  "productAmountAsked": "Gevraagd ({unit})",
+  "productAmountBoxes": "{count,plural, =1{{count} box} other{{count} boxes}}",
+  "productAmountPicked": "Gepickt ({unit})",
+  "productAmountToPick": "Te picken ({unit})",
+  "productAvailable": "Beschikbaar",
+  "productConfirmDelete": "Weet je zeker dat je dit item wilt verwijderen?",
+  "productDelete": "Verwijderen",
+  "productNotFound": "Product niet gevonden",
+  "productOrderline": "Orderregel",
+  "productProcess": "Verwerken",
+  "productProductNumber": "Productnummer",
+  "productScanBarcode": "Scan barcode",
+  "productToPick": "Te picken",
+  "productTradeUnitAmount": "Logistieke eenheid",
+  "productWantToProcess": "Wilt u de mutaties verwerken?",
+  "productWarehouseLocation": "Magazijn locatie",
+  "productWarehouseStock": "Magazijn voorraad",
+  "productWrongProduct": "Verkeerd product gescand",
+  "products": "Producten",
+  "warehouseReceipts": "Magazijnbonnen"
+}
