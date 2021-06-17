@@ -10,16 +10,6 @@ final List<Map<String, dynamic>> items = [
     'route': '/products',
   },
   {
-    'title': 'Klanten',
-    'icon': Icons.inventory_2,
-    'route': '/picklists',
-  },
-  {
-    'title': 'Voorraadmutaties',
-    'icon': Icons.point_of_sale,
-    'route': '/picklists',
-  },
-  {
     'title': (context) => AppLocalizations.of(context)!.warehouseReceipts,
     'icon': Icons.list_alt,
     'route': '/picklists',
@@ -53,7 +43,7 @@ class HomeScreen extends StatelessWidget {
                   mainAxisSpacing: 20.0,
                   crossAxisSpacing: 20.0),
               delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                (context, index) {
                   final item = items[index];
                   return GridItem(
                     item['title'](context),
