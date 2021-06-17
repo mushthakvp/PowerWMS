@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scanner/api.dart';
-import 'package:scanner/gs1_barcode_parser/src/barcode_parser.dart';
+import 'package:scanner/barcode_parser/barcode_parser.dart';
 import 'package:scanner/models/product.dart';
 import 'package:scanner/screens/products_screen/widgets/amount.dart';
 import 'package:scanner/widgets/product_image.dart';

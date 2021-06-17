@@ -18,7 +18,8 @@ jobs:
         with:
           channel: 'stable' # 'dev', 'alpha', default to: 'stable'
       - run: flutter pub get
-      - run: flutter build apk --no-sound-null-safety
+      - run: flutter clean
+      - run: flutter build apk
       - uses: actions/upload-artifact@v1
         with:
           name: android-build
@@ -35,7 +36,8 @@ jobs:
         with:
           channel: 'stable'
       - run: flutter pub get
-      - run: flutter build ios --release --no-codesign --no-sound-null-safety
+      - run: flutter clean
+      - run: flutter build ios --release --no-codesign
       - uses: actions/upload-artifact@v1
         with:
           name: ios-build
