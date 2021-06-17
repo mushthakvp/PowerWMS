@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:gs1_barcode_parser/gs1_barcode_parser.dart';
+import 'package:scanner/gs1_barcode_parser/gs1_barcode_parser.dart';
 
 final parser = GS1BarcodeParser.defaultParser();
 

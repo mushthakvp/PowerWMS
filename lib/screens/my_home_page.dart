@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:gs1_barcode_parser/gs1_barcode_parser.dart';
+import 'package:scanner/gs1_barcode_parser/src/barcode_parser.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key}) : super(key: key);
@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       setState(() {
                         try {
                           _result = parser.parse(value).toString();
-                        } catch(e) {
+                        } catch (e) {
                           _result = 'Invalid matrix for $value';
                           print(e);
                         }

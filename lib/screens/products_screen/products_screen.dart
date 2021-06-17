@@ -5,9 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:gs1_barcode_parser/gs1_barcode_parser.dart';
 import 'package:scanner/api.dart';
+import 'package:scanner/gs1_barcode_parser/src/barcode_parser.dart';
 import 'package:scanner/models/product.dart';
 import 'package:scanner/screens/products_screen/widgets/amount.dart';
 import 'package:scanner/widgets/product_image.dart';

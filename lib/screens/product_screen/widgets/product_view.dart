@@ -2,11 +2,10 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:gs1_barcode_parser/gs1_barcode_parser.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/api.dart';
 import 'package:scanner/exceptions/domain_exception.dart';
+import 'package:scanner/gs1_barcode_parser/gs1_barcode_parser.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/stock_mutation.dart';

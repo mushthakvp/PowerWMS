@@ -38,7 +38,6 @@ dependencies:
 
   shared_preferences: ^2.0.6
 
-  gs1_barcode_parser: ^0.0.8
   flutter_barcode_scanner: ^2.0.0
 
   assets_audio_player: ^3.0.3+3
