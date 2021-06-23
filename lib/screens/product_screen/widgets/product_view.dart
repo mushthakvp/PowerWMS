@@ -18,8 +18,9 @@ final audio = Audio('assets/error.mp3');
 
 class ProductView extends StatefulWidget {
   final PicklistLine _line;
+  final List<StockMutationItem> _items;
 
-  const ProductView(this._line, {Key? key}) : super(key: key);
+  const ProductView(this._line, this._items, {Key? key}) : super(key: key);
 
   @override
   _ProductViewState createState() => _ProductViewState();
@@ -30,12 +31,13 @@ class _ProductViewState extends State<ProductView> {
 
   @override
   void initState() {
-    _mutationFuture = StockMutation.fromMemory(widget._line);
+    _mutationFuture = StockMutation.fromMemory(widget._line, widget._items);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final formKey = GlobalKey<FormState>();
     final line = widget._line;
     return FutureBuilder<StockMutation>(
       future: _mutationFuture!,
@@ -81,21 +83,31 @@ class _ProductViewState extends State<ProductView> {
               visualDensity: VisualDensity.compact,
               title: Container(
                 width: double.infinity,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                        child: Text(AppLocalizations.of(context)!
-                            .productAdd
-                            .toUpperCase()),
-                        flex: 2),
-                    Flexible(
-                      flex: 3,
-                      child: BarcodeInput((value, barcode) {
-                        _parseHandler(mutation, value, barcode);
-                      }),
-                    ),
-                  ],
+                child: Form(
+                  key: formKey,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                          child: ElevatedButton(
+                            child: Text(
+                              AppLocalizations.of(context)!
+                                  .productAdd
+                                  .toUpperCase(),
+                            ),
+                            onPressed: () {
+                              formKey.currentState?.save();
+                            },
+                          ),
+                          flex: 2),
+                      Flexible(
+                        flex: 3,
+                        child: BarcodeInput((value, barcode) {
+                          _parseHandler(mutation, value, barcode);
+                        }),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -117,6 +129,10 @@ class _ProductViewState extends State<ProductView> {
               ..._itemsBuilder(
                 mutation.items,
                 (item) => mutation.removeItem(item),
+                (item) {
+                  mutation.cancelItem(item);
+                  cancelStockMutation(item.id!);
+                },
               ),
           ]),
         );
@@ -193,7 +209,7 @@ class _ProductViewState extends State<ProductView> {
       if (!mutation.needToScan())
         ..._amountInput(
           mutation.line.product.unit,
-          mutation.items.first.mutationAmount.toString(),
+          mutation.items.first.amount.toString(),
           (amount) {
             var first = mutation.items.first;
             setState(() {
@@ -202,7 +218,7 @@ class _ProductViewState extends State<ProductView> {
                   StockMutationItem(
                     productId: mutation.line.product.id,
                     batch: first.batch,
-                    mutationAmount: int.parse(amount),
+                    amount: int.parse(amount),
                     productionDate: first.productionDate,
                     expirationDate: first.expirationDate,
                     stickerCode: first.stickerCode,
@@ -252,9 +268,9 @@ class _ProductViewState extends State<ProductView> {
           StockMutationItem(
             productId: mutation.line.product.id,
             batch: batch,
-            mutationAmount: !mutation.needToScan() && settings.oneScanPickAll
+            amount: !mutation.needToScan() && settings.oneScanPickAll
                 ? mutation.toPickAmount
-                : amount + item.mutationAmount,
+                : amount + item.amount,
             productionDate: productionDate,
             expirationDate: expirationDate,
             stickerCode: serial,
@@ -264,7 +280,7 @@ class _ProductViewState extends State<ProductView> {
         mutation.addItem(StockMutationItem(
           productId: mutation.line.product.id,
           batch: batch,
-          mutationAmount: amount,
+          amount: amount,
           productionDate: productionDate,
           expirationDate: expirationDate,
           stickerCode: serial,
@@ -272,7 +288,8 @@ class _ProductViewState extends State<ProductView> {
       } finally {
         setState(() {});
       }
-      if (mutation.toPickAmount <= 0 && mutation.allowBelowZero == null) {
+      if (mutation.toPickAmount < mutation.totalAmount &&
+          mutation.allowBelowZero == null) {
         showDialog(
           context: context,
           builder: (BuildContext context) => AlertDialog(
@@ -344,9 +361,34 @@ class _ProductViewState extends State<ProductView> {
     ];
   }
 
-  _itemsBuilder(List<StockMutationItem> items,
-      void Function(StockMutationItem item) onRemove) {
-    return items.map((item) => Dismissible(
+  _itemsBuilder(
+    List<StockMutationItem> items,
+    void Function(StockMutationItem item) onRemove,
+    void Function(StockMutationItem item) onCancel,
+  ) {
+    return items.map((item) {
+      final itemTile = Column(
+        children: [
+          ListTile(
+            title: Text(
+              '${item.amount} x ${item.batch} | ${item.stickerCode}',
+            ),
+            trailing: item.isReserved()
+                ? IconButton(
+                    icon: Icon(Icons.cancel_outlined, color: Colors.yellow),
+                    onPressed: () {
+                      setState(() {
+                        onCancel(item);
+                      });
+                    },
+                  )
+                : null,
+          ),
+          Divider(height: 1),
+        ],
+      );
+      if (item.isNew()) {
+        return Dismissible(
           key: Key(item.batch),
           onDismissed: (direction) {
             setState(() {
@@ -361,16 +403,11 @@ class _ProductViewState extends State<ProductView> {
               child: Icon(Icons.delete, color: Colors.white),
             ),
           ),
-          child: Column(
-            children: [
-              ListTile(
-                title: Text(
-                  '${item.mutationAmount} x ${item.batch} | ${item.stickerCode}',
-                ),
-              ),
-              Divider(height: 1),
-            ],
-          ),
-        ));
+          child: itemTile,
+        );
+      } else {
+        return itemTile;
+      }
+    });
   }
 }

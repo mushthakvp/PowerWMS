@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:scanner/api.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
+import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_item.dart';
 import 'package:scanner/screens/picklist_screen/widgets/product_list.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
@@ -21,13 +22,17 @@ class PicklistScreen extends StatefulWidget {
 class _PicklistScreenState extends State<PicklistScreen> {
   @override
   Widget build(BuildContext context) {
-    final _future = getPicklistLines(widget._picklist.id);
+    var picklistId = widget._picklist.id;
+    final _future = Future.wait([
+      getPicklistLines(picklistId),
+      getStockMutation(picklistId),
+    ]);
     return Scaffold(
       appBar: WMSAppBar(
         widget._picklist.uid,
         context: context,
       ),
-      body: FutureBuilder<Response<Map<String, dynamic>>>(
+      body: FutureBuilder<List<Response<Map<String, dynamic>>>>(
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -41,13 +46,16 @@ class _PicklistScreenState extends State<PicklistScreen> {
           }
           if (snapshot.hasData) {
             final picklist = widget._picklist;
-            final lines = (snapshot.data!.data!['data'] as List<dynamic>)
+            final lines = (snapshot.data![0].data!['data'] as List<dynamic>)
                 .map((json) => PicklistLine.fromJson(json))
+                .toList();
+            final items = (snapshot.data![1].data!['data'] as List<dynamic>)
+                .map((json) => StockMutationItem.fromJson(json))
                 .toList();
             return CustomScrollView(
               slivers: [
                 PicklistItem(picklist),
-                ProductList(lines),
+                ProductList(lines, items),
               ],
             );
           }

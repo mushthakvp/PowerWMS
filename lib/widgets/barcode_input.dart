@@ -28,9 +28,10 @@ class _BarcodeInputState extends State<BarcodeInput> {
     return Row(
       children: [
         Expanded(
-          child: TextField(
+          child: TextFormField(
             controller: controller,
-            onSubmitted: _parse,
+            onFieldSubmitted: _parse,
+            onSaved: _parse,
             autofocus: true,
             focusNode: focusNode,
             keyboardType: TextInputType.number,
@@ -56,15 +57,17 @@ class _BarcodeInputState extends State<BarcodeInput> {
     );
   }
 
-  _parse(String value) {
-    try {
-      var barcode = parser.parse(value);
-      if (barcode.hasAI('01')) {
-        widget.onParse(barcode.getAIData('01'), barcode);
+  void _parse(String? value) {
+    if (value != null) {
+      try {
+        var barcode = parser.parse(value);
+        if (barcode.hasAI('01')) {
+          widget.onParse(barcode.getAIData('01'), barcode);
+        }
+      } catch (e) {
+        widget.onParse(value, null);
       }
-    } catch (e) {
-      widget.onParse(value, null);
+      focusNode.requestFocus();
     }
-    focusNode.requestFocus();
   }
 }

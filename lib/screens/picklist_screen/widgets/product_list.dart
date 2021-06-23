@@ -4,12 +4,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:scanner/api.dart';
 import 'package:scanner/models/picklist_line.dart';
+import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 
 class ProductList extends StatefulWidget {
   final List<PicklistLine> lines;
+  final List<StockMutationItem> items;
 
-  const ProductList(this.lines, {Key? key}) : super(key: key);
+  const ProductList(this.lines, this.items, {Key? key}) : super(key: key);
 
   @override
   _ProductListState createState() => _ProductListState();
@@ -28,10 +30,14 @@ class _ProductListState extends State<ProductList> {
                     title: BarcodeInput((value, barcode) {
                       setState(() {
                         _ean = value;
-                        final lines =
-                        widget.lines.where((line) => _ean == '' || line.product.ean == _ean);
+                        final lines = widget.lines.where(
+                            (line) => _ean == '' || line.product.ean == _ean);
                         if (lines.length == 1) {
-                          Navigator.of(context).pushNamed('/product', arguments: lines.first);
+                          Navigator.of(context).pushNamed('/product',
+                              arguments: {
+                                'line': lines.first,
+                                'items': widget.items
+                              });
                         }
                       });
                     }),
@@ -46,8 +52,11 @@ class _ProductListState extends State<ProductList> {
                       children: [
                         ListTile(
                           onTap: () {
-                            Navigator.of(context)
-                                .pushNamed('/product', arguments: line);
+                            Navigator.of(context).pushNamed('/product',
+                                arguments: {
+                                  'line': line,
+                                  'items': widget.items
+                                });
                           },
                           leading: Container(
                             width: 60,

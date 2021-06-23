@@ -81,7 +81,7 @@ class _PicklistScreenState extends State<PicklistsScreen> {
     );
   }
 
-  _search(value) async {
+  _search(String? value) async {
     try {
       setState(() {
         _future = getPicklists(value);

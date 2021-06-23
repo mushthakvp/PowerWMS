@@ -6,6 +6,7 @@ import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
+import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
 import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
@@ -46,7 +47,14 @@ class MyApp extends StatelessWidget {
           ),
           textTheme: TextTheme(button: TextStyle(color: Colors.blueAccent)),
           textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(primary: Colors.blueAccent)),
+            style: TextButton.styleFrom(primary: Colors.blueAccent),
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: TextButton.styleFrom(
+              primary: Colors.white,
+              backgroundColor: Colors.blueAccent,
+            ),
+          ),
         ),
         home: FutureBuilder<SharedPreferences>(
           future: SharedPreferences.getInstance(),
@@ -67,9 +75,11 @@ class MyApp extends StatelessWidget {
         routes: {
           '/products': (context) => ProductsScreen(),
           '/product': (context) {
-            final line =
-                ModalRoute.of(context)!.settings.arguments as PicklistLine;
-            return ProductScreen(line);
+            var arguments = ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>;
+            final line = arguments['line'] as PicklistLine;
+            final items = arguments['items'] as List<StockMutationItem>;
+            return ProductScreen(line, items);
           },
           '/picklists': (context) => PicklistsScreen(),
           '/picklist': (context) {

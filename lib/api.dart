@@ -14,7 +14,7 @@ Future login(String username, String password) {
   );
 }
 
-Future<Response<Map<String, dynamic>>> getPicklists(String search) {
+Future<Response<Map<String, dynamic>>> getPicklists(String? search) {
   return dio.post(
     '/picklist/list',
     data: {
@@ -51,9 +51,24 @@ Future<Response<Uint8List>> getProductImage(int id) {
   );
 }
 
-Future<Response<Map<String, dynamic>>> addStockMutation(StockMutation mutation) {
+Future<Response<Map<String, dynamic>>> addStockMutation(
+    StockMutation mutation) {
   return dio.post(
-    '/StockMutation',
+    '/stockmutation/add',
     data: mutation.toJson(),
   );
+}
+
+Future<Response<Map<String, dynamic>>> getStockMutation(int picklistId) {
+  return dio.post(
+    '/stockmutation/list',
+    data: {
+      'picklistId': picklistId,
+      'skipPaging': true,
+    },
+  );
+}
+
+Future<Response<Map<String, dynamic>>> cancelStockMutation(int id) {
+  return dio.post('/stockmutation/$id/cancel');
 }

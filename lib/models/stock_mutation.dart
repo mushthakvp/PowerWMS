@@ -12,21 +12,23 @@ class StockMutation {
   final Packaging? packaging;
   bool? allowBelowZero;
 
-  static Future<StockMutation> fromMemory(PicklistLine line) async {
+  static Future<StockMutation> fromMemory(
+    PicklistLine line,
+    List<StockMutationItem> items,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final json = prefs.getString('${line.id}');
-    List<StockMutationItem> items = [];
     if (json != null) {
-      items = (jsonDecode(json) as List<dynamic>)
+      items.addAll((jsonDecode(json) as List<dynamic>)
           .map((json) => StockMutationItem.fromJson(json))
-          .toList();
+          .toList());
     }
 
     final mutation = StockMutation._(line, items);
     if (!mutation.needToScan()) {
       mutation.items.add(StockMutationItem(
         productId: mutation.line.product.id,
-        mutationAmount: mutation.maxAmountToPick,
+        amount: mutation.maxAmountToPick,
         batch: '',
         productionDate: '',
         expirationDate: '',
@@ -50,7 +52,7 @@ class StockMutation {
       };
 
   int get totalAmount {
-    return items.fold<int>(0, (sum, item) => sum + item.mutationAmount);
+    return items.fold<int>(0, (sum, item) => sum + item.amount);
   }
 
   int get maxAmountToPick {
@@ -58,7 +60,7 @@ class StockMutation {
   }
 
   int get toPickAmount {
-    return (line.pickAmount - line.pickedAmount - totalAmount).round();
+    return (line.pickAmount - line.pickedAmount).round();
   }
 
   int get askedAmount {
@@ -91,6 +93,24 @@ class StockMutation {
   removeItem(StockMutationItem value) {
     items.remove(value);
     _cacheData();
+  }
+
+  cancelItem(StockMutationItem value) {
+    final index = items.indexOf(value);
+    if (index != -1) {
+      items.replaceRange(index, index + 1, [
+        StockMutationItem(
+          productId: value.productId,
+          amount: value.amount,
+          batch: value.batch,
+          productionDate: value.productionDate,
+          expirationDate: value.expirationDate,
+          stickerCode: value.stickerCode,
+          status: StockMutationItemStatus.Cancelled,
+        ),
+      ]);
+      _cacheData();
+    }
   }
 
   replaceItem(StockMutationItem oldValue, StockMutationItem newValue) {
