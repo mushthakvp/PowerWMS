@@ -1,26 +1,17 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
 import 'package:scanner/api.dart';
-import 'package:scanner/barcode_parser/barcode_parser.dart';
-import 'package:scanner/exceptions/domain_exception.dart';
 import 'package:scanner/models/picklist_line.dart';
-import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
-import 'package:scanner/screens/products_screen/widgets/amount.dart';
-import 'package:scanner/widgets/barcode_input.dart';
+import 'package:scanner/screens/product_screen/widgets/scan_form.dart';
 import 'package:scanner/widgets/product_image.dart';
 
-final audio = Audio('assets/error.mp3');
-
 class ProductView extends StatefulWidget {
-  final PicklistLine _line;
-  final List<StockMutationItem> _items;
+  const ProductView(this._line, {Key? key}) : super(key: key);
 
-  const ProductView(this._line, this._items, {Key? key}) : super(key: key);
+  final PicklistLine _line;
 
   @override
   _ProductViewState createState() => _ProductViewState();
@@ -31,19 +22,18 @@ class _ProductViewState extends State<ProductView> {
 
   @override
   void initState() {
-    _mutationFuture = StockMutation.fromMemory(widget._line, widget._items);
+    _mutationFuture = StockMutation.fromMemory(widget._line);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
     final line = widget._line;
     return FutureBuilder<StockMutation>(
       future: _mutationFuture!,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          print(snapshot.error);
+          print('${snapshot.error}\n${snapshot.stackTrace}');
           return SliverFillRemaining();
         }
         if (!snapshot.hasData) {
@@ -78,40 +68,17 @@ class _ProductViewState extends State<ProductView> {
               ),
             ),
             Divider(height: 1),
-            ..._pickTile(mutation),
-            ListTile(
-              visualDensity: VisualDensity.compact,
-              title: Container(
-                width: double.infinity,
-                child: Form(
-                  key: formKey,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                          child: ElevatedButton(
-                            child: Text(
-                              AppLocalizations.of(context)!
-                                  .productAdd
-                                  .toUpperCase(),
-                            ),
-                            onPressed: () {
-                              formKey.currentState?.save();
-                            },
-                          ),
-                          flex: 2),
-                      Flexible(
-                        flex: 3,
-                        child: BarcodeInput((value, barcode) {
-                          _parseHandler(mutation, value, barcode);
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            _pickTile(mutation),
             Divider(height: 1),
+            ScanForm(
+              mutation,
+              (process) {
+                setState(() {});
+                if (process) {
+                  _onProcessHandler(mutation);
+                }
+              },
+            ),
             ListTile(
               visualDensity: VisualDensity.compact,
               trailing: ElevatedButton(
@@ -125,15 +92,10 @@ class _ProductViewState extends State<ProductView> {
               ),
             ),
             Divider(height: 1),
-            if (mutation.needToScan())
-              ..._itemsBuilder(
-                mutation.items,
-                (item) => mutation.removeItem(item),
-                (item) {
-                  mutation.cancelItem(item);
-                  cancelStockMutation(item.id!);
-                },
-              ),
+            ..._itemsBuilder(
+              mutation.items,
+              (item) => mutation.removeItem(item),
+            ),
           ]),
         );
       },
@@ -141,188 +103,68 @@ class _ProductViewState extends State<ProductView> {
   }
 
   _pickTile(StockMutation mutation) {
-    return [
-      ListTile(
-        visualDensity: VisualDensity.compact,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!
-                      .productAmountAsked(mutation.line.product.unit),
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    '${mutation.askedAmount}',
-                    style: TextStyle(
-                      fontSize: 50,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ),
-                Text(
-                  AppLocalizations.of(context)!
-                      .productAmountBoxes(mutation.askedPackagingAmount)
-                      .toUpperCase(),
-                ),
-              ],
-            ),
-            SizedBox(width: 30),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!
-                      .productAmountToPick(mutation.line.product.unit),
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    '${mutation.toPickAmount}',
-                    style: TextStyle(
-                      fontSize: 50,
-                      color: mutation.toPickAmount < 0
-                          ? Colors.red
-                          : Colors.black54,
-                    ),
-                  ),
-                ),
-                Text(
-                  AppLocalizations.of(context)!
-                      .productAmountBoxes(mutation.toPickPackagingAmount)
-                      .toUpperCase(),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      Divider(height: 1),
-      if (!mutation.needToScan())
-        ..._amountInput(
-          mutation.line.product.unit,
-          mutation.items.first.amount.toString(),
-          (amount) {
-            var first = mutation.items.first;
-            setState(() {
-              mutation.replaceItem(
-                  first,
-                  StockMutationItem(
-                    productId: mutation.line.product.id,
-                    batch: first.batch,
-                    amount: int.parse(amount),
-                    productionDate: first.productionDate,
-                    expirationDate: first.expirationDate,
-                    stickerCode: first.stickerCode,
-                  ));
-            });
-          },
-        ),
-    ];
-  }
-
-  _parseHandler(StockMutation mutation, String ean, GS1Barcode? barcode) {
-    try {
-      var amount = 0;
-      if (mutation.line.product.ean == ean) {
-        amount = 1;
-      } else if (mutation.packaging != null && mutation.packaging!.uid == ean) {
-        amount = mutation.packaging!.defaultAmount.round();
-      } else {
-        throw new DomainException(
-          AppLocalizations.of(context)!.productWrongProduct,
-        );
-      }
-      final serial = barcode?.getAIData('21');
-      final batch = barcode?.getAIData('10');
-      final productionDate = barcode?.getAIData('11');
-      final expirationDate = barcode?.getAIData('17');
-      if (barcode != null &&
-          serial &&
-          mutation.items.any((item) => item.stickerCode == serial)) {
-        throw new DomainException(
-          AppLocalizations.of(context)!.productAlreadyScanned,
-        );
-      }
-      try {
-        var item = mutation.items.firstWhere(
-          (item) {
-            return !mutation.needToScan() ||
-                (item.batch == batch &&
-                    item.productionDate == productionDate &&
-                    item.expirationDate == expirationDate &&
-                    item.stickerCode == serial);
-          },
-        );
-        final settings = context.read<ValueNotifier<Settings>>().value;
-        mutation.replaceItem(
-          item,
-          StockMutationItem(
-            productId: mutation.line.product.id,
-            batch: batch,
-            amount: !mutation.needToScan() && settings.oneScanPickAll
-                ? mutation.toPickAmount
-                : amount + item.amount,
-            productionDate: productionDate,
-            expirationDate: expirationDate,
-            stickerCode: serial,
-          ),
-        );
-      } catch (e) {
-        mutation.addItem(StockMutationItem(
-          productId: mutation.line.product.id,
-          batch: batch,
-          amount: amount,
-          productionDate: productionDate,
-          expirationDate: expirationDate,
-          stickerCode: serial,
-        ));
-      } finally {
-        setState(() {});
-      }
-      if (mutation.toPickAmount < mutation.totalAmount &&
-          mutation.allowBelowZero == null) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            title: Text(
-              AppLocalizations.of(context)!.productWantToProcess,
-            ),
-            // content: const Text('AlertDialog description'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  mutation.allowBelowZero = false;
-                  Navigator.pop(context, 'Cancel');
-                },
-                child: Text(AppLocalizations.of(context)!.cancel),
+    return ListTile(
+      visualDensity: VisualDensity.compact,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                AppLocalizations.of(context)!
+                    .productAmountAsked(mutation.line.product.unit),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              TextButton(
-                onPressed: () {
-                  mutation.allowBelowZero = true;
-                  _onProcessHandler(mutation);
-                  Navigator.pop(context, 'OK');
-                },
-                child: Text(AppLocalizations.of(context)!.ok),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(
+                  '${mutation.askedAmount}',
+                  style: TextStyle(
+                    fontSize: 50,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
+              Text(
+                AppLocalizations.of(context)!
+                    .productAmountBoxes(mutation.askedPackagingAmount)
+                    .toUpperCase(),
               ),
             ],
           ),
-        );
-      }
-    } catch (e) {
-      AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
-        final snackBar = SnackBar(content: Text(e.toString()));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      });
-    }
+          SizedBox(width: 30),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                AppLocalizations.of(context)!
+                    .productAmountToPick(mutation.line.product.unit),
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(
+                  '${mutation.toPickAmount}',
+                  style: TextStyle(
+                    fontSize: 50,
+                    color:
+                        mutation.toPickAmount < 0 ? Colors.red : Colors.black54,
+                  ),
+                ),
+              ),
+              Text(
+                AppLocalizations.of(context)!
+                    .productAmountBoxes(mutation.toPickPackagingAmount)
+                    .toUpperCase(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   _onProcessHandler(StockMutation mutation) {
@@ -342,72 +184,37 @@ class _ProductViewState extends State<ProductView> {
     });
   }
 
-  _amountInput(
-      String unit, String value, void Function(String value) onChange) {
-    return [
-      ListTile(
-        visualDensity: VisualDensity.compact,
-        title: Column(
-          children: [
-            Text(
-              AppLocalizations.of(context)!.productAmountPicked(unit),
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Amount(value, onChange),
-          ],
-        ),
-      ),
-      Divider(height: 1),
-    ];
-  }
-
   _itemsBuilder(
     List<StockMutationItem> items,
     void Function(StockMutationItem item) onRemove,
-    void Function(StockMutationItem item) onCancel,
   ) {
     return items.map((item) {
-      final itemTile = Column(
-        children: [
-          ListTile(
-            title: Text(
-              '${item.amount} x ${item.batch} | ${item.stickerCode}',
-            ),
-            trailing: item.isReserved()
-                ? IconButton(
-                    icon: Icon(Icons.cancel_outlined, color: Colors.yellow),
-                    onPressed: () {
-                      setState(() {
-                        onCancel(item);
-                      });
-                    },
-                  )
-                : null,
+      return Dismissible(
+        key: Key(item.batch),
+        onDismissed: (direction) {
+          setState(() {
+            onRemove(item);
+          });
+        },
+        background: Container(
+          color: Colors.red,
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Icon(Icons.delete, color: Colors.white),
           ),
-          Divider(height: 1),
-        ],
+        ),
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(
+                '${item.amount} x ${item.batch} | ${item.stickerCode}',
+              ),
+            ),
+            Divider(height: 1),
+          ],
+        ),
       );
-      if (item.isNew()) {
-        return Dismissible(
-          key: Key(item.batch),
-          onDismissed: (direction) {
-            setState(() {
-              onRemove(item);
-            });
-          },
-          background: Container(
-            color: Colors.red,
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: Icon(Icons.delete, color: Colors.white),
-            ),
-          ),
-          child: itemTile,
-        );
-      } else {
-        return itemTile;
-      }
     });
   }
 }

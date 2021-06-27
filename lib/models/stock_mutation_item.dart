@@ -10,7 +10,7 @@ enum StockMutationItemStatus {
 }
 
 amountFromJson(num value) => value.round();
-statusFromJson(int value) {
+statusFromJson(int? value) {
   switch (value) {
     case 1:
       return StockMutationItemStatus.Reserved;
@@ -36,16 +36,25 @@ statusToJson(StockMutationItemStatus status) {
   }
 }
 
+dateFromJson(String? value) {
+  if (value != null) {
+    return DateTime.tryParse(value) ?? null;
+  }
+  return null;
+}
+
 @JsonSerializable()
 class StockMutationItem {
   final int? id;
   @JsonKey(fromJson: amountFromJson)
   final int amount;
   final String batch;
-  final String productionDate;
-  final String expirationDate;
+  final String? productionDate;
+  final String? expirationDate;
+  @JsonKey(fromJson: dateFromJson)
+  final DateTime? createdDate;
   final int productId;
-  final String stickerCode;
+  final String? stickerCode;
   @JsonKey(fromJson: statusFromJson, toJson: statusToJson)
   final StockMutationItemStatus status;
 
@@ -58,6 +67,7 @@ class StockMutationItem {
     required this.productId,
     required this.stickerCode,
     this.status = StockMutationItemStatus.New,
+    this.createdDate,
   });
 
   isNew() => status == StockMutationItemStatus.New;

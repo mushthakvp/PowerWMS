@@ -39,7 +39,8 @@ class _AmountState extends State<Amount> {
           child: Icon(Icons.remove),
           onPressed: () {
             controller.text =
-                max<int>(0, (int.tryParse(controller.text) ?? 0) - 1).toString();
+                max<int>(0, (int.tryParse(controller.text) ?? 0) - 1)
+                    .toString();
           },
         ),
         Expanded(
@@ -56,7 +57,8 @@ class _AmountState extends State<Amount> {
         ElevatedButton(
           child: Icon(Icons.add),
           onPressed: () {
-            controller.text = ((int.tryParse(controller.text) ?? 0) + 1).toString();
+            controller.text =
+                ((int.tryParse(controller.text) ?? 0) + 1).toString();
           },
         ),
       ],

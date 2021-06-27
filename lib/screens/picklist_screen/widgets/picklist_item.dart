@@ -36,7 +36,7 @@ class _PicklistItemState extends State<PicklistItem> {
   _address() {
     return [
       ListTile(
-        title: Text(widget._picklist.debtor.address),
+        title: Text(widget._picklist.debtor.address ?? ''),
       ),
       Divider(),
     ];

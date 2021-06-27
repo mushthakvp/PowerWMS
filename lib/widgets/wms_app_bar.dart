@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WMSAppBar extends AppBar {
@@ -18,17 +17,17 @@ class WMSAppBar extends AppBar {
             ],
           ),
           bottom: bottom,
-          leading: IconButton(
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return SettingsDialog();
-                  },
-                );
-              },
-              icon: Icon(Icons.settings)),
+          // leading: IconButton(
+          //     onPressed: () {
+          //       showDialog<void>(
+          //         context: context,
+          //         barrierDismissible: false,
+          //         builder: (BuildContext context) {
+          //           return SettingsDialog();
+          //         },
+          //       );
+          //     },
+          //     icon: Icon(Icons.settings)),
           actions: [
             IconButton(
               icon: Icon(Icons.logout),

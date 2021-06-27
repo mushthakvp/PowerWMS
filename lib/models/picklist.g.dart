@@ -19,7 +19,7 @@ Picklist _$PicklistFromJson(Map<String, dynamic> json) {
     colliAmount: (json['colliAmount'] as num).toDouble(),
     palletAmount: (json['palletAmount'] as num).toDouble(),
     invoiceId: json['invoiceId'] as String,
-    deliveryConditionId: json['deliveryConditionId'] as String,
+    deliveryConditionId: json['deliveryConditionId'] as String?,
     internalMemo: json['internalMemo'] as String,
     picker: json['picker'] as String,
     lines: json['lines'] as int,

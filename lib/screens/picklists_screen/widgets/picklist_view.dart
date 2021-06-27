@@ -18,45 +18,56 @@ class PicklistView extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          var response = (snapshot.error as DioError).response;
+          var error = (snapshot.error as DioError);
+          var response = error.response;
           if (response?.statusCode == 401) {
             SharedPreferences.getInstance().then((prefs) {
               prefs.clear();
               Navigator.pushReplacementNamed(context, '/');
+            });
+          } else {
+            Future.microtask(() {
+              final snackBar = SnackBar(content: Text(error.message));
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
             });
           }
         }
         if (snapshot.hasData) {
           final filtered = (snapshot.data!.data!['data'] as List<dynamic>)
               .map((json) => Picklist.fromJson(json))
-              .toList()
               .where(_where);
-          return ListView(
-            children: filtered
-                .map((picklist) => Column(
-                      children: [
-                        ListTile(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/picklist', arguments: picklist);
-                          },
-                          title: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(picklist.uid),
-                              Text(picklist.debtor.city),
-                              Text(picklist.debtor.name,
-                                  style: TextStyle(color: Colors.grey[400])),
-                            ],
+          try {
+            return ListView(
+              children: filtered
+                  .map((picklist) => Column(
+                        children: [
+                          ListTile(
+                            onTap: () {
+                              Navigator.pushNamed(context, '/picklist',
+                                  arguments: picklist);
+                            },
+                            title: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(picklist.uid),
+                                if (picklist.debtor.city != null)
+                                  Text(picklist.debtor.city!),
+                                Text(picklist.debtor.name,
+                                    style: TextStyle(color: Colors.grey[400])),
+                              ],
+                            ),
+                            trailing: Icon(Icons.chevron_right),
                           ),
-                          trailing: Icon(Icons.chevron_right),
-                        ),
-                        Divider(
-                          height: 1,
-                        ),
-                      ],
-                    ))
-                .toList(),
-          );
+                          Divider(
+                            height: 1,
+                          ),
+                        ],
+                      ))
+                  .toList(),
+            );
+          } catch (e, stack) {
+            return Text('${e.toString()}:\n${stack.toString()}');
+          }
         } else {
           return Container();
         }

@@ -12,31 +12,17 @@ class StockMutation {
   final Packaging? packaging;
   bool? allowBelowZero;
 
-  static Future<StockMutation> fromMemory(
-    PicklistLine line,
-    List<StockMutationItem> items,
-  ) async {
+  static Future<StockMutation> fromMemory(PicklistLine line) async {
     final prefs = await SharedPreferences.getInstance();
     final json = prefs.getString('${line.id}');
+    List<StockMutationItem> items = [];
     if (json != null) {
-      items.addAll((jsonDecode(json) as List<dynamic>)
+      items = (jsonDecode(json) as List<dynamic>)
           .map((json) => StockMutationItem.fromJson(json))
-          .toList());
+          .toList();
     }
 
-    final mutation = StockMutation._(line, items);
-    if (!mutation.needToScan()) {
-      mutation.items.add(StockMutationItem(
-        productId: mutation.line.product.id,
-        amount: mutation.maxAmountToPick,
-        batch: '',
-        productionDate: '',
-        expirationDate: '',
-        stickerCode: '',
-      ));
-    }
-
-    return mutation;
+    return StockMutation._(line, items);
   }
 
   StockMutation._(this.line, this.items)
@@ -79,6 +65,10 @@ class StockMutation {
         : 0;
   }
 
+  int get leftToPickAmount {
+    return toPickAmount - totalAmount;
+  }
+
   needToScan() {
     return line.product.productGroupBatchField > 0 ||
         line.product.productGroupExpirationDateField > 0 ||
@@ -93,24 +83,6 @@ class StockMutation {
   removeItem(StockMutationItem value) {
     items.remove(value);
     _cacheData();
-  }
-
-  cancelItem(StockMutationItem value) {
-    final index = items.indexOf(value);
-    if (index != -1) {
-      items.replaceRange(index, index + 1, [
-        StockMutationItem(
-          productId: value.productId,
-          amount: value.amount,
-          batch: value.batch,
-          productionDate: value.productionDate,
-          expirationDate: value.expirationDate,
-          stickerCode: value.stickerCode,
-          status: StockMutationItemStatus.Cancelled,
-        ),
-      ]);
-      _cacheData();
-    }
   }
 
   replaceItem(StockMutationItem oldValue, StockMutationItem newValue) {

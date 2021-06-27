@@ -11,11 +11,12 @@ StockMutationItem _$StockMutationItemFromJson(Map<String, dynamic> json) {
     id: json['id'] as int?,
     amount: amountFromJson(json['amount'] as num),
     batch: json['batch'] as String,
-    productionDate: json['productionDate'] as String,
-    expirationDate: json['expirationDate'] as String,
+    productionDate: json['productionDate'] as String?,
+    expirationDate: json['expirationDate'] as String?,
     productId: json['productId'] as int,
-    stickerCode: json['stickerCode'] as String,
-    status: statusFromJson(json['status'] as int),
+    stickerCode: json['stickerCode'] as String?,
+    status: statusFromJson(json['status'] as int?),
+    createdDate: dateFromJson(json['createdDate'] as String?),
   );
 }
 
@@ -26,6 +27,7 @@ Map<String, dynamic> _$StockMutationItemToJson(StockMutationItem instance) =>
       'batch': instance.batch,
       'productionDate': instance.productionDate,
       'expirationDate': instance.expirationDate,
+      'createdDate': instance.createdDate?.toIso8601String(),
       'productId': instance.productId,
       'stickerCode': instance.stickerCode,
       'status': statusToJson(instance.status),

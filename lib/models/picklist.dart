@@ -1,5 +1,5 @@
-import 'package:scanner/models/debtor.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:scanner/models/debtor.dart';
 
 part 'picklist.g.dart';
 
@@ -20,7 +20,7 @@ class Picklist {
   double colliAmount;
   double palletAmount;
   String invoiceId;
-  String deliveryConditionId;
+  String? deliveryConditionId;
   String internalMemo;
   String picker;
   int lines;
@@ -51,6 +51,7 @@ class Picklist {
     required this.isNew,
   });
 
-  factory Picklist.fromJson(Map<String, dynamic> json) => _$PicklistFromJson(json);
+  factory Picklist.fromJson(Map<String, dynamic> json) =>
+      _$PicklistFromJson(json);
   Map<String, dynamic> toJson() => _$PicklistToJson(this);
 }

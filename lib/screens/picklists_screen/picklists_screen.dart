@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scanner/api.dart';
+import 'package:scanner/models/picklist.dart';
 import 'package:scanner/screens/picklists_screen/widgets/picklist_view.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,9 +73,9 @@ class _PicklistScreenState extends State<PicklistsScreen> {
         ),
         body: TabBarView(
           children: [
-            PicklistView(
-                _future!, (element) => [1, 2].contains(element.status)),
-            PicklistView(_future!, (element) => element.status == 4),
+            PicklistView(_future!,
+                (Picklist element) => [1, 2].contains(element.status)),
+            PicklistView(_future!, (Picklist element) => element.status == 4),
           ],
         ),
       ),

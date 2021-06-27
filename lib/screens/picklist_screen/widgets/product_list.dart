@@ -4,14 +4,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:scanner/api.dart';
 import 'package:scanner/models/picklist_line.dart';
-import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 
 class ProductList extends StatefulWidget {
-  final List<PicklistLine> lines;
-  final List<StockMutationItem> items;
+  const ProductList(this.lines, {Key? key}) : super(key: key);
 
-  const ProductList(this.lines, this.items, {Key? key}) : super(key: key);
+  final List<PicklistLine> lines;
 
   @override
   _ProductListState createState() => _ProductListState();
@@ -33,11 +31,8 @@ class _ProductListState extends State<ProductList> {
                         final lines = widget.lines.where(
                             (line) => _ean == '' || line.product.ean == _ean);
                         if (lines.length == 1) {
-                          Navigator.of(context).pushNamed('/product',
-                              arguments: {
-                                'line': lines.first,
-                                'items': widget.items
-                              });
+                          Navigator.of(context)
+                              .pushNamed('/product', arguments: lines.first);
                         }
                       });
                     }),
@@ -52,11 +47,8 @@ class _ProductListState extends State<ProductList> {
                       children: [
                         ListTile(
                           onTap: () {
-                            Navigator.of(context).pushNamed('/product',
-                                arguments: {
-                                  'line': line,
-                                  'items': widget.items
-                                });
+                            Navigator.of(context)
+                                .pushNamed('/product', arguments: line);
                           },
                           leading: Container(
                             width: 60,
@@ -85,7 +77,7 @@ class _ProductListState extends State<ProductList> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text('${line.pickAmount} x ${line.product.unit}'),
-                              Text('Floor 2 - Row 14',
+                              Text(line.location ?? '',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Colors.grey[400],

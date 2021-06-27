@@ -59,10 +59,12 @@ Future<Response<Map<String, dynamic>>> addStockMutation(
   );
 }
 
-Future<Response<Map<String, dynamic>>> getStockMutation(int picklistId) {
+Future<Response<Map<String, dynamic>>> getStockMutation(
+    int picklistId, int productId) {
   return dio.post(
     '/stockmutation/list',
     data: {
+      'productId': productId,
       'picklistId': picklistId,
       'skipPaging': true,
     },

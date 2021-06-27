@@ -11,9 +11,9 @@ class PicklistLine {
   final String uid;
   final String warehouse;
   final int warehouseId;
-  final String lineDate;
+  final String? lineDate;
   final num pickAmount;
-  final num canceledAmount;
+  final num? canceledAmount;
   final num pickedAmount;
   final num available;
   final String descriptionA;
@@ -21,7 +21,7 @@ class PicklistLine {
   final String internalMemo;
   final int status;
   final Product product;
-  final String location;
+  final String? location;
   final int id;
   final bool isNew;
 
@@ -47,6 +47,7 @@ class PicklistLine {
     required this.isNew,
   });
 
-  factory PicklistLine.fromJson(Map<String, dynamic> json) => _$PicklistLineFromJson(json);
+  factory PicklistLine.fromJson(Map<String, dynamic> json) =>
+      _$PicklistLineFromJson(json);
   Map<String, dynamic> toJson() => _$PicklistLineToJson(this);
 }
