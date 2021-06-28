@@ -177,6 +177,7 @@ class _ProductViewState extends State<ProductView> {
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         if (response.data!['success']) {
+          widget._line.pickedAmount += mutation.totalAmount;
           mutation.clear();
           Navigator.of(context).pop();
         }
