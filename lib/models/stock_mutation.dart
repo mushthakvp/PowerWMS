@@ -46,7 +46,7 @@ class StockMutation {
   }
 
   int get toPickAmount {
-    return (line.pickAmount - line.pickedAmount).round();
+    return (line.pickAmount - line.pickedAmount).round() - totalAmount;
   }
 
   int get askedAmount {
@@ -63,10 +63,6 @@ class StockMutation {
     return packaging != null
         ? max((askedAmount / packaging!.defaultAmount).floor(), 0)
         : 0;
-  }
-
-  int get leftToPickAmount {
-    return toPickAmount - totalAmount;
   }
 
   needToScan() {

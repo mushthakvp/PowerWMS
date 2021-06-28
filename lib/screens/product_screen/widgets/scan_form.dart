@@ -27,7 +27,7 @@ class _ScanFormState extends State<ScanForm> {
 
   @override
   void didChangeDependencies() {
-    _amount = widget.mutation.leftToPickAmount;
+    _amount = widget.mutation.toPickAmount;
     super.didChangeDependencies();
   }
 
@@ -42,7 +42,6 @@ class _ScanFormState extends State<ScanForm> {
           if (!mutation.needToScan())
             ..._amountInput(
               mutation.line.product.unit,
-              _amount.toString(),
               (amount) {
                 setState(() {
                   _amount = int.tryParse(amount) ?? _amount;
@@ -63,15 +62,20 @@ class _ScanFormState extends State<ScanForm> {
                               .productAdd
                               .toUpperCase(),
                         ),
-                        onPressed: () {
-                          formKey.currentState?.save();
-                        },
+                        onPressed: mutation.needToScan()
+                            ? null
+                            : () {
+                                formKey.currentState?.save();
+                              },
                       ),
                       flex: 2),
                   Flexible(
                     flex: 3,
                     child: BarcodeInput((value, barcode) {
                       _parseHandler(mutation, value, barcode);
+                      setState(() {
+                        _amount = widget.mutation.toPickAmount;
+                      });
                     }),
                   ),
                 ],
@@ -85,7 +89,6 @@ class _ScanFormState extends State<ScanForm> {
 
   _amountInput(
     String unit,
-    String value,
     void Function(String value) onChange,
   ) {
     return [
@@ -97,11 +100,14 @@ class _ScanFormState extends State<ScanForm> {
               AppLocalizations.of(context)!.productAmountPicked(unit),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Amount(_amount.toString(), (value) {
-              setState(() {
-                _amount = int.tryParse(value) ?? 0;
-              });
-            }),
+            Amount(
+              _amount,
+              (value) {
+                setState(() {
+                  _amount = value;
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -155,7 +161,7 @@ class _ScanFormState extends State<ScanForm> {
           stickerCode: serial,
         ));
       }
-      if (mutation.toPickAmount < mutation.totalAmount &&
+      if (mutation.maxAmountToPick <= mutation.totalAmount &&
           mutation.allowBelowZero == null) {
         showDialog(
           context: context,
@@ -198,7 +204,7 @@ class _ScanFormState extends State<ScanForm> {
     if (mutation.line.product.ean == ean) {
       amount = mutation.needToScan() || !settings.oneScanPickAll
           ? 1
-          : mutation.leftToPickAmount;
+          : mutation.toPickAmount;
     } else if (mutation.packaging != null && mutation.packaging!.uid == ean) {
       amount = mutation.packaging!.defaultAmount.round();
     } else if (_amount > 0) {

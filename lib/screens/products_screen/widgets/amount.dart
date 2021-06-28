@@ -3,44 +3,21 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-class Amount extends StatefulWidget {
-  final String value;
-  final void Function(String value) onChange;
+class Amount extends StatelessWidget {
+  const Amount(this._value, this._onChange, {Key? key}) : super(key: key);
 
-  const Amount(this.value, this.onChange, {Key? key}) : super(key: key);
-
-  @override
-  _AmountState createState() => _AmountState();
-}
-
-class _AmountState extends State<Amount> {
-  final controller = TextEditingController(text: '1');
-
-  @override
-  void didChangeDependencies() {
-    controller.text = widget.value;
-    controller.addListener(() {
-      widget.onChange(controller.text);
-    });
-    super.didChangeDependencies();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
+  final int _value;
+  final void Function(int value) _onChange;
 
   @override
   Widget build(BuildContext context) {
+    final controller = TextEditingController(text: '$_value');
     return Row(
       children: [
         ElevatedButton(
           child: Icon(Icons.remove),
           onPressed: () {
-            controller.text =
-                max<int>(0, (int.tryParse(controller.text) ?? 0) - 1)
-                    .toString();
+            _onChange(max<int>(0, _value - 1));
           },
         ),
         Expanded(
@@ -52,13 +29,15 @@ class _AmountState extends State<Amount> {
               fontSize: 24,
               height: 2.0,
             ),
+            onChanged: (String value) {
+              _onChange(int.tryParse(value) ?? _value);
+            },
           ),
         ),
         ElevatedButton(
           child: Icon(Icons.add),
           onPressed: () {
-            controller.text =
-                ((int.tryParse(controller.text) ?? 0) + 1).toString();
+            _onChange(_value + 1);
           },
         ),
       ],
