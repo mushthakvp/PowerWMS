@@ -20,6 +20,7 @@ class Settings {
   final PicklistSort picklistSort;
   final bool finishedProductsAtBottom;
   final bool oneScanPickAll;
+  final bool directlyProcess;
 
   static Future<Settings> fromMemory() async {
     final prefs = await SharedPreferences.getInstance();
@@ -35,19 +36,22 @@ class Settings {
     this.picklistSort = PicklistSort.productNumber,
     this.finishedProductsAtBottom = false,
     this.oneScanPickAll = true,
+    this.directlyProcess = false,
   });
 
   factory Settings.fromJson(Map<String, dynamic> json) => Settings(
-    picklistSort: getStatusFromString(json['picklistSort']),
-    finishedProductsAtBottom: json['finishedProductsAtBottom'],
-    oneScanPickAll: json['oneScanPickAll'],
-  );
+        picklistSort: getStatusFromString(json['picklistSort']),
+        finishedProductsAtBottom: json['finishedProductsAtBottom'] ?? false,
+        oneScanPickAll: json['oneScanPickAll'] ?? true,
+        directlyProcess: json['directlyProcess'] ?? false,
+      );
 
   Map<String, dynamic> toJson() => {
-    'picklistSort': picklistSort.toString(),
-    'finishedProductsAtBottom': finishedProductsAtBottom,
-    'oneScanPickAll': oneScanPickAll,
-  };
+        'picklistSort': picklistSort.toString(),
+        'finishedProductsAtBottom': finishedProductsAtBottom,
+        'oneScanPickAll': oneScanPickAll,
+        'directlyProcess': directlyProcess,
+      };
 
   save() async {
     final prefs = await SharedPreferences.getInstance();

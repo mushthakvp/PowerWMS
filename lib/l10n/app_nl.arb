@@ -63,5 +63,6 @@
   "productWarehouseStock": "Magazijn voorraad",
   "productWrongProduct": "Verkeerd product gescand",
   "products": "Producten",
+  "settingsDirectlyProcess": "Direct verwerken",
   "warehouseReceipts": "Magazijnbonnen"
 }

@@ -162,7 +162,8 @@ class _ScanFormState extends State<ScanForm> {
         ));
       }
       if (mutation.maxAmountToPick <= mutation.totalAmount &&
-          mutation.allowBelowZero == null) {
+          mutation.allowBelowZero == null &&
+          !settings.directlyProcess) {
         showDialog(
           context: context,
           builder: (BuildContext context) => AlertDialog(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/models/settings.dart';
 
@@ -13,6 +14,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
   PicklistSort? _picklistSort;
   bool? _finishedProductsAtBottom;
   bool? _oneScanPickAll;
+  bool? _directlyProcess;
 
   @override
   void initState() {
@@ -20,6 +22,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     _picklistSort = settings.picklistSort;
     _finishedProductsAtBottom = settings.finishedProductsAtBottom;
     _oneScanPickAll = settings.oneScanPickAll;
+    _directlyProcess = settings.directlyProcess;
     super.initState();
   }
 
@@ -81,6 +84,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   });
                 },
               ),
+              SwitchListTile(
+                title:
+                    Text(AppLocalizations.of(context)!.settingsDirectlyProcess),
+                controlAffinity: ListTileControlAffinity.leading,
+                value: _directlyProcess!,
+                onChanged: (value) {
+                  setState(() {
+                    _directlyProcess = value;
+                  });
+                },
+              ),
             ],
           ),
         ),
@@ -93,6 +107,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               picklistSort: _picklistSort ?? PicklistSort.productNumber,
               finishedProductsAtBottom: _finishedProductsAtBottom ?? false,
               oneScanPickAll: _oneScanPickAll ?? true,
+              directlyProcess: _directlyProcess ?? false,
             );
             settings.save();
             context.read<ValueNotifier<Settings>>().value = settings;
