@@ -2,103 +2,96 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scanner/api.dart';
-import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/screens/product_screen/widgets/scan_form.dart';
 import 'package:scanner/widgets/product_image.dart';
 
 class ProductView extends StatefulWidget {
-  const ProductView(this._line, {Key? key}) : super(key: key);
+  const ProductView(this.mutation, {Key? key}) : super(key: key);
 
-  final PicklistLine _line;
+  final StockMutation mutation;
 
   @override
   _ProductViewState createState() => _ProductViewState();
 }
 
 class _ProductViewState extends State<ProductView> {
-  Future<StockMutation>? _mutationFuture;
+  int _amount = 0;
 
   @override
   void initState() {
-    _mutationFuture = StockMutation.fromMemory(widget._line);
+    _amount = widget.mutation.toPickAmount;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final line = widget._line;
-    return FutureBuilder<StockMutation>(
-      future: _mutationFuture!,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          print('${snapshot.error}\n${snapshot.stackTrace}');
-          return SliverFillRemaining();
-        }
-        if (!snapshot.hasData) {
-          return SliverFillRemaining();
-        }
-        final mutation = snapshot.data!;
-        return SliverList(
-          delegate: SliverChildListDelegate([
-            ListTile(
-              title: Row(
+    final mutation = widget.mutation;
+    final line = mutation.line;
+    return SliverList(
+      delegate: SliverChildListDelegate([
+        ListTile(
+          title: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${AppLocalizations.of(context)!.productProductNumber}:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(mutation.line.product.uid),
-                      SizedBox(height: 10),
-                      const Text(
-                        'GTIN / EAN:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(mutation.line.product.ean),
-                    ],
+                  Text(
+                    '${AppLocalizations.of(context)!.productProductNumber}:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Spacer(),
-                  // SizedBox(width: 20),
-                  ProductImage(line.product.id, width: 120),
+                  Text(mutation.line.product.uid),
+                  SizedBox(height: 10),
+                  const Text(
+                    'GTIN / EAN:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(mutation.line.product.ean),
                 ],
               ),
-            ),
-            Divider(height: 1),
-            _pickTile(mutation),
-            Divider(height: 1),
-            ScanForm(
-              mutation,
-              (process) {
-                setState(() {});
-                if (process) {
-                  _onProcessHandler(mutation);
-                }
-              },
-            ),
-            ListTile(
-              visualDensity: VisualDensity.compact,
-              trailing: ElevatedButton(
-                child: Text(
-                    AppLocalizations.of(context)!.productProcess.toUpperCase()),
-                onPressed: mutation.items.length > 0
-                    ? () {
-                        _onProcessHandler(mutation);
-                      }
-                    : null,
-              ),
-            ),
-            Divider(height: 1),
-            ..._itemsBuilder(
-              mutation.items,
-              (item) => mutation.removeItem(item),
-            ),
-          ]),
-        );
-      },
+              Spacer(),
+              // SizedBox(width: 20),
+              ProductImage(line.product.id, width: 120),
+            ],
+          ),
+        ),
+        Divider(height: 1),
+        _pickTile(mutation),
+        Divider(height: 1),
+        ScanForm(
+          mutation,
+          (process) {
+            setState(() {});
+            if (process) {
+              _onProcessHandler(mutation);
+            }
+          },
+          _amount,
+          (int amount) {
+            setState(() {
+              _amount = amount;
+            });
+          },
+        ),
+        ListTile(
+          visualDensity: VisualDensity.compact,
+          trailing: ElevatedButton(
+            child: Text(
+                AppLocalizations.of(context)!.productProcess.toUpperCase()),
+            onPressed: mutation.items.length > 0
+                ? () {
+                    _onProcessHandler(mutation);
+                  }
+                : null,
+          ),
+        ),
+        Divider(height: 1),
+        ..._itemsBuilder(
+          mutation.items,
+          (item) => mutation.removeItem(item),
+        ),
+      ]),
     );
   }
 
@@ -177,7 +170,7 @@ class _ProductViewState extends State<ProductView> {
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         if (response.data!['success']) {
-          widget._line.pickedAmount += mutation.totalAmount;
+          widget.mutation.line.pickedAmount += mutation.totalAmount;
           mutation.clear();
           Navigator.of(context).pop();
         }
@@ -195,6 +188,7 @@ class _ProductViewState extends State<ProductView> {
         onDismissed: (direction) {
           setState(() {
             onRemove(item);
+            _amount = widget.mutation.toPickAmount;
           });
         },
         background: Container(
