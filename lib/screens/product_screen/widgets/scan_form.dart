@@ -120,6 +120,13 @@ class _ScanFormState extends State<ScanForm> {
   _parseHandler(StockMutation mutation, String ean, GS1Barcode? barcode) {
     final settings = context.read<ValueNotifier<Settings>>().value;
     try {
+      if (ean != '' &&
+          (mutation.line.product.ean != ean ||
+              mutation.packaging?.uid != ean)) {
+        throw new DomainException(
+          AppLocalizations.of(context)!.productWrongProduct,
+        );
+      }
       int amount = _calculateAmount(mutation, ean, settings);
       final serial = barcode?.getAIData('21');
       final batch = barcode?.getAIData('10');
@@ -202,7 +209,11 @@ class _ScanFormState extends State<ScanForm> {
     }
   }
 
-  int _calculateAmount(StockMutation mutation, String ean, Settings settings) {
+  int _calculateAmount(
+    StockMutation mutation,
+    String ean,
+    Settings settings,
+  ) {
     var amount = 0;
     if (mutation.line.product.ean == ean) {
       amount = mutation.needToScan() || !settings.oneScanPickAll
@@ -210,12 +221,8 @@ class _ScanFormState extends State<ScanForm> {
           : mutation.toPickAmount;
     } else if (mutation.packaging != null && mutation.packaging!.uid == ean) {
       amount = mutation.packaging!.defaultAmount.round();
-    } else if (_amount > 0) {
-      amount = _amount;
     } else {
-      throw new DomainException(
-        AppLocalizations.of(context)!.productWrongProduct,
-      );
+      amount = _amount;
     }
     return amount;
   }
