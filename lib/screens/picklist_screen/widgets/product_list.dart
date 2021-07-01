@@ -6,6 +6,9 @@ import 'package:scanner/api.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 
+filter(String search) => (PicklistLine line) =>
+    search == '' || line.product.ean == search || line.product.uid == search;
+
 class ProductList extends StatefulWidget {
   const ProductList(this.lines, {Key? key}) : super(key: key);
 
@@ -16,10 +19,11 @@ class ProductList extends StatefulWidget {
 }
 
 class _ProductListState extends State<ProductList> {
-  String _ean = '';
+  String _search = '';
 
   @override
   Widget build(BuildContext context) {
+    var test = filter(_search);
     return SliverList(
         delegate: SliverChildListDelegate([
               Column(
@@ -27,9 +31,8 @@ class _ProductListState extends State<ProductList> {
                   ListTile(
                     title: BarcodeInput((value, barcode) {
                       setState(() {
-                        _ean = value;
-                        final lines = widget.lines.where(
-                            (line) => _ean == '' || line.product.ean == _ean);
+                        _search = value;
+                        final lines = widget.lines.where(test);
                         if (lines.length == 1) {
                           Navigator.of(context)
                               .pushNamed('/product', arguments: lines.first);
@@ -42,7 +45,7 @@ class _ProductListState extends State<ProductList> {
               ),
             ].toList() +
             widget.lines
-                .where((line) => _ean == '' || line.product.ean == _ean)
+                .where(test)
                 .map((line) => Column(
                       children: [
                         ListTile(
