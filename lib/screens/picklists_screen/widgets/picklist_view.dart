@@ -46,14 +46,37 @@ class PicklistView extends StatelessWidget {
                               Navigator.pushNamed(context, '/picklist',
                                   arguments: picklist);
                             },
+                            leading: Container(
+                              width: 40,
+                              height: 40,
+                              color: Colors.black,
+                              alignment: Alignment.center,
+                              child: Text(
+                                '${picklist.lines}',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                             title: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(picklist.uid),
-                                if (picklist.debtor.city != null)
-                                  Text(picklist.debtor.city!),
-                                Text(picklist.debtor.name,
-                                    style: TextStyle(color: Colors.grey[400])),
+                                Row(
+                                  children: [
+                                    Text(
+                                      picklist.uid,
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(picklist.debtor.city ?? '',
+                                          overflow: TextOverflow.ellipsis),
+                                    ),
+                                  ],
+                                ),
+                                Text(picklist.debtor.name),
                               ],
                             ),
                             trailing: Icon(Icons.chevron_right),
