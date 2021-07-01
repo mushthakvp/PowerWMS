@@ -112,7 +112,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             style: headline6,
                           ),
                           ProductImage(product.id),
-                          Amount('1', (value) {}),
+                          Amount(1, (value) {}),
                           Divider(height: 1),
                         ],
                       );
@@ -163,7 +163,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                           ),
                                           SizedBox(width: 20),
                                           Expanded(
-                                              child: Amount('1', (value) {})),
+                                              child: Amount(1, (value) {})),
                                         ],
                                       ),
                                     ),

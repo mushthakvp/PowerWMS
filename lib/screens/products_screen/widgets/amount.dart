@@ -4,25 +4,47 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class Amount extends StatefulWidget {
-  final String value;
-  final void Function(String value) onChange;
+  const Amount(this._value, this._onChange, {Key? key}) : super(key: key);
 
-  const Amount(this.value, this.onChange, {Key? key}) : super(key: key);
+  final int _value;
+  final void Function(int value) _onChange;
 
   @override
   _AmountState createState() => _AmountState();
 }
 
 class _AmountState extends State<Amount> {
-  final controller = TextEditingController(text: '1');
+  final controller = TextEditingController(text: '');
 
   @override
   void didChangeDependencies() {
-    controller.text = widget.value;
+    controller.text = widget._value.toString();
+    controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: controller.text.length),
+    );
     controller.addListener(() {
-      widget.onChange(controller.text);
+      if (controller.text != widget._value.toString()) {
+        Future.microtask(() {
+          var value = int.tryParse(controller.text);
+          print(value);
+          if (value != null) {
+            widget._onChange(value);
+          }
+        });
+      }
     });
     super.didChangeDependencies();
+  }
+
+  @override
+  void didUpdateWidget(covariant Amount oldWidget) {
+    if (widget._value != int.tryParse(controller.text)) {
+      controller.text = widget._value.toString();
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.text.length),
+      );
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -38,13 +60,11 @@ class _AmountState extends State<Amount> {
         ElevatedButton(
           child: Icon(Icons.remove),
           onPressed: () {
-            controller.text =
-                max<int>(0, (int.tryParse(controller.text) ?? 0) - 1)
-                    .toString();
+            widget._onChange(max<int>(0, widget._value - 1));
           },
         ),
         Expanded(
-          child: TextField(
+          child: TextFormField(
             controller: controller,
             keyboardType: TextInputType.number,
             textAlign: TextAlign.center,
@@ -57,8 +77,7 @@ class _AmountState extends State<Amount> {
         ElevatedButton(
           child: Icon(Icons.add),
           onPressed: () {
-            controller.text =
-                ((int.tryParse(controller.text) ?? 0) + 1).toString();
+            widget._onChange(widget._value + 1);
           },
         ),
       ],

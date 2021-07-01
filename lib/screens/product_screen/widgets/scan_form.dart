@@ -12,28 +12,18 @@ import 'package:scanner/widgets/barcode_input.dart';
 
 final audio = Audio('assets/error.mp3');
 
-class ScanForm extends StatefulWidget {
-  const ScanForm(this.mutation, this.onParse, {Key? key}) : super(key: key);
+class ScanForm extends StatelessWidget {
+  const ScanForm(this.mutation, this.onParse, this._amount, this.onChange,
+      {Key? key})
+      : super(key: key);
 
   final StockMutation mutation;
   final void Function(bool proceed) onParse;
-
-  @override
-  _ScanFormState createState() => _ScanFormState();
-}
-
-class _ScanFormState extends State<ScanForm> {
-  int _amount = 0;
-
-  @override
-  void didChangeDependencies() {
-    _amount = widget.mutation.leftToPickAmount;
-    super.didChangeDependencies();
-  }
+  final int _amount;
+  final void Function(int amount) onChange;
 
   @override
   Widget build(BuildContext context) {
-    final mutation = widget.mutation;
     final formKey = GlobalKey<FormState>();
     return ListTile(
       visualDensity: VisualDensity.compact,
@@ -42,12 +32,8 @@ class _ScanFormState extends State<ScanForm> {
           if (!mutation.needToScan())
             ..._amountInput(
               mutation.line.product.unit,
-              _amount.toString(),
-              (amount) {
-                setState(() {
-                  _amount = int.tryParse(amount) ?? _amount;
-                });
-              },
+              onChange,
+              context,
             ),
           Container(
             width: double.infinity,
@@ -63,15 +49,18 @@ class _ScanFormState extends State<ScanForm> {
                               .productAdd
                               .toUpperCase(),
                         ),
-                        onPressed: () {
-                          formKey.currentState?.save();
-                        },
+                        onPressed: mutation.needToScan()
+                            ? null
+                            : () {
+                                formKey.currentState?.save();
+                              },
                       ),
                       flex: 2),
                   Flexible(
                     flex: 3,
                     child: BarcodeInput((value, barcode) {
-                      _parseHandler(mutation, value, barcode);
+                      _parseHandler(mutation, value, barcode, context);
+                      onChange(mutation.toPickAmount);
                     }),
                   ),
                 ],
@@ -85,8 +74,8 @@ class _ScanFormState extends State<ScanForm> {
 
   _amountInput(
     String unit,
-    String value,
-    void Function(String value) onChange,
+    void Function(int value) onChange,
+    BuildContext context,
   ) {
     return [
       ListTile(
@@ -97,11 +86,10 @@ class _ScanFormState extends State<ScanForm> {
               AppLocalizations.of(context)!.productAmountPicked(unit),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Amount(_amount.toString(), (value) {
-              setState(() {
-                _amount = int.tryParse(value) ?? 0;
-              });
-            }),
+            Amount(
+              _amount,
+              onChange,
+            ),
           ],
         ),
       ),
@@ -109,10 +97,11 @@ class _ScanFormState extends State<ScanForm> {
     ];
   }
 
-  _parseHandler(StockMutation mutation, String ean, GS1Barcode? barcode) {
+  _parseHandler(StockMutation mutation, String ean, GS1Barcode? barcode,
+      BuildContext context) {
     final settings = context.read<ValueNotifier<Settings>>().value;
     try {
-      int amount = _calculateAmount(mutation, ean, settings);
+      int amount = _calculateAmount(mutation, ean, settings, context);
       final serial = barcode?.getAIData('21');
       final batch = barcode?.getAIData('10');
       final productionDate = barcode?.getAIData('11');
@@ -155,8 +144,9 @@ class _ScanFormState extends State<ScanForm> {
           stickerCode: serial,
         ));
       }
-      if (mutation.toPickAmount < mutation.totalAmount &&
-          mutation.allowBelowZero == null) {
+      if (mutation.maxAmountToPick <= mutation.totalAmount &&
+          mutation.allowBelowZero == null &&
+          !settings.directlyProcess) {
         showDialog(
           context: context,
           builder: (BuildContext context) => AlertDialog(
@@ -180,9 +170,9 @@ class _ScanFormState extends State<ScanForm> {
               ),
             ],
           ),
-        ).then((result) => widget.onParse(result));
+        ).then((result) => onParse(result));
       } else {
-        widget.onParse(false);
+        onParse(false);
       }
     } catch (e, stack) {
       AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
@@ -193,12 +183,17 @@ class _ScanFormState extends State<ScanForm> {
     }
   }
 
-  int _calculateAmount(StockMutation mutation, String ean, Settings settings) {
+  int _calculateAmount(
+    StockMutation mutation,
+    String ean,
+    Settings settings,
+    BuildContext context,
+  ) {
     var amount = 0;
     if (mutation.line.product.ean == ean) {
       amount = mutation.needToScan() || !settings.oneScanPickAll
           ? 1
-          : mutation.leftToPickAmount;
+          : mutation.toPickAmount;
     } else if (mutation.packaging != null && mutation.packaging!.uid == ean) {
       amount = mutation.packaging!.defaultAmount.round();
     } else if (_amount > 0) {
