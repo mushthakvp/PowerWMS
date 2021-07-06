@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
 
@@ -25,35 +26,44 @@ class _BarcodeInputState extends State<BarcodeInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextFormField(
-            controller: controller,
-            onFieldSubmitted: _parse,
-            onSaved: _parse,
-            autofocus: true,
-            focusNode: focusNode,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(hintText: 'Barcode'),
+    return RawKeyboardListener(
+      focusNode: FocusNode(),
+      onKey: (event) {
+        if (event.runtimeType == RawKeyDownEvent &&
+            (event.logicalKey.keyLabel == 'Enter')) {
+          _parse(controller.text);
+        }
+      },
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              onFieldSubmitted: _parse,
+              onSaved: _parse,
+              autofocus: true,
+              focusNode: focusNode,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(hintText: 'Barcode'),
+            ),
           ),
-        ),
-        IconButton(
-          icon: Icon(Icons.photo_camera_rounded),
-          onPressed: () async {
-            String value = await FlutterBarcodeScanner.scanBarcode(
-              "#ff6666",
-              "Cancel",
-              false,
-              ScanMode.DEFAULT,
-            );
-            setState(() {
-              controller.text = value;
-            });
-            _parse(value);
-          },
-        ),
-      ],
+          IconButton(
+            icon: Icon(Icons.photo_camera_rounded),
+            onPressed: () async {
+              String value = await FlutterBarcodeScanner.scanBarcode(
+                "#ff6666",
+                "Cancel",
+                false,
+                ScanMode.DEFAULT,
+              );
+              setState(() {
+                controller.text = value;
+              });
+              _parse(value);
+            },
+          ),
+        ],
+      ),
     );
   }
 
