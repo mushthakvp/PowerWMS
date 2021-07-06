@@ -54,6 +54,7 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                 Container(
                   child: TextField(
                     onChanged: _onChangeHandler,
+                    autofocus: true,
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context)!.picklistsSearch,
                       border: InputBorder.none,
