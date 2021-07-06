@@ -122,6 +122,7 @@ class _ScanFormState extends State<ScanForm> {
     try {
       if (ean != '' &&
           (mutation.line.product.ean != ean ||
+              mutation.line.product.uid != ean ||
               mutation.packaging?.uid != ean)) {
         throw new DomainException(
           AppLocalizations.of(context)!.productWrongProduct,
@@ -215,7 +216,7 @@ class _ScanFormState extends State<ScanForm> {
     Settings settings,
   ) {
     var amount = 0;
-    if (mutation.line.product.ean == ean) {
+    if (mutation.line.product.ean == ean || mutation.line.product.uid == ean) {
       amount = mutation.needToScan() || !settings.oneScanPickAll
           ? 1
           : mutation.toPickAmount;
