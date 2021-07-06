@@ -66,26 +66,38 @@ class _ReservedListState extends State<ReservedList> {
                     .map((item) => Column(
                           children: [
                             _itemTile(item, () {
-                              // setState(() {
-                              _future = Future.sync(() {
-                                final index = items.indexOf(item);
-                                if (index != -1) {
-                                  items.replaceRange(index, index + 1, [
-                                    StockMutationItem(
-                                      productId: item.productId,
-                                      amount: item.amount,
-                                      batch: item.batch,
-                                      productionDate: item.productionDate,
-                                      expirationDate: item.expirationDate,
-                                      stickerCode: item.stickerCode,
-                                      status: StockMutationItemStatus.Cancelled,
-                                    ),
-                                  ]);
-                                }
-                                return items;
+                              setState(() {
+                                _future = Future.sync(() {
+                                  final index = items.indexOf(item);
+                                  if (index != -1) {
+                                    items.replaceRange(index, index + 1, [
+                                      StockMutationItem(
+                                        productId: item.productId,
+                                        amount: item.amount,
+                                        batch: item.batch,
+                                        productionDate: item.productionDate,
+                                        expirationDate: item.expirationDate,
+                                        stickerCode: item.stickerCode,
+                                        status:
+                                            StockMutationItemStatus.Cancelled,
+                                        createdDate: item.createdDate,
+                                      ),
+                                    ]);
+                                  }
+                                  return items;
+                                });
                               });
-                              // });
-                              cancelStockMutation(item.id!);
+                              cancelStockMutation(item.id!).then((response) {
+                                final snackBar = SnackBar(
+                                  backgroundColor:
+                                      response.data!['success'] as bool
+                                          ? Colors.green
+                                          : Colors.red,
+                                  content: Text(response.data!['message']),
+                                );
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+                              });
                               widget.onCancel(item);
                             }),
                             Divider(height: 1),
@@ -103,12 +115,14 @@ class _ReservedListState extends State<ReservedList> {
   ) {
     return ListTile(
       title: Text(
-        '${item.amount} x ${item.batch} | ${item.stickerCode} ${item.createdDate != null ? DateFormat('yy-MM-dd HH:mm').format(item.createdDate!) : ''}',
+        '${item.amount} x ${item.batch} | ${item.stickerCode}       ${item.createdDate != null ? DateFormat('yy-MM-dd HH:mm').format(item.createdDate!) : ''}',
       ),
-      trailing: IconButton(
-        icon: Icon(Icons.cancel_outlined, color: Colors.amber),
-        onPressed: onCancel,
-      ),
+      trailing: item.isReserved()
+          ? IconButton(
+              icon: Icon(Icons.cancel_outlined, color: Colors.amber),
+              onPressed: onCancel,
+            )
+          : null,
     );
   }
 }

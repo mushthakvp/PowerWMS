@@ -12,7 +12,7 @@ class StockMutation extends ChangeNotifier {
   final List<StockMutationItem> items;
   final Packaging? packaging;
   bool? allowBelowZero;
-  int amount;
+  int amount = 0;
 
   static Future<StockMutation> fromMemory(PicklistLine line) async {
     final prefs = await SharedPreferences.getInstance();
@@ -23,8 +23,10 @@ class StockMutation extends ChangeNotifier {
           .map((json) => StockMutationItem.fromJson(json))
           .toList();
     }
+    final mutation = StockMutation._(line, items);
+    mutation.amount = mutation.toPickAmount;
 
-    return StockMutation._(line, items);
+    return mutation;
   }
 
   StockMutation._(this.line, this.items)
@@ -73,12 +75,14 @@ class StockMutation extends ChangeNotifier {
 
   addItem(StockMutationItem value) {
     items.add(value);
+    amount = toPickAmount;
     _cacheData();
     notifyListeners();
   }
 
   removeItem(StockMutationItem value) {
     items.remove(value);
+    amount = toPickAmount;
     _cacheData();
     notifyListeners();
   }
@@ -90,17 +94,26 @@ class StockMutation extends ChangeNotifier {
     } else {
       items.add(newValue);
     }
+    amount = toPickAmount;
+    _cacheData();
     notifyListeners();
   }
 
   clear() {
     items.clear();
+    amount = toPickAmount;
     _cacheData();
     notifyListeners();
   }
 
-  changePickedAmount(int amount) {
-    line.pickedAmount += amount;
+  changeLinePickedAmount(int value) {
+    line.pickedAmount += value;
+    amount = toPickAmount;
+    notifyListeners();
+  }
+
+  changeAmount(int value) {
+    amount = value;
     notifyListeners();
   }
 

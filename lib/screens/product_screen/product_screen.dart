@@ -31,7 +31,7 @@ class ProductScreen extends StatelessWidget {
                   LineInfo(_line),
                   ProductView(),
                   ReservedList(_line, (item) {
-                    mutation.changePickedAmount(-item.amount.abs());
+                    mutation.changeLinePickedAmount(-item.amount.abs());
                   }),
                 ],
               ),

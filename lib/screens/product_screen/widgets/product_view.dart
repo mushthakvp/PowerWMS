@@ -146,7 +146,7 @@ class ProductView extends StatelessWidget {
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         if (response.data!['success']) {
-          mutation.changePickedAmount(mutation.totalAmount);
+          mutation.changeLinePickedAmount(mutation.totalAmount);
           mutation.clear();
           Navigator.of(context).pop();
         }
