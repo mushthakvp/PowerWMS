@@ -8,9 +8,10 @@ import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 
 class ReservedList extends StatefulWidget {
-  ReservedList(this.line, {Key? key}) : super(key: key);
+  ReservedList(this.line, this.onCancel, {Key? key}) : super(key: key);
 
   final PicklistLine line;
+  final void Function(StockMutationItem item) onCancel;
 
   @override
   _ReservedListState createState() => _ReservedListState();
@@ -65,27 +66,27 @@ class _ReservedListState extends State<ReservedList> {
                     .map((item) => Column(
                           children: [
                             _itemTile(item, () {
-                              setState(() {
-                                _future = Future.sync(() {
-                                  final index = items.indexOf(item);
-                                  if (index != -1) {
-                                    items.replaceRange(index, index + 1, [
-                                      StockMutationItem(
-                                        productId: item.productId,
-                                        amount: item.amount,
-                                        batch: item.batch,
-                                        productionDate: item.productionDate,
-                                        expirationDate: item.expirationDate,
-                                        stickerCode: item.stickerCode,
-                                        status:
-                                            StockMutationItemStatus.Cancelled,
-                                      ),
-                                    ]);
-                                  }
-                                  return items;
-                                });
+                              // setState(() {
+                              _future = Future.sync(() {
+                                final index = items.indexOf(item);
+                                if (index != -1) {
+                                  items.replaceRange(index, index + 1, [
+                                    StockMutationItem(
+                                      productId: item.productId,
+                                      amount: item.amount,
+                                      batch: item.batch,
+                                      productionDate: item.productionDate,
+                                      expirationDate: item.expirationDate,
+                                      stickerCode: item.stickerCode,
+                                      status: StockMutationItemStatus.Cancelled,
+                                    ),
+                                  ]);
+                                }
+                                return items;
                               });
+                              // });
                               cancelStockMutation(item.id!);
+                              widget.onCancel(item);
                             }),
                             Divider(height: 1),
                           ],

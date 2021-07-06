@@ -12,18 +12,30 @@ import 'package:scanner/widgets/barcode_input.dart';
 
 final audio = Audio('assets/error.mp3');
 
-class ScanForm extends StatelessWidget {
-  const ScanForm(this.mutation, this.onParse, this._amount, this.onChange,
-      {Key? key})
-      : super(key: key);
+class ScanForm extends StatefulWidget {
+  const ScanForm(this.onParse, {Key? key}) : super(key: key);
 
-  final StockMutation mutation;
   final void Function(bool proceed) onParse;
-  final int _amount;
-  final void Function(int amount) onChange;
+
+  @override
+  _ScanFormState createState() => _ScanFormState();
+}
+
+class _ScanFormState extends State<ScanForm> {
+  int? _amount;
+
+  @override
+  void didChangeDependencies() {
+    if (_amount == null) {
+      Provider.of<StockMutation>(context).context.watch<StockMutation>();
+    }
+    _amount = widget.mutation.toPickAmount;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final mutation = widget.mutation;
     final formKey = GlobalKey<FormState>();
     return ListTile(
       visualDensity: VisualDensity.compact,
@@ -32,8 +44,11 @@ class ScanForm extends StatelessWidget {
           if (!mutation.needToScan())
             ..._amountInput(
               mutation.line.product.unit,
-              onChange,
-              context,
+              (amount) {
+                setState(() {
+                  _amount = int.tryParse(amount) ?? _amount;
+                });
+              },
             ),
           Container(
             width: double.infinity,
@@ -59,8 +74,10 @@ class ScanForm extends StatelessWidget {
                   Flexible(
                     flex: 3,
                     child: BarcodeInput((value, barcode) {
-                      _parseHandler(mutation, value, barcode, context);
-                      onChange(mutation.toPickAmount);
+                      _parseHandler(mutation, value, barcode);
+                      setState(() {
+                        _amount = widget.mutation.toPickAmount;
+                      });
                     }),
                   ),
                 ],
@@ -74,8 +91,7 @@ class ScanForm extends StatelessWidget {
 
   _amountInput(
     String unit,
-    void Function(int value) onChange,
-    BuildContext context,
+    void Function(String value) onChange,
   ) {
     return [
       ListTile(
@@ -88,7 +104,11 @@ class ScanForm extends StatelessWidget {
             ),
             Amount(
               _amount,
-              onChange,
+              (value) {
+                setState(() {
+                  _amount = value;
+                });
+              },
             ),
           ],
         ),
@@ -97,11 +117,10 @@ class ScanForm extends StatelessWidget {
     ];
   }
 
-  _parseHandler(StockMutation mutation, String ean, GS1Barcode? barcode,
-      BuildContext context) {
+  _parseHandler(StockMutation mutation, String ean, GS1Barcode? barcode) {
     final settings = context.read<ValueNotifier<Settings>>().value;
     try {
-      int amount = _calculateAmount(mutation, ean, settings, context);
+      int amount = _calculateAmount(mutation, ean, settings);
       final serial = barcode?.getAIData('21');
       final batch = barcode?.getAIData('10');
       final productionDate = barcode?.getAIData('11');
@@ -170,9 +189,9 @@ class ScanForm extends StatelessWidget {
               ),
             ],
           ),
-        ).then((result) => onParse(result));
+        ).then((result) => widget.onParse(result));
       } else {
-        onParse(false);
+        widget.onParse(false);
       }
     } catch (e, stack) {
       AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
@@ -183,12 +202,7 @@ class ScanForm extends StatelessWidget {
     }
   }
 
-  int _calculateAmount(
-    StockMutation mutation,
-    String ean,
-    Settings settings,
-    BuildContext context,
-  ) {
+  int _calculateAmount(StockMutation mutation, String ean, Settings settings) {
     var amount = 0;
     if (mutation.line.product.ean == ean) {
       amount = mutation.needToScan() || !settings.oneScanPickAll

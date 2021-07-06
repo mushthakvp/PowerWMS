@@ -1,16 +1,18 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:scanner/models/packaging.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class StockMutation {
+class StockMutation extends ChangeNotifier {
   final PicklistLine line;
   final List<StockMutationItem> items;
   final Packaging? packaging;
   bool? allowBelowZero;
+  int amount;
 
   static Future<StockMutation> fromMemory(PicklistLine line) async {
     final prefs = await SharedPreferences.getInstance();
@@ -74,11 +76,13 @@ class StockMutation {
   addItem(StockMutationItem value) {
     items.add(value);
     _cacheData();
+    notifyListeners();
   }
 
   removeItem(StockMutationItem value) {
     items.remove(value);
     _cacheData();
+    notifyListeners();
   }
 
   replaceItem(StockMutationItem oldValue, StockMutationItem newValue) {
@@ -88,11 +92,18 @@ class StockMutation {
     } else {
       items.add(newValue);
     }
+    notifyListeners();
   }
 
   clear() {
     items.clear();
     _cacheData();
+    notifyListeners();
+  }
+
+  changePickedAmount(int amount) {
+    line.pickedAmount += amount;
+    notifyListeners();
   }
 
   _cacheData() async {

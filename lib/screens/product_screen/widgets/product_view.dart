@@ -1,101 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:scanner/api.dart';
 import 'package:scanner/models/stock_mutation.dart';
-import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/screens/product_screen/widgets/scan_form.dart';
 import 'package:scanner/widgets/product_image.dart';
 
-class ProductView extends StatefulWidget {
-  const ProductView(this.mutation, {Key? key}) : super(key: key);
-
-  final StockMutation mutation;
-
-  @override
-  _ProductViewState createState() => _ProductViewState();
-}
-
-class _ProductViewState extends State<ProductView> {
-  int _amount = 0;
-
-  @override
-  void initState() {
-    _amount = widget.mutation.toPickAmount;
-    super.initState();
-  }
+class ProductView extends StatelessWidget {
+  const ProductView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final mutation = widget.mutation;
-    final line = mutation.line;
-    return SliverList(
-      delegate: SliverChildListDelegate([
-        ListTile(
-          title: Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Consumer<StockMutation>(
+      builder: (context, mutation, _) {
+        return SliverList(
+          delegate: SliverChildListDelegate([
+            ListTile(
+              title: Row(
                 children: [
-                  Text(
-                    '${AppLocalizations.of(context)!.productProductNumber}:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${AppLocalizations.of(context)!.productProductNumber}:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(mutation.line.product.uid),
+                      SizedBox(height: 10),
+                      const Text(
+                        'GTIN / EAN:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(mutation.line.product.ean),
+                    ],
                   ),
-                  Text(mutation.line.product.uid),
-                  SizedBox(height: 10),
-                  const Text(
-                    'GTIN / EAN:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(mutation.line.product.ean),
+                  Spacer(),
+                  // SizedBox(width: 20),
+                  ProductImage(mutation.line.product.id, width: 120),
                 ],
               ),
-              Spacer(),
-              // SizedBox(width: 20),
-              ProductImage(line.product.id, width: 120),
-            ],
-          ),
-        ),
-        Divider(height: 1),
-        _pickTile(mutation),
-        Divider(height: 1),
-        ScanForm(
-          mutation,
-          (process) {
-            setState(() {});
-            if (process) {
-              _onProcessHandler(mutation);
-            }
-          },
-          _amount,
-          (int amount) {
-            setState(() {
-              _amount = amount;
-            });
-          },
-        ),
-        ListTile(
-          visualDensity: VisualDensity.compact,
-          trailing: ElevatedButton(
-            child: Text(
-                AppLocalizations.of(context)!.productProcess.toUpperCase()),
-            onPressed: mutation.items.length > 0
-                ? () {
-                    _onProcessHandler(mutation);
-                  }
-                : null,
-          ),
-        ),
-        Divider(height: 1),
-        ..._itemsBuilder(
-          mutation.items,
-          (item) => mutation.removeItem(item),
-        ),
-      ]),
+            ),
+            Divider(height: 1),
+            _pickTile(mutation, context),
+            Divider(height: 1),
+            ScanForm(
+              (process) {
+                if (process) {
+                  _onProcessHandler(mutation, context);
+                }
+              },
+            ),
+            ListTile(
+              visualDensity: VisualDensity.compact,
+              trailing: ElevatedButton(
+                child: Text(
+                    AppLocalizations.of(context)!.productProcess.toUpperCase()),
+                onPressed: mutation.items.length > 0
+                    ? () {
+                        _onProcessHandler(mutation, context);
+                      }
+                    : null,
+              ),
+            ),
+            Divider(height: 1),
+            ..._itemsBuilder(mutation),
+          ]),
+        );
+      },
     );
   }
 
-  _pickTile(StockMutation mutation) {
+  _pickTile(StockMutation mutation, BuildContext context) {
     return ListTile(
       visualDensity: VisualDensity.compact,
       title: Row(
@@ -160,7 +136,7 @@ class _ProductViewState extends State<ProductView> {
     );
   }
 
-  _onProcessHandler(StockMutation mutation) {
+  _onProcessHandler(StockMutation mutation, BuildContext context) {
     addStockMutation(mutation).then((response) {
       if (response.data != null) {
         final snackBar = SnackBar(
@@ -170,7 +146,7 @@ class _ProductViewState extends State<ProductView> {
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         if (response.data!['success']) {
-          widget.mutation.line.pickedAmount += mutation.totalAmount;
+          mutation.changePickedAmount(mutation.totalAmount);
           mutation.clear();
           Navigator.of(context).pop();
         }
@@ -178,18 +154,12 @@ class _ProductViewState extends State<ProductView> {
     });
   }
 
-  _itemsBuilder(
-    List<StockMutationItem> items,
-    void Function(StockMutationItem item) onRemove,
-  ) {
-    return items.map((item) {
+  _itemsBuilder(StockMutation mutation) {
+    return mutation.items.map((item) {
       return Dismissible(
         key: Key(item.batch),
         onDismissed: (direction) {
-          setState(() {
-            onRemove(item);
-            _amount = widget.mutation.toPickAmount;
-          });
+          mutation.removeItem(item);
         },
         background: Container(
           color: Colors.red,
