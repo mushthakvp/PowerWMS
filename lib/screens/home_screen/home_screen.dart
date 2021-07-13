@@ -59,7 +59,18 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      drawer: Drawer(),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            ListTile(
+              title: Text('Logs'),
+              onTap: () {
+                Navigator.of(context).pushNamed('/logs');
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

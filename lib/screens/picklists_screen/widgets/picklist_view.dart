@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,17 +19,22 @@ class PicklistView extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          var error = (snapshot.error as DioError);
-          var response = error.response;
-          if (response?.statusCode == 401) {
+          var error = snapshot.error;
+          if (error is DioError && error.response?.statusCode == 401) {
             SharedPreferences.getInstance().then((prefs) {
               prefs.clear();
               Navigator.pushReplacementNamed(context, '/');
             });
           } else {
             Future.microtask(() {
-              final snackBar = SnackBar(content: Text(error.message));
+              final snackBar = SnackBar(content: Text(error.toString()));
               ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              FLog.error(
+                dataLogType: DataLogType.DEFAULT.toString(),
+                exception: error,
+                stacktrace: snapshot.stackTrace,
+                text: DateTime.now().toString(),
+              );
             });
           }
         }
