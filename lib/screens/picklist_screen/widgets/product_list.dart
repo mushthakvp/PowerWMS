@@ -9,6 +9,10 @@ import 'package:scanner/widgets/barcode_input.dart';
 filter(String search) => (PicklistLine line) =>
     search == '' || line.product.ean == search || line.product.uid == search;
 
+const blue = Color(0xFF034784);
+const white = Colors.white;
+final black = Colors.grey[900];
+
 class ProductList extends StatefulWidget {
   const ProductList(this.lines, {Key? key}) : super(key: key);
 
@@ -23,7 +27,6 @@ class _ProductListState extends State<ProductList> {
 
   @override
   Widget build(BuildContext context) {
-    var test = filter(_search);
     return SliverList(
         delegate: SliverChildListDelegate([
               Column(
@@ -31,11 +34,12 @@ class _ProductListState extends State<ProductList> {
                   ListTile(
                     title: BarcodeInput((value, barcode) {
                       setState(() {
-                        _search = value;
-                        final lines = widget.lines.where(test);
+                        final lines = widget.lines.where(filter(value));
                         if (lines.length == 1) {
                           Navigator.of(context)
                               .pushNamed('/product', arguments: lines.first);
+                        } else {
+                          _search = value;
                         }
                       });
                     }),
@@ -44,54 +48,78 @@ class _ProductListState extends State<ProductList> {
                 ],
               ),
             ].toList() +
-            widget.lines
-                .where(test)
-                .map((line) => Column(
+            widget.lines.where(filter(_search)).map((line) {
+              var fullyPicked = line.isFullyPicked();
+              return Column(
+                children: [
+                  ListTile(
+                    tileColor: fullyPicked ? blue : null,
+                    onTap: () {
+                      Navigator.of(context)
+                          .pushNamed('/product', arguments: line);
+                    },
+                    leading: Container(
+                      width: 60,
+                      height: 60,
+                      color: Colors.grey[300],
+                      child: FutureBuilder<Response<Uint8List>>(
+                        future: getProductImage(line.product.id),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Image.memory(snapshot.data!.data!);
+                          }
+                          return Center(
+                              child: Text(line.product.uid.substring(0, 1)));
+                        },
+                      ),
+                    ),
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ListTile(
-                          onTap: () {
-                            Navigator.of(context)
-                                .pushNamed('/product', arguments: line);
-                          },
-                          leading: Container(
-                            width: 60,
-                            height: 60,
-                            color: Colors.grey[300],
-                            child: FutureBuilder<Response<Uint8List>>(
-                              future: getProductImage(line.product.id),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return Image.memory(snapshot.data!.data!);
-                                }
-                                return Center(
-                                    child:
-                                        Text(line.product.uid.substring(0, 1)));
-                              },
-                            ),
+                        Text(
+                          line.product.uid,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: fullyPicked ? white : black,
                           ),
-                          title: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(line.product.uid,
-                                  style: TextStyle(fontSize: 13)),
-                              Text(
-                                line.product.description,
-                                style: TextStyle(fontSize: 16),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text('${line.pickAmount} x ${line.product.unit}'),
-                              Text(line.location ?? '',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[400],
-                                  )),
-                            ],
-                          ),
-                          trailing: Icon(Icons.chevron_right),
                         ),
-                        Divider(height: 5),
+                        Text(
+                          line.product.description,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: fullyPicked ? white : black,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          '${line.pickAmount} (${line.product.unit})',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: fullyPicked ? white : black,
+                          ),
+                        ),
                       ],
-                    ))
-                .toList()));
+                    ),
+                    subtitle: line.location != null
+                        ? Text(
+                            line.location!,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: fullyPicked ? white : Colors.grey[400],
+                            ),
+                          )
+                        : null,
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: fullyPicked ? white : black,
+                    ),
+                  ),
+                  Divider(
+                    height: 1,
+                    color: fullyPicked ? blue : null,
+                  ),
+                ],
+              );
+            }).toList()));
   }
 }

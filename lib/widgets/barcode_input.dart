@@ -48,6 +48,13 @@ class _BarcodeInputState extends State<BarcodeInput> {
             ),
           ),
           IconButton(
+            onPressed: () {
+              controller.clear();
+              _parse('');
+            },
+            icon: Icon(Icons.clear),
+          ),
+          IconButton(
             icon: Icon(Icons.photo_camera_rounded),
             onPressed: () async {
               String value = await FlutterBarcodeScanner.scanBarcode(
@@ -56,10 +63,12 @@ class _BarcodeInputState extends State<BarcodeInput> {
                 false,
                 ScanMode.DEFAULT,
               );
-              setState(() {
-                controller.text = value;
-              });
-              _parse(value);
+              if (value != '-1') {
+                setState(() {
+                  controller.text = value;
+                });
+                _parse(value);
+              }
             },
           ),
         ],
@@ -77,7 +86,10 @@ class _BarcodeInputState extends State<BarcodeInput> {
       } catch (e) {
         widget.onParse(value, null);
       }
-      focusNode.requestFocus();
+      setState(() {
+        controller.text = '';
+        focusNode.requestFocus();
+      });
     }
   }
 }

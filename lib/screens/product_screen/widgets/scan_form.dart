@@ -50,7 +50,9 @@ class ScanForm extends StatelessWidget {
                   Flexible(
                     flex: 3,
                     child: BarcodeInput((value, barcode) {
-                      _parseHandler(context, mutation, value, barcode);
+                      if (!mutation.needToScan() || value.length > 0) {
+                        _parseHandler(context, mutation, value, barcode);
+                      }
                     }),
                   ),
                 ],
@@ -95,20 +97,23 @@ class ScanForm extends StatelessWidget {
     final settings = context.read<ValueNotifier<Settings>>().value;
     try {
       if (ean != '' &&
-          (mutation.line.product.ean != ean ||
-              mutation.line.product.uid != ean ||
+          (mutation.line.product.ean != ean &&
+              mutation.line.product.uid != ean &&
               mutation.packaging?.uid != ean)) {
         throw new DomainException(
           AppLocalizations.of(context)!.productWrongProduct,
         );
       }
       int amount = _calculateAmount(mutation, ean, settings);
+      if (amount == 0) {
+        throw new DomainException('Amount should be greater than 0');
+      }
       final serial = barcode?.getAIData('21');
       final batch = barcode?.getAIData('10');
       final productionDate = barcode?.getAIData('11');
-      final expirationDate = barcode?.getAIData('17');
+      final expirationDate = barcode?.getAIData('17') as DateTime?;
       if (barcode != null &&
-          serial &&
+          serial != null &&
           mutation.items.any((item) => item.stickerCode == serial)) {
         throw new DomainException(
           AppLocalizations.of(context)!.productAlreadyScanned,
@@ -119,7 +124,7 @@ class ScanForm extends StatelessWidget {
           return !mutation.needToScan() ||
               (item.batch == batch &&
                   item.productionDate == productionDate &&
-                  item.expirationDate == expirationDate &&
+                  item.expirationDate == expirationDate?.toString() &&
                   item.stickerCode == serial);
         });
         mutation.replaceItem(
@@ -129,19 +134,19 @@ class ScanForm extends StatelessWidget {
             batch: batch ?? '',
             amount: amount + item.amount,
             productionDate: productionDate,
-            expirationDate: expirationDate,
+            expirationDate: expirationDate?.toString(),
             stickerCode: serial,
           ),
         );
       } catch (e, stack) {
-        print(e);
-        print(stack);
+        print('$e\n$stack');
+        print(expirationDate);
         mutation.addItem(StockMutationItem(
           productId: mutation.line.product.id,
           batch: batch ?? '',
           amount: amount,
           productionDate: productionDate,
-          expirationDate: expirationDate,
+          expirationDate: expirationDate?.toString(),
           stickerCode: serial,
         ));
       }
@@ -173,14 +178,14 @@ class ScanForm extends StatelessWidget {
           ),
         ).then((result) => onParse(result));
       } else {
-        onParse(false);
+        onParse(settings.directlyProcess && mutation.toPickAmount == 0);
       }
     } catch (e, stack) {
       AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
         final snackBar = SnackBar(content: Text(e.toString()));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       });
-      print(stack);
+      print('$e\n$stack');
     }
   }
 

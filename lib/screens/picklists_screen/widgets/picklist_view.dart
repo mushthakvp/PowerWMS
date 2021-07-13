@@ -4,14 +4,14 @@ import 'package:scanner/models/picklist.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PicklistView extends StatelessWidget {
-  final Future<Response<Map<String, dynamic>>> _future;
+  final Future<List<Picklist>> _future;
   final bool Function(Picklist picklist) _where;
 
   const PicklistView(this._future, this._where, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Response<Map<String, dynamic>>>(
+    return FutureBuilder<List<Picklist>>(
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -33,9 +33,7 @@ class PicklistView extends StatelessWidget {
           }
         }
         if (snapshot.hasData) {
-          final filtered = (snapshot.data!.data!['data'] as List<dynamic>)
-              .map((json) => Picklist.fromJson(json))
-              .where(_where);
+          final filtered = snapshot.data!.where(_where);
           try {
             return ListView(
               children: filtered

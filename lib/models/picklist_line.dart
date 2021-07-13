@@ -47,6 +47,10 @@ class PicklistLine {
     required this.isNew,
   });
 
+  isFullyPicked() {
+    return pickAmount == pickedAmount;
+  }
+
   factory PicklistLine.fromJson(Map<String, dynamic> json) =>
       _$PicklistLineFromJson(json);
   Map<String, dynamic> toJson() => _$PicklistLineToJson(this);

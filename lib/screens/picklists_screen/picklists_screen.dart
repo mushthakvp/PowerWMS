@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scanner/api.dart';
@@ -18,12 +17,19 @@ class PicklistsScreen extends StatefulWidget {
 
 class _PicklistScreenState extends State<PicklistsScreen> {
   Timer? _searchOnStoppedTyping;
-  Future<Response<Map<String, dynamic>>>? _future;
+  Future<List<Picklist>>? _future;
+  TextEditingController controller = TextEditingController();
 
   @override
   void initState() {
     _search(null);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -53,6 +59,7 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                 ),
                 Container(
                   child: TextField(
+                    controller: controller,
                     onChanged: _onChangeHandler,
                     autofocus: true,
                     decoration: InputDecoration(
@@ -86,7 +93,18 @@ class _PicklistScreenState extends State<PicklistsScreen> {
   _search(String? value) async {
     try {
       setState(() {
-        _future = getPicklists(value);
+        _future = getPicklists(value).then((response) {
+          return (response.data!['data'] as List<dynamic>)
+              .map((json) => Picklist.fromJson(json))
+              .toList();
+        });
+        _future!.then((value) {
+          if (value.length == 1) {
+            controller.clear();
+            _search('');
+            Navigator.pushNamed(context, '/picklist', arguments: value.first);
+          }
+        });
       });
     } catch (e) {
       final prefs = await SharedPreferences.getInstance();
