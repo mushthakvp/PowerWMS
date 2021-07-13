@@ -37,7 +37,10 @@ class _ProductListState extends State<ProductList> {
                         final lines = widget.lines.where(filter(value));
                         if (lines.length == 1) {
                           Navigator.of(context)
-                              .pushNamed('/product', arguments: lines.first);
+                              .pushNamed('/product', arguments: lines.first)
+                              .then((value) {
+                            setState(() {});
+                          });
                         } else {
                           _search = value;
                         }
@@ -56,7 +59,10 @@ class _ProductListState extends State<ProductList> {
                     tileColor: fullyPicked ? blue : null,
                     onTap: () {
                       Navigator.of(context)
-                          .pushNamed('/product', arguments: line);
+                          .pushNamed('/product', arguments: line)
+                          .then((value) {
+                        setState(() {});
+                      });
                     },
                     leading: Container(
                       width: 60,
