@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:scanner/models/picklist.dart';
 
-class PicklistItem extends StatefulWidget {
+class PicklistHeader extends StatefulWidget {
   final Picklist _picklist;
 
-  const PicklistItem(this._picklist, {Key? key}) : super(key: key);
+  const PicklistHeader(this._picklist, {Key? key}) : super(key: key);
 
   @override
-  _PicklistItemState createState() => _PicklistItemState();
+  _PicklistHeaderState createState() => _PicklistHeaderState();
 }
 
-class _PicklistItemState extends State<PicklistItem> {
+class _PicklistHeaderState extends State<PicklistHeader> {
   bool _open = false;
 
   @override

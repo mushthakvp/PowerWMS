@@ -1,13 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:scanner/api.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
-import 'package:scanner/models/settings.dart';
-import 'package:scanner/screens/picklist_screen/widgets/picklist_item.dart';
-import 'package:scanner/screens/picklist_screen/widgets/product_list.dart';
+import 'package:scanner/screens/picklist_screen/widgets/picklist_body.dart';
+import 'package:scanner/screens/picklist_screen/widgets/picklist_header.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,7 +18,6 @@ class PicklistScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     var picklistId = _picklist.id;
     final _future = getPicklistLines(picklistId);
-    final settings = Provider.of<ValueNotifier<Settings>>(context).value;
     return Scaffold(
       appBar: WMSAppBar(
         _picklist.uid,
@@ -42,13 +39,10 @@ class PicklistScreen extends StatelessWidget {
             final lines = (snapshot.data!.data!['data'] as List<dynamic>)
                 .map((json) => PicklistLine.fromJson(json))
                 .toList();
-            if (settings.finishedProductsAtBottom) {
-              lines.sort((a, b) => a.status - b.status);
-            }
             return CustomScrollView(
               slivers: [
-                PicklistItem(_picklist),
-                ProductList(lines),
+                PicklistHeader(_picklist),
+                PicklistBody(lines),
               ],
             );
           }

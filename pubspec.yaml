@@ -46,6 +46,8 @@ dependencies:
 
   provider: ^5.0.0
 
+  sliver_tools: ^0.2.5
+
   f_logs:
     git:
       url: git://github.com/draganjovanovic1/Flogs

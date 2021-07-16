@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/api.dart';
+import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/screens/product_screen/widgets/scan_form.dart';
 import 'package:scanner/widgets/product_image.dart';
@@ -146,9 +147,12 @@ class ProductView extends StatelessWidget {
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         if (response.data!['success']) {
-          mutation.changeLinePickedAmount(mutation.totalAmount);
-          mutation.clear();
-          Navigator.of(context).pop();
+          getPicklistLine(mutation.line.picklistId, mutation.line.id)
+              .then((response) {
+            final newLine = PicklistLine.fromJson(response.data!);
+            mutation.clear();
+            Navigator.of(context).pop(newLine);
+          });
         }
       }
     });

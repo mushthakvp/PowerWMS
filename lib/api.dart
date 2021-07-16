@@ -34,6 +34,13 @@ Future<Response<Map<String, dynamic>>> getPicklistLines(int picklistId) {
   );
 }
 
+Future<Response<Map<String, dynamic>>> getPicklistLine(
+  int picklistId,
+  int lineId,
+) {
+  return dio.post('/picklist/$picklistId/line/$lineId');
+}
+
 Future<Response<Map<String, dynamic>>> getProducts(String? search) {
   return dio.post(
     '/product/list',
