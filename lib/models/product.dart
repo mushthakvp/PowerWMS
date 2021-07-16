@@ -6,13 +6,13 @@ part 'product.g.dart';
 @JsonSerializable()
 class Product {
   final String uid;
-  final String name;
-  final String description;
+  final String? name;
+  final String? description;
   final String ean;
-  final String productGroupName;
-  final int productGroupBatchField;
-  final int productGroupProductionDateField;
-  final int productGroupExpirationDateField;
+  final String? productGroupName;
+  final int? productGroupBatchField;
+  final int? productGroupProductionDateField;
+  final int? productGroupExpirationDateField;
   final String unit;
   final int status;
   final num stock;
@@ -39,6 +39,7 @@ class Product {
     required this.isNew,
   });
 
-  factory Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
+  factory Product.fromJson(Map<String, dynamic> json) =>
+      _$ProductFromJson(json);
   Map<String, dynamic> toJson() => _$ProductToJson(this);
 }

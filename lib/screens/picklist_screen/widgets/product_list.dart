@@ -89,14 +89,15 @@ class _ProductListState extends State<ProductList> {
                             color: fullyPicked ? white : black,
                           ),
                         ),
-                        Text(
-                          line.product.description,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: fullyPicked ? white : black,
+                        if (line.product.description != null)
+                          Text(
+                            line.product.description!,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: fullyPicked ? white : black,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
                         Text(
                           '${line.pickAmount} (${line.product.unit})',
                           style: TextStyle(

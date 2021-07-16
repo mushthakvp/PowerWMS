@@ -70,7 +70,8 @@ class StockMutation extends ChangeNotifier {
   }
 
   needToScan() {
-    return line.product.productGroupBatchField > 0;
+    return line.product.productGroupBatchField != null &&
+        line.product.productGroupBatchField! > 0;
   }
 
   addItem(StockMutationItem value) {

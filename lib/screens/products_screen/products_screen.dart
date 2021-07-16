@@ -103,10 +103,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            product.description,
-                            style: headline6,
-                          ),
+                          if (product.description != null)
+                            Text(
+                              product.description!,
+                              style: headline6,
+                            ),
                           Text(
                             '${product.ean} | ${product.uid}',
                             style: headline6,

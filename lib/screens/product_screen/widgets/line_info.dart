@@ -23,7 +23,7 @@ class _ProductDescriptionState extends State<LineInfo> {
       delegate: SliverChildListDelegate([
         ListTile(
           visualDensity: VisualDensity.compact,
-          title: Text(line.product.description),
+          title: Text(line.product.description ?? '-'),
           trailing: Icon(_open ? Icons.expand_less : Icons.expand_more),
           onTap: () {
             setState(() {
