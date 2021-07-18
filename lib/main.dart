@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/db.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
+import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
@@ -16,6 +18,7 @@ import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
 import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
 import 'package:scanner/screens/product_screen/product_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
+import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
@@ -47,19 +50,31 @@ Future<void> main() async {
       text: DateTime.now().toString(),
     );
   };
+  final db = await createDb();
 
-  runApp(MyApp());
+  runApp(WMSApp(db));
 }
 
-class MyApp extends StatelessWidget {
+class WMSApp extends StatelessWidget {
+  WMSApp(this._db);
+
+  final Database _db;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Settings>(
       future: Settings.fromMemory(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return ChangeNotifierProvider<ValueNotifier<Settings>>(
-            create: (_) => ValueNotifier<Settings>(snapshot.data!),
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider<ValueNotifier<Settings>>(
+                create: (_) => ValueNotifier<Settings>(snapshot.data!),
+              ),
+              Provider<PicklistRepository>(
+                create: (_) => PicklistRepository(_db),
+              ),
+            ],
             child: MaterialApp(
               debugShowCheckedModeBanner: false,
               title: 'Extracom WMS',

@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:scanner/api.dart';
+import 'package:provider/provider.dart';
 import 'package:scanner/models/picklist.dart';
+import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/screens/picklists_screen/widgets/picklist_view.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -91,20 +92,17 @@ class _PicklistScreenState extends State<PicklistsScreen> {
   }
 
   _search(String? value) async {
+    final repository = context.read<PicklistRepository>();
     try {
       setState(() {
-        _future = getPicklists(value).then((response) {
-          return (response.data!['data'] as List<dynamic>)
-              .map((json) => Picklist.fromJson(json))
-              .toList();
-        });
-        _future!.then((value) {
-          if (value.length == 1) {
-            controller.clear();
-            _search('');
-            Navigator.pushNamed(context, '/picklist', arguments: value.first);
-          }
-        });
+        _future = repository.getPicklists(value)
+          ..then((value) {
+            if (value.length == 1) {
+              controller.clear();
+              _search('');
+              Navigator.pushNamed(context, '/picklist', arguments: value.first);
+            }
+          });
       });
     } catch (e) {
       final prefs = await SharedPreferences.getInstance();

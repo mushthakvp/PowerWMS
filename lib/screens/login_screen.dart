@@ -107,7 +107,8 @@ class LoginScreen extends StatelessWidget {
                             await SharedPreferences.getInstance();
                         prefs.setString('token', response.data);
                         Navigator.pushReplacementNamed(context, '/');
-                      } catch (e) {
+                      } catch (e, stack) {
+                        print('$e\n$stack');
                         _showErrorDialog(context, 'Invalid credentials');
                       }
                     }
