@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/db.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/log.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
@@ -23,33 +23,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  LogsConfig config = LogsConfig()
-    ..isDebuggable = true
-    ..customClosingDivider = "|"
-    ..customOpeningDivider = "|"
-    ..csvDelimiter = ", "
-    ..encryptionEnabled = false
-    ..encryptionKey = ""
-    ..formatType = FormatType.FORMAT_CURLY
-    ..logLevelsEnabled = [LogLevel.INFO, LogLevel.ERROR]
-    ..dataLogTypes = [
-      DataLogType.DEFAULT.toString(),
-      DataLogType.DEVICE.toString(),
-      DataLogType.NETWORK.toString(),
-      DataLogType.ERRORS.toString(),
-    ]
-    ..timestampFormat = TimestampFormat.TIME_FORMAT_READABLE;
-  FLog.applyConfigurations(config);
-  FLog.clearLogs();
-
-  FlutterError.onError = (FlutterErrorDetails details) async {
-    FLog.error(
-      dataLogType: DataLogType.DEFAULT.toString(),
-      exception: details.exception,
-      stacktrace: details.stack,
-      text: DateTime.now().toString(),
-    );
-  };
+  initLogs();
   final db = await createDb();
 
   runApp(WMSApp(db));
