@@ -1,8 +1,7 @@
 import 'package:scanner/models/picklist.dart';
-import 'package:scanner/resources/picklist_repository.dart';
 import 'package:sembast/sembast.dart';
 
-class PicklistDbProvider implements Source, Cache {
+class PicklistDbProvider {
   PicklistDbProvider(this.db);
 
   final Database db;

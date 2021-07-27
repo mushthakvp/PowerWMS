@@ -8,21 +8,21 @@ Debtor _debtorFromJson(Map<String, dynamic> json) => new Debtor.fromJson(json);
 
 @JsonSerializable()
 class Picklist {
-  String timezone;
+  String? timezone;
   String uid;
-  String orderDate;
-  String orderDateFormatted;
-  String deliveryDate;
-  String deliveryDateFormatted;
+  String? orderDate;
+  String? orderDateFormatted;
+  String? deliveryDate;
+  String? deliveryDateFormatted;
   @JsonKey(fromJson: _debtorFromJson, toJson: _debtorToJson)
   Debtor debtor;
-  String agent;
-  double colliAmount;
-  double palletAmount;
-  String invoiceId;
+  String? agent;
+  double? colliAmount;
+  double? palletAmount;
+  String? invoiceId;
   String? deliveryConditionId;
-  String internalMemo;
-  String picker;
+  String? internalMemo;
+  String? picker;
   int lines;
   int status;
   bool hasCancelled;

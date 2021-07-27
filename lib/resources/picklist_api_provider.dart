@@ -1,8 +1,7 @@
 import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist.dart';
-import 'package:scanner/resources/picklist_repository.dart';
 
-class PicklistApiProvider implements Source {
+class PicklistApiProvider {
   Future<List<Picklist>> getPicklists(String? search) {
     return dio.post<Map<String, dynamic>>(
       '/picklist/list',

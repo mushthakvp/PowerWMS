@@ -3,15 +3,6 @@ import 'package:scanner/resources/picklist_api_provider.dart';
 import 'package:scanner/resources/picklist_db_provider.dart';
 import 'package:sembast/sembast.dart';
 
-abstract class Source {
-  Future<List<Picklist>> getPicklists(String? search);
-}
-
-abstract class Cache {
-  Future<dynamic> savePicklist(Picklist picklist);
-  Future<dynamic> clear();
-}
-
 class PicklistRepository {
   PicklistRepository(Database db) {
     _apiProvider = PicklistApiProvider();
