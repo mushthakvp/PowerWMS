@@ -3,7 +3,7 @@ import 'package:scanner/models/packaging_unit_translation.dart';
 
 part 'packaging.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Packaging {
   final int productId;
   final int packagingUnitId;

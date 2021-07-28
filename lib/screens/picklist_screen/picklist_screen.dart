@@ -1,9 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:scanner/api.dart';
+import 'package:provider/provider.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
+import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_body.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_header.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
@@ -16,15 +16,15 @@ class PicklistScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var picklistId = _picklist.id;
-    final _future = getPicklistLines(picklistId);
+    final repository = context.read<PicklistLineRepository>();
+    final future = repository.getPicklistLines(_picklist.id);
     return Scaffold(
       appBar: WMSAppBar(
         _picklist.uid,
         context: context,
       ),
-      body: FutureBuilder<Response<Map<String, dynamic>>>(
-        future: _future,
+      body: FutureBuilder<List<PicklistLine>>(
+        future: future,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -36,13 +36,10 @@ class PicklistScreen extends StatelessWidget {
             });
           }
           if (snapshot.hasData) {
-            final lines = (snapshot.data!.data!['data'] as List<dynamic>)
-                .map((json) => PicklistLine.fromJson(json))
-                .toList();
             return CustomScrollView(
               slivers: [
                 PicklistHeader(_picklist),
-                PicklistBody(lines),
+                PicklistBody(snapshot.data!),
               ],
             );
           }

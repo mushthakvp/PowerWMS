@@ -30,17 +30,6 @@ class _PicklistBodyState extends State<PicklistBody> {
 
   @override
   Widget build(BuildContext context) {
-    final onPop = (newLine) {
-      setState(() {
-        if (newLine is PicklistLine) {
-          final index =
-              widget.lines.indexWhere((line) => line.id == newLine.id);
-          if (index >= 0) {
-            widget.lines.replaceRange(index, index + 1, [newLine]);
-          }
-        }
-      });
-    };
     return MultiSliver(
       children: [
         SliverToBoxAdapter(
@@ -52,8 +41,7 @@ class _PicklistBodyState extends State<PicklistBody> {
                     final lines = widget.lines.where(filter(value));
                     if (lines.length == 1) {
                       Navigator.of(context)
-                          .pushNamed('/product', arguments: lines.first)
-                          .then(onPop);
+                          .pushNamed('/product', arguments: lines.first);
                     } else {
                       _search = value;
                     }
@@ -80,8 +68,7 @@ class _PicklistBodyState extends State<PicklistBody> {
                   tileColor: fullyPicked ? blue : null,
                   onTap: () {
                     Navigator.of(context)
-                        .pushNamed('/product', arguments: line)
-                        .then(onPop);
+                        .pushNamed('/product', arguments: line);
                   },
                   leading: Container(
                     width: 60,

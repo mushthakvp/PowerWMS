@@ -3,7 +3,7 @@ import 'package:scanner/models/product.dart';
 
 part 'picklist_line.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class PicklistLine {
   final String picklist;
   final int picklistId;

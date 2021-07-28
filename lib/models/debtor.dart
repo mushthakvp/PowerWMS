@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'debtor.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Debtor {
   String uid;
   String name;

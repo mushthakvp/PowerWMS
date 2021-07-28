@@ -14,14 +14,10 @@ Picklist _$PicklistFromJson(Map<String, dynamic> json) {
     orderDateFormatted: json['orderDateFormatted'] as String?,
     deliveryDate: json['deliveryDate'] as String?,
     deliveryDateFormatted: json['deliveryDateFormatted'] as String?,
-    debtor: _debtorFromJson(json['debtor'] as Map<String, dynamic>),
+    debtor: Debtor.fromJson(json['debtor'] as Map<String, dynamic>),
     agent: json['agent'] as String?,
-    colliAmount: json['colliAmount'] != null
-        ? (json['colliAmount'] as num).toDouble()
-        : null,
-    palletAmount: json['palletAmount'] != null
-        ? (json['palletAmount'] as num).toDouble()
-        : null,
+    colliAmount: (json['colliAmount'] as num?)?.toDouble(),
+    palletAmount: (json['palletAmount'] as num?)?.toDouble(),
     invoiceId: json['invoiceId'] as String?,
     deliveryConditionId: json['deliveryConditionId'] as String?,
     internalMemo: json['internalMemo'] as String?,
@@ -41,7 +37,7 @@ Map<String, dynamic> _$PicklistToJson(Picklist instance) => <String, dynamic>{
       'orderDateFormatted': instance.orderDateFormatted,
       'deliveryDate': instance.deliveryDate,
       'deliveryDateFormatted': instance.deliveryDateFormatted,
-      'debtor': _debtorToJson(instance.debtor),
+      'debtor': instance.debtor.toJson(),
       'agent': instance.agent,
       'colliAmount': instance.colliAmount,
       'palletAmount': instance.palletAmount,

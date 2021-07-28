@@ -14,33 +14,6 @@ Future login(String username, String password) {
   );
 }
 
-Future<Response<Map<String, dynamic>>> getPicklists(String? search) {
-  return dio.post(
-    '/picklist/list',
-    data: {
-      'search': search,
-      'skipPaging': true,
-    },
-  );
-}
-
-Future<Response<Map<String, dynamic>>> getPicklistLines(int picklistId) {
-  return dio.post(
-    '/picklist/lines',
-    data: {
-      'picklistId': picklistId,
-      'skipPaging': true,
-    },
-  );
-}
-
-Future<Response<Map<String, dynamic>>> getPicklistLine(
-  int picklistId,
-  int lineId,
-) {
-  return dio.post('/picklist/$picklistId/line/$lineId');
-}
-
 Future<Response<Map<String, dynamic>>> getProducts(String? search) {
   return dio.post(
     '/product/list',

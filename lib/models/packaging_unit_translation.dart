@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'packaging_unit_translation.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class PackagingUnitTranslation {
   final String culture;
   final String value;
@@ -16,6 +16,7 @@ class PackagingUnitTranslation {
     required this.isNew,
   });
 
-  factory PackagingUnitTranslation.fromJson(Map<String, dynamic> json) => _$PackagingUnitTranslationFromJson(json);
+  factory PackagingUnitTranslation.fromJson(Map<String, dynamic> json) =>
+      _$PackagingUnitTranslationFromJson(json);
   Map<String, dynamic> toJson() => _$PackagingUnitTranslationToJson(this);
 }

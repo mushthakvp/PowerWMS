@@ -3,7 +3,7 @@ import 'package:scanner/models/packaging.dart';
 
 part 'product.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Product {
   final String uid;
   final String? name;

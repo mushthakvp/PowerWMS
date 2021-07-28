@@ -57,7 +57,8 @@ Map<String, dynamic> _$PackagingToJson(Packaging instance) => <String, dynamic>{
       'batchField': instance.batchField,
       'productionDateField': instance.productionDateField,
       'expirationDateField': instance.expirationDateField,
-      'packagingUnitTranlations': instance.packagingUnitTranslations,
+      'packagingUnitTranlations':
+          instance.packagingUnitTranslations.map((e) => e.toJson()).toList(),
       'translatedName': instance.translatedName,
       'formattedDimension': instance.formattedDimension,
       'id': instance.id,

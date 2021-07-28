@@ -47,7 +47,7 @@ Map<String, dynamic> _$PicklistLineToJson(PicklistLine instance) =>
       'descriptionB': instance.descriptionB,
       'internalMemo': instance.internalMemo,
       'status': instance.status,
-      'product': instance.product,
+      'product': instance.product.toJson(),
       'location': instance.location,
       'id': instance.id,
       'isNew': instance.isNew,

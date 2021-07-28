@@ -3,10 +3,7 @@ import 'package:scanner/models/debtor.dart';
 
 part 'picklist.g.dart';
 
-Map<String, dynamic> _debtorToJson(Debtor debtor) => debtor.toJson();
-Debtor _debtorFromJson(Map<String, dynamic> json) => new Debtor.fromJson(json);
-
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Picklist {
   String? timezone;
   String uid;
@@ -14,7 +11,6 @@ class Picklist {
   String? orderDateFormatted;
   String? deliveryDate;
   String? deliveryDateFormatted;
-  @JsonKey(fromJson: _debtorFromJson, toJson: _debtorToJson)
   Debtor debtor;
   String? agent;
   double? colliAmount;
