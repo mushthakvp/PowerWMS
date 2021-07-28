@@ -8,8 +8,13 @@ class PicklistDbProvider {
   final Database db;
 
   Future<List<Picklist>> getPicklists(String? search) {
-    var finder =
-        Finder(filter: search == null ? null : Filter.equals('uid', search));
+    var finder = Finder(
+        filter: search == null
+            ? null
+            : Filter.or([
+                Filter.equals('uid', search),
+                Filter.equals('debtor.name', search),
+              ]));
     return _store.find(db, finder: finder).then((records) =>
         records.map((snapshot) => Picklist.fromJson(snapshot.value)).toList());
   }
@@ -19,7 +24,6 @@ class PicklistDbProvider {
   }
 
   Future<dynamic> savePicklists(List<Picklist> picklists) {
-    print(picklists.map<int>((picklist) => picklist.id));
     return _store
         .records(picklists.map<int>((picklist) => picklist.id))
         .put(db, picklists.map((picklist) => picklist.toJson()).toList());
