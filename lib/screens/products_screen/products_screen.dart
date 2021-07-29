@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:scanner/api.dart';
+import 'package:provider/provider.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
 import 'package:scanner/models/product.dart';
+import 'package:scanner/resources/product_repository.dart';
 import 'package:scanner/screens/products_screen/widgets/amount.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
@@ -29,11 +29,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   void initState() {
-    _future = getProducts(null).then((response) {
-      return (response.data!['data'] as List<dynamic>)
-          .map((json) => Product.fromJson(json))
-          .toList();
-    }, onError: (_) {
+    final repository = context.read<ProductRepository>();
+    _future = repository.getProducts(null).catchError((_) {
       SharedPreferences.getInstance().then((prefs) {
         prefs.clear();
         Navigator.pushReplacementNamed(context, '/');
@@ -87,7 +84,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 future: _future,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    print(snapshot.error);
+                    print('${snapshot.error}\n${snapshot.stackTrace}');
                   }
                   if (_result == '') {
                     return Text(AppLocalizations.of(context)!.barcodeHelp);
@@ -132,17 +129,17 @@ class _ProductsScreenState extends State<ProductsScreen> {
               future: _future,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
+                  final repository = context.read<ProductRepository>();
                   try {
                     final product = snapshot.data!
                         .firstWhere((product) => product.ean == _result);
                     var headline5 = Theme.of(context).textTheme.headline5;
-                    return FutureBuilder<Response<Map<String, dynamic>>>(
-                      future: getProducts(product.uid),
+                    return FutureBuilder<List<Product>>(
+                      future: repository.getProducts(product.uid),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
-                          final products = (snapshot.data!.data!['data']
-                                  as List<dynamic>)
-                              .where((element) => element['ean'] != product.ean)
+                          final products = snapshot.data!
+                              .where((element) => element.ean != product.ean)
                               .toList();
                           return SliverList(
                             delegate: SliverChildBuilderDelegate(
@@ -152,14 +149,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                   children: [
                                     ListTile(
                                       title: Text(
-                                        product['unit'],
+                                        product.unit,
                                         textAlign: TextAlign.center,
                                         style: headline5,
                                       ),
                                       subtitle: Row(
                                         children: [
                                           ProductImage(
-                                            product['id'],
+                                            product.id,
                                             width: 60,
                                           ),
                                           SizedBox(width: 20),
@@ -180,8 +177,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         return SliverFillRemaining();
                       },
                     );
-                  } catch (e) {
-                    print(e);
+                  } catch (e, stack) {
+                    print('$e\n$stack');
                   }
                 }
 

@@ -14,16 +14,6 @@ Future login(String username, String password) {
   );
 }
 
-Future<Response<Map<String, dynamic>>> getProducts(String? search) {
-  return dio.post(
-    '/product/list',
-    data: {
-      'search': search,
-      'skipPaging': true,
-    },
-  );
-}
-
 Future<Response<Uint8List>> getProductImage(int id) {
   return dio.get(
     '/product/image/$id',

@@ -18,7 +18,7 @@ class Packaging {
   final String product;
   final String productName;
   final String productUnit;
-  final num productDecimals;
+  final num? productDecimals;
   final String productDescription;
   final int batchField;
   final int productionDateField;

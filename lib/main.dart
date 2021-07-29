@@ -12,6 +12,7 @@ import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
+import 'package:scanner/resources/product_repository.dart';
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
@@ -51,6 +52,9 @@ class WMSApp extends StatelessWidget {
               ),
               Provider<PicklistLineRepository>(
                 create: (_) => PicklistLineRepository(_db),
+              ),
+              Provider<ProductRepository>(
+                create: (_) => ProductRepository(_db),
               ),
             ],
             child: MaterialApp(

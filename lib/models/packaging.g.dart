@@ -21,7 +21,7 @@ Packaging _$PackagingFromJson(Map<String, dynamic> json) {
     product: json['product'] as String,
     productName: json['productName'] as String,
     productUnit: json['productUnit'] as String,
-    productDecimals: json['productDecimals'] as num,
+    productDecimals: json['productDecimals'] as num?,
     productDescription: json['productDescription'] as String,
     batchField: json['batchField'] as int,
     productionDateField: json['productionDateField'] as int,
