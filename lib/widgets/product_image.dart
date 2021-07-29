@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:scanner/screens/resources/product_image_repository.dart';
+import 'package:scanner/resources/product_image_repository.dart';
 
 final productImageRepository = ProductImageRepository();
 

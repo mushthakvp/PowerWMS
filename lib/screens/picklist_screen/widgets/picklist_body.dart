@@ -1,12 +1,9 @@
-import 'dart:typed_data';
-
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scanner/api.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/widgets/barcode_input.dart';
+import 'package:scanner/widgets/product_image.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 filter(String search) => (PicklistLine line) =>
@@ -70,21 +67,7 @@ class _PicklistBodyState extends State<PicklistBody> {
                     Navigator.of(context)
                         .pushNamed('/product', arguments: line);
                   },
-                  leading: Container(
-                    width: 60,
-                    height: 60,
-                    color: Colors.grey[300],
-                    child: FutureBuilder<Response<Uint8List>>(
-                      future: getProductImage(line.product.id),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return Image.memory(snapshot.data!.data!);
-                        }
-                        return Center(
-                            child: Text(line.product.uid.substring(0, 1)));
-                      },
-                    ),
-                  ),
+                  leading: ProductImage(line.product.id, width: 60),
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
