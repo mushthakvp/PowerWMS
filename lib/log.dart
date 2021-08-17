@@ -26,9 +26,9 @@ void initLogs() {
   };
 }
 
-void log(Object exception, StackTrace? stack) {
+void log(dynamic exception, StackTrace? stack) {
   FLog.error(
-    dataLogType: DataLogType.DEFAULT.toString(),
+    dataLogType: 'DEFAULT',
     exception: exception,
     stacktrace: stack,
     text: DateTime.now().toString(),

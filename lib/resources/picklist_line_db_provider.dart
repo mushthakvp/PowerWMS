@@ -1,26 +1,71 @@
+import 'dart:async';
+
+import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
+import 'package:scanner/models/stock_mutation.dart';
+import 'package:scanner/resources/stock_mutation_db_provider.dart';
+import 'package:scanner/resources/stock_mutation_item_db_provider.dart';
 import 'package:sembast/sembast.dart';
 
 class PicklistLineDbProvider {
-  PicklistLineDbProvider(this.db);
+  static const name = 'picklist_lines';
 
-  final _store = intMapStoreFactory.store('picklist_lines');
-  final Database db;
-
-  Future<List<PicklistLine>> getPicklistLines(int picklistId) {
-    var finder = Finder(filter: Filter.equals('picklistId', picklistId));
-    return _store.find(db, finder: finder).then((records) => records
-        .map((snapshot) => PicklistLine.fromJson(snapshot.value))
-        .toList());
+  PicklistLineDbProvider(this.db) {
+    intMapStoreFactory
+        .store(StockMutationDbProvider.name)
+        .addOnChangesListener(db, (transaction, changes) async {
+      for (var change in changes) {
+        if (change.isAdd) {
+          final mutation = StockMutation.fromJson(change.newValue!);
+          final record = _store.record(mutation.lineId);
+          final line = await record.get(transaction);
+          if (line != null) {
+            await record.update(
+              transaction,
+              {
+                'pickedAmount': (line['pickedAmount'] as num) +
+                    mutation.items
+                        .fold(0, (result, item) => result + item.amount),
+              },
+            );
+          }
+        }
+      }
+    });
+    intMapStoreFactory
+        .store(StockMutationItemDbProvider.cancelledName)
+        .addOnChangesListener(db, (transaction, changes) async {
+      for (var change in changes) {
+        if (change.isAdd) {
+          final item = CancelledStockMutationItem.fromJson(change.newValue!);
+          final finder =
+              Finder(filter: Filter.equals('product.id', item.productId));
+          final line =
+              (await _store.findFirst(transaction, finder: finder))?.value;
+          if (line != null) {
+            await _store.record(line['id'] as int).update(
+              transaction,
+              {'pickedAmount': (line['pickedAmount'] as num) - item.amount},
+            );
+          }
+        }
+      }
+    });
   }
 
-  Future<PicklistLine?> getPicklistLine(int id) {
-    var finder = Finder(filter: Filter.equals('id', id));
-    return _store.findFirst(db, finder: finder).then(
-          (record) => record?.value != null
-              ? PicklistLine.fromJson(record!.value)
-              : null,
-        );
+  final _store = intMapStoreFactory.store(name);
+  final Database db;
+
+  Stream<List<PicklistLine>> getPicklistLinesStream(int picklistId) {
+    var finder = Finder(filter: Filter.equals('picklistId', picklistId));
+    return _store.query(finder: finder).onSnapshots(db).transform(
+        StreamTransformer.fromHandlers(handleData: (snapshotList, sink) {
+      sink.add(
+        snapshotList
+            .map((snapshot) => PicklistLine.fromJson(snapshot.value))
+            .toList(),
+      );
+    }));
   }
 
   Future<dynamic> savePicklistLine(PicklistLine line) {
@@ -38,8 +83,12 @@ class PicklistLineDbProvider {
     return _store.count(db, filter: Filter.equals('picklistId', picklistId));
   }
 
-  Future<dynamic> clear(int picklistId) {
-    var finder = Finder(filter: Filter.equals('picklistId', picklistId));
-    return _store.delete(db, finder: finder);
+  Future<dynamic> clear(int? picklistId) {
+    if (picklistId != null) {
+      final finder = Finder(filter: Filter.equals('picklistId', picklistId));
+      return _store.delete(db, finder: finder);
+    } else {
+      return _store.drop(db);
+    }
   }
 }

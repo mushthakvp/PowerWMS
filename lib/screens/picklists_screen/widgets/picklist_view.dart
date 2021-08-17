@@ -1,104 +1,77 @@
-import 'package:dio/dio.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scanner/models/picklist.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PicklistView extends StatelessWidget {
-  final Future<List<Picklist>> _future;
-  final bool Function(Picklist picklist) _where;
+  const PicklistView(
+    this._list,
+    this._refreshController,
+    this.onRefresh, {
+    Key? key,
+  }) : super(key: key);
 
-  const PicklistView(this._future, this._where, {Key? key}) : super(key: key);
+  final List<Picklist> _list;
+  final void Function() onRefresh;
+  final RefreshController _refreshController;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Picklist>>(
-      future: _future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          var error = snapshot.error;
-          if (error is DioError && error.response?.statusCode == 401) {
-            SharedPreferences.getInstance().then((prefs) {
-              prefs.clear();
-              Navigator.pushReplacementNamed(context, '/');
-            });
-          } else {
-            Future.microtask(() {
-              final snackBar = SnackBar(content: Text(error.toString()));
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              FLog.error(
-                dataLogType: DataLogType.DEFAULT.toString(),
-                exception: error,
-                stacktrace: snapshot.stackTrace,
-                text: DateTime.now().toString(),
-              );
-            });
-          }
-        }
-        if (snapshot.hasData) {
-          final filtered = snapshot.data!.where(_where);
-          try {
-            return ListView(
-              children: filtered
-                  .map((picklist) => Column(
+    return SmartRefresher(
+      enablePullDown: true,
+      header: MaterialClassicHeader(),
+      controller: _refreshController,
+      onRefresh: onRefresh,
+      child: ListView(
+        children: _list
+            .map((picklist) => Column(
+                  children: [
+                    ListTile(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/picklist',
+                            arguments: picklist);
+                      },
+                      leading: Container(
+                        width: 40,
+                        height: 40,
+                        color: Colors.black,
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${picklist.lines}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ListTile(
-                            onTap: () {
-                              Navigator.pushNamed(context, '/picklist',
-                                  arguments: picklist);
-                            },
-                            leading: Container(
-                              width: 40,
-                              height: 40,
-                              color: Colors.black,
-                              alignment: Alignment.center,
-                              child: Text(
-                                '${picklist.lines}',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                          Row(
+                            children: [
+                              Text(
+                                picklist.uid,
+                                style: TextStyle(fontSize: 12),
                               ),
-                            ),
-                            title: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      picklist.uid,
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                    SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(picklist.debtor.city ?? '',
-                                          overflow: TextOverflow.ellipsis),
-                                    ),
-                                  ],
-                                ),
-                                Text(picklist.debtor.name),
-                              ],
-                            ),
-                            trailing: Icon(Icons.chevron_right),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Text(picklist.debtor.city ?? '',
+                                    overflow: TextOverflow.ellipsis),
+                              ),
+                            ],
                           ),
-                          Divider(
-                            height: 1,
-                          ),
+                          Text(picklist.debtor.name),
                         ],
-                      ))
-                  .toList(),
-            );
-          } catch (e, stack) {
-            return Text('${e.toString()}:\n${stack.toString()}');
-          }
-        } else {
-          return Container();
-        }
-      },
+                      ),
+                      trailing: Icon(Icons.chevron_right),
+                    ),
+                    Divider(
+                      height: 1,
+                    ),
+                  ],
+                ))
+            .toList(),
+      ),
     );
   }
 }

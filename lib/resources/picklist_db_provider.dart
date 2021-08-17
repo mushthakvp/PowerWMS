@@ -1,26 +1,52 @@
+import 'dart:async';
+
 import 'package:scanner/models/picklist.dart';
+import 'package:scanner/resources/picklist_line_db_provider.dart';
 import 'package:sembast/sembast.dart';
 
 class PicklistDbProvider {
-  PicklistDbProvider(this.db);
+  PicklistDbProvider(this.db) {
+    var lineStore = intMapStoreFactory.store(PicklistLineDbProvider.name);
+    lineStore.addOnChangesListener(db, (transaction, changes) async {
+      for (var change in changes) {
+        if (change.isUpdate) {
+          final picklistId = change.newValue!['picklistId'] as int;
+          final finder =
+              Finder(filter: Filter.equals('picklistId', picklistId));
+          final lines = await lineStore.find(transaction, finder: finder);
+          if (lines
+              .every((line) => line['pickAmount'] == line['pickedAmount'])) {
+            await _store.record(picklistId).update(
+              transaction,
+              {
+                'status': PicklistStatus.picked.name,
+              },
+            );
+          }
+        }
+      }
+    });
+  }
 
   final _store = intMapStoreFactory.store('picklists');
   final Database db;
 
-  Future<List<Picklist>> getPicklists(String? search) {
+  Stream<List<Picklist>> getPicklistsStream(String? search) {
     var finder = Finder(
-        filter: search == null
+        filter: search == ''
             ? null
             : Filter.or([
                 Filter.equals('uid', search),
                 Filter.equals('debtor.name', search),
               ]));
-    return _store.find(db, finder: finder).then((records) =>
-        records.map((snapshot) => Picklist.fromJson(snapshot.value)).toList());
-  }
-
-  Future<dynamic> savePicklist(Picklist picklist) {
-    return _store.record(picklist.id).put(db, picklist.toJson());
+    return _store.query(finder: finder).onSnapshots(db).transform(
+        StreamTransformer.fromHandlers(handleData: (snapshotList, sink) {
+      sink.add(
+        snapshotList
+            .map((snapshot) => Picklist.fromJson(snapshot.value))
+            .toList(),
+      );
+    }));
   }
 
   Future<dynamic> savePicklists(List<Picklist> picklists) {

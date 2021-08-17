@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
 import 'package:scanner/exceptions/domain_exception.dart';
 import 'package:scanner/models/settings.dart';
-import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
+import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/screens/products_screen/widgets/amount.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 
@@ -19,13 +19,13 @@ class ScanForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mutation = context.watch<StockMutation>();
+    final provider = context.watch<MutationProvider?>()!;
     final formKey = GlobalKey<FormState>();
     return ListTile(
       visualDensity: VisualDensity.compact,
       title: Column(
         children: [
-          if (!mutation.needToScan()) ..._amountInput(context, mutation),
+          if (!provider.needToScan()) ..._amountInput(context, provider),
           Container(
             width: double.infinity,
             child: Form(
@@ -34,24 +34,23 @@ class ScanForm extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
-                      child: ElevatedButton(
-                        child: Text(
-                          AppLocalizations.of(context)!
-                              .productAdd
-                              .toUpperCase(),
-                        ),
-                        onPressed: mutation.needToScan()
-                            ? null
-                            : () {
-                                formKey.currentState?.save();
-                              },
+                    child: ElevatedButton(
+                      child: Text(
+                        AppLocalizations.of(context)!.productAdd.toUpperCase(),
                       ),
-                      flex: 2),
+                      onPressed: provider.needToScan()
+                          ? null
+                          : () {
+                              formKey.currentState?.save();
+                            },
+                    ),
+                    flex: 2,
+                  ),
                   Flexible(
                     flex: 3,
                     child: BarcodeInput((value, barcode) {
-                      if (!mutation.needToScan() || value.length > 0) {
-                        _parseHandler(context, mutation, value, barcode);
+                      if (!provider.needToScan() || value.length > 0) {
+                        _parseHandler(context, provider, value, barcode);
                       }
                     }),
                   ),
@@ -64,7 +63,7 @@ class ScanForm extends StatelessWidget {
     );
   }
 
-  _amountInput(BuildContext context, StockMutation mutation) {
+  _amountInput(BuildContext context, MutationProvider mutation) {
     var unit = mutation.line.product.unit;
     return [
       ListTile(
@@ -90,7 +89,7 @@ class ScanForm extends StatelessWidget {
 
   _parseHandler(
     BuildContext context,
-    StockMutation mutation,
+    MutationProvider mutation,
     String ean,
     GS1Barcode? barcode,
   ) {
@@ -114,13 +113,13 @@ class ScanForm extends StatelessWidget {
       final expirationDate = barcode?.getAIData('17') as DateTime?;
       if (barcode != null &&
           serial != null &&
-          mutation.items.any((item) => item.stickerCode == serial)) {
+          mutation.idleItems.any((item) => item.stickerCode == serial)) {
         throw new DomainException(
           AppLocalizations.of(context)!.productAlreadyScanned,
         );
       }
       try {
-        var item = mutation.items.firstWhere((item) {
+        var item = mutation.idleItems.firstWhere((item) {
           return !mutation.needToScan() ||
               (item.batch == batch &&
                   item.productionDate == productionDate &&
@@ -130,17 +129,17 @@ class ScanForm extends StatelessWidget {
         mutation.replaceItem(
           item,
           StockMutationItem(
+            id: item.id,
             productId: mutation.line.product.id,
             batch: batch ?? '',
             amount: amount + item.amount,
             productionDate: productionDate,
             expirationDate: expirationDate?.toString(),
             stickerCode: serial,
+            picklistLineId: mutation.line.id,
           ),
         );
-      } catch (e, stack) {
-        print('$e\n$stack');
-        print(expirationDate);
+      } catch (e) {
         mutation.addItem(StockMutationItem(
           productId: mutation.line.product.id,
           batch: batch ?? '',
@@ -148,6 +147,7 @@ class ScanForm extends StatelessWidget {
           productionDate: productionDate,
           expirationDate: expirationDate?.toString(),
           stickerCode: serial,
+          picklistLineId: mutation.line.id,
         ));
       }
       if (mutation.maxAmountToPick <= mutation.totalAmount &&
@@ -190,19 +190,19 @@ class ScanForm extends StatelessWidget {
   }
 
   int _calculateAmount(
-    StockMutation mutation,
+    MutationProvider provider,
     String ean,
     Settings settings,
   ) {
     var amount = 0;
-    if (mutation.line.product.ean == ean || mutation.line.product.uid == ean) {
-      amount = mutation.needToScan() || !settings.oneScanPickAll
+    if (provider.line.product.ean == ean || provider.line.product.uid == ean) {
+      amount = provider.needToScan() || !settings.oneScanPickAll
           ? 1
-          : mutation.toPickAmount;
-    } else if (mutation.packaging != null && mutation.packaging!.uid == ean) {
-      amount = mutation.packaging!.defaultAmount.round();
+          : provider.toPickAmount;
+    } else if (provider.packaging != null && provider.packaging!.uid == ean) {
+      amount = provider.packaging!.defaultAmount.round();
     } else {
-      amount = mutation.amount;
+      amount = provider.amount;
     }
     return amount;
   }

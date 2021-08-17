@@ -3,27 +3,59 @@ import 'package:scanner/models/debtor.dart';
 
 part 'picklist.g.dart';
 
+enum PicklistStatus {
+  @JsonValue(1)
+  added,
+  @JsonValue(2)
+  inProgress,
+  @JsonValue(3)
+  inactive,
+  @JsonValue(4)
+  picked,
+  @JsonValue(5)
+  completed,
+}
+
+extension PicklistStatusExtension on PicklistStatus {
+  int get name => toJson();
+
+  toJson() {
+    switch (this) {
+      case PicklistStatus.added:
+        return 1;
+      case PicklistStatus.inProgress:
+        return 2;
+      case PicklistStatus.inactive:
+        return 3;
+      case PicklistStatus.picked:
+        return 4;
+      case PicklistStatus.completed:
+        return 5;
+    }
+  }
+}
+
 @JsonSerializable(explicitToJson: true)
 class Picklist {
-  String? timezone;
-  String uid;
-  String? orderDate;
-  String? orderDateFormatted;
-  String? deliveryDate;
-  String? deliveryDateFormatted;
-  Debtor debtor;
-  String? agent;
-  double? colliAmount;
-  double? palletAmount;
-  String? invoiceId;
-  String? deliveryConditionId;
-  String? internalMemo;
-  String? picker;
-  int lines;
-  int status;
-  bool hasCancelled;
-  int id;
-  bool isNew;
+  final String? timezone;
+  final String uid;
+  final String? orderDate;
+  final String? orderDateFormatted;
+  final String? deliveryDate;
+  final String? deliveryDateFormatted;
+  final Debtor debtor;
+  final String? agent;
+  final double? colliAmount;
+  final double? palletAmount;
+  final String? invoiceId;
+  final String? deliveryConditionId;
+  final String? internalMemo;
+  final String? picker;
+  final int lines;
+  final PicklistStatus status;
+  final bool hasCancelled;
+  final int id;
+  final bool isNew;
 
   Picklist({
     required this.timezone,
@@ -46,6 +78,15 @@ class Picklist {
     required this.id,
     required this.isNew,
   });
+
+  isNotPicked() {
+    return status == PicklistStatus.added ||
+        status == PicklistStatus.inProgress;
+  }
+
+  isPicked() {
+    return status == PicklistStatus.picked;
+  }
 
   factory Picklist.fromJson(Map<String, dynamic> json) =>
       _$PicklistFromJson(json);

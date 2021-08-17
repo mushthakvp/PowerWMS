@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -13,6 +14,8 @@ import 'package:scanner/models/settings.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/resources/product_repository.dart';
+import 'package:scanner/resources/stock_mutation_item_repository.dart';
+import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
@@ -55,6 +58,16 @@ class WMSApp extends StatelessWidget {
               ),
               Provider<ProductRepository>(
                 create: (_) => ProductRepository(_db),
+              ),
+              Provider<StockMutationItemRepository>(
+                create: (_) => StockMutationItemRepository(_db),
+              ),
+              Provider<StockMutationRepository>(
+                create: (_) => StockMutationRepository(_db),
+              ),
+              StreamProvider<ConnectivityResult?>(
+                create: (_) => Connectivity().onConnectivityChanged,
+                initialData: null,
               ),
             ],
             child: MaterialApp(

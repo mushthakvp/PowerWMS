@@ -12,26 +12,17 @@ class PicklistLineRepository {
   late PicklistLineApiProvider _apiProvider;
   late PicklistLineDbProvider _dbProvider;
 
-  Future<List<PicklistLine>> getPicklistLines(int picklistId) async {
-    List<PicklistLine> list;
+  Stream<List<PicklistLine>> getPicklistLinesStream(int picklistId) async* {
+    final stream = _dbProvider.getPicklistLinesStream(picklistId);
     if (await _dbProvider.count(picklistId) == 0) {
-      list = await _apiProvider.getPicklistLines(picklistId);
+      final list = await _apiProvider.getPicklistLines(picklistId);
       _dbProvider.savePicklistLines(list);
-    } else {
-      list = await _dbProvider.getPicklistLines(picklistId);
     }
 
-    return list;
+    yield* stream;
   }
 
-  Future<PicklistLine?> refreshPicklistLine(int picklistId, int lineId) async {
-    final line = await _apiProvider.getPicklistLine(picklistId, lineId);
-    await _dbProvider.savePicklistLine(line);
-
-    return line;
-  }
-
-  clearCache(int picklistId) async {
-    _dbProvider.clear(picklistId);
+  Future<dynamic> clear({int? picklistId}) {
+    return _dbProvider.clear(picklistId);
   }
 }
