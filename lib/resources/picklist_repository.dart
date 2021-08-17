@@ -12,19 +12,17 @@ class PicklistRepository {
   late PicklistApiProvider _apiProvider;
   late PicklistDbProvider _dbProvider;
 
-  Future<List<Picklist>> getPicklists(String? search) async {
-    List<Picklist> list;
+  Stream<List<Picklist>> getPicklistsStream(String search) async* {
+    final stream = _dbProvider.getPicklistsStream(search);
     if (await _dbProvider.count() == 0) {
-      list = await _apiProvider.getPicklists(search);
+      final list = await _apiProvider.getPicklists(search);
       _dbProvider.savePicklists(list);
-    } else {
-      list = await _dbProvider.getPicklists(search);
     }
 
-    return list;
+    yield* stream;
   }
 
-  clearCache() async {
-    _dbProvider.clear();
+  Future<dynamic> clear() {
+    return _dbProvider.clear();
   }
 }

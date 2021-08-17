@@ -23,7 +23,7 @@ Picklist _$PicklistFromJson(Map<String, dynamic> json) {
     internalMemo: json['internalMemo'] as String?,
     picker: json['picker'] as String?,
     lines: json['lines'] as int,
-    status: json['status'] as int,
+    status: _$enumDecode(_$PicklistStatusEnumMap, json['status']),
     hasCancelled: json['hasCancelled'] as bool,
     id: json['id'] as int,
     isNew: json['isNew'] as bool,
@@ -46,8 +46,42 @@ Map<String, dynamic> _$PicklistToJson(Picklist instance) => <String, dynamic>{
       'internalMemo': instance.internalMemo,
       'picker': instance.picker,
       'lines': instance.lines,
-      'status': instance.status,
+      'status': _$PicklistStatusEnumMap[instance.status],
       'hasCancelled': instance.hasCancelled,
       'id': instance.id,
       'isNew': instance.isNew,
     };
+
+K _$enumDecode<K, V>(
+  Map<K, V> enumValues,
+  Object? source, {
+  K? unknownValue,
+}) {
+  if (source == null) {
+    throw ArgumentError(
+      'A value must be provided. Supported values: '
+      '${enumValues.values.join(', ')}',
+    );
+  }
+
+  return enumValues.entries.singleWhere(
+    (e) => e.value == source,
+    orElse: () {
+      if (unknownValue == null) {
+        throw ArgumentError(
+          '`$source` is not one of the supported values: '
+          '${enumValues.values.join(', ')}',
+        );
+      }
+      return MapEntry(unknownValue, enumValues.values.first);
+    },
+  ).key;
+}
+
+const _$PicklistStatusEnumMap = {
+  PicklistStatus.added: 1,
+  PicklistStatus.inProgress: 2,
+  PicklistStatus.inactive: 3,
+  PicklistStatus.picked: 4,
+  PicklistStatus.completed: 5,
+};

@@ -1,78 +1,132 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:scanner/api.dart';
+import 'package:scanner/models/cancelled_stock_mutation_item.dart';
+import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
-import 'package:scanner/resources/picklist_line_repository.dart';
+import 'package:scanner/models/stock_mutation_item.dart';
+import 'package:scanner/providers/mutation_provider.dart';
+import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/product_screen/widgets/scan_form.dart';
 import 'package:scanner/widgets/product_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductView extends StatelessWidget {
-  const ProductView({Key? key}) : super(key: key);
+  const ProductView(this.line, this.cancelledItems, {Key? key})
+      : super(key: key);
+
+  final PicklistLine line;
+  final List<CancelledStockMutationItem> cancelledItems;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<StockMutation>(
-      builder: (context, mutation, _) {
-        return SliverList(
-          delegate: SliverChildListDelegate([
-            ListTile(
-              title: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${AppLocalizations.of(context)!.productProductNumber}:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(mutation.line.product.uid),
-                      SizedBox(height: 10),
-                      const Text(
-                        'GTIN / EAN:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(mutation.line.product.ean),
-                    ],
-                  ),
-                  Spacer(),
-                  // SizedBox(width: 20),
-                  ProductImage(mutation.line.product.id, width: 120),
-                ],
+    var mutationRepository = context.read<StockMutationRepository>();
+    return MultiProvider(
+      providers: [
+        StreamProvider<Map<int, StockMutation>?>(
+          create: (_) =>
+              mutationRepository.getStockMutationsStream(line.picklistId),
+          initialData: null,
+        ),
+        FutureProvider<List<StockMutationItem>?>(
+          create: (_) async {
+            final prefs = await SharedPreferences.getInstance();
+            final json = prefs.getString('${line.id}');
+            if (json != null) {
+              print(json);
+              return (jsonDecode(json) as List<dynamic>)
+                  .map((json) => StockMutationItem.fromJson(json))
+                  .toList();
+            } else {
+              return [];
+            }
+          },
+          initialData: null,
+        ),
+        ListenableProxyProvider2<List<StockMutationItem>?,
+            Map<int, StockMutation>?, MutationProvider?>(
+          update: (context, idleItems, queuedMutations, _) {
+            if (idleItems == null || queuedMutations == null) {
+              return null;
+            }
+            return MutationProvider.create(
+              line,
+              idleItems,
+              cancelledItems,
+              queuedMutations.values.toList(),
+            );
+          },
+        ),
+      ],
+      child: Consumer<MutationProvider?>(
+        builder: (context, provider, _) {
+          if (provider == null) {
+            return SliverToBoxAdapter(
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          return SliverList(
+            delegate: SliverChildListDelegate([
+              ListTile(
+                title: Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${AppLocalizations.of(context)!.productProductNumber}:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(line.product.uid),
+                        SizedBox(height: 10),
+                        const Text(
+                          'GTIN / EAN:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(line.product.ean),
+                      ],
+                    ),
+                    Spacer(),
+                    ProductImage(line.product.id, width: 120),
+                  ],
+                ),
               ),
-            ),
-            Divider(height: 1),
-            _pickTile(mutation, context),
-            Divider(height: 1),
-            ScanForm(
-              (process) {
-                if (process) {
-                  _onProcessHandler(mutation, context);
-                }
-              },
-            ),
-            ListTile(
-              visualDensity: VisualDensity.compact,
-              trailing: ElevatedButton(
-                child: Text(
-                    AppLocalizations.of(context)!.productProcess.toUpperCase()),
-                onPressed: mutation.items.length > 0
-                    ? () {
-                        _onProcessHandler(mutation, context);
-                      }
-                    : null,
+              Divider(height: 1),
+              _pickTile(provider, context),
+              Divider(height: 1),
+              ScanForm(
+                (process) {
+                  if (process) {
+                    _onProcessHandler(provider, context);
+                  }
+                },
               ),
-            ),
-            Divider(height: 1),
-            ..._itemsBuilder(mutation),
-          ]),
-        );
-      },
+              ListTile(
+                visualDensity: VisualDensity.compact,
+                trailing: ElevatedButton(
+                  child: Text(AppLocalizations.of(context)!
+                      .productProcess
+                      .toUpperCase()),
+                  onPressed: provider.idleItems.length > 0
+                      ? () {
+                          _onProcessHandler(provider, context);
+                        }
+                      : null,
+                ),
+              ),
+              Divider(height: 1),
+              ..._itemsBuilder(provider, context),
+            ]),
+          );
+        },
+      ),
     );
   }
 
-  _pickTile(StockMutation mutation, BuildContext context) {
+  _pickTile(MutationProvider provider, BuildContext context) {
     return ListTile(
       visualDensity: VisualDensity.compact,
       title: Row(
@@ -84,13 +138,13 @@ class ProductView extends StatelessWidget {
             children: [
               Text(
                 AppLocalizations.of(context)!
-                    .productAmountAsked(mutation.line.product.unit),
+                    .productAmountAsked(provider.line.product.unit),
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
-                  '${mutation.askedAmount}',
+                  '${provider.askedAmount}',
                   style: TextStyle(
                     fontSize: 50,
                     color: Colors.black54,
@@ -99,35 +153,35 @@ class ProductView extends StatelessWidget {
               ),
               Text(
                 AppLocalizations.of(context)!
-                    .productAmountBoxes(mutation.askedPackagingAmount)
+                    .productAmountBoxes(provider.askedPackagingAmount)
                     .toUpperCase(),
               ),
             ],
           ),
-          SizedBox(width: 30),
+          Spacer(),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 AppLocalizations.of(context)!
-                    .productAmountToPick(mutation.line.product.unit),
+                    .productAmountToPick(provider.line.product.unit),
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
-                  '${mutation.toPickAmount}',
+                  '${provider.toPickAmount}',
                   style: TextStyle(
                     fontSize: 50,
                     color:
-                        mutation.toPickAmount < 0 ? Colors.red : Colors.black54,
+                        provider.toPickAmount < 0 ? Colors.red : Colors.black54,
                   ),
                 ),
               ),
               Text(
                 AppLocalizations.of(context)!
-                    .productAmountBoxes(mutation.toPickPackagingAmount)
+                    .productAmountBoxes(provider.toPickPackagingAmount)
                     .toUpperCase(),
               ),
             ],
@@ -137,30 +191,18 @@ class ProductView extends StatelessWidget {
     );
   }
 
-  _onProcessHandler(StockMutation mutation, BuildContext context) {
-    addStockMutation(mutation).then((response) {
-      if (response.data != null) {
-        final snackBar = SnackBar(
-          backgroundColor:
-              response.data!['success'] as bool ? Colors.green : Colors.red,
-          content: Text(response.data!['message']),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        if (response.data!['success']) {
-          final repository = context.read<PicklistLineRepository>();
-          repository
-              .refreshPicklistLine(mutation.line.picklistId, mutation.line.id)
-              .then((_) {
-            mutation.clear();
-            Navigator.of(context).pop();
-          });
-        }
-      }
+  _onProcessHandler(MutationProvider provider, BuildContext context) {
+    context
+        .read<StockMutationRepository>()
+        .saveMutation(provider.getStockMutation())
+        .then((value) {
+      provider.clear();
+      Navigator.of(context).pop();
     });
   }
 
-  _itemsBuilder(StockMutation mutation) {
-    return mutation.items.map((item) {
+  _itemsBuilder(MutationProvider mutation, BuildContext context) {
+    return mutation.idleItems.map((item) {
       return Dismissible(
         key: Key(item.batch),
         onDismissed: (direction) {

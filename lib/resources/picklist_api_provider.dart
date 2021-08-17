@@ -2,11 +2,11 @@ import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist.dart';
 
 class PicklistApiProvider {
-  Future<List<Picklist>> getPicklists(String? search) {
+  Future<List<Picklist>> getPicklists(String search) {
     return dio.post<Map<String, dynamic>>(
       '/picklist/list',
       data: {
-        'search': search,
+        'search': search == '' ? null : search,
         'skipPaging': true,
       },
     ).then(

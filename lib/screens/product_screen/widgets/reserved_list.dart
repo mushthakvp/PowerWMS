@@ -1,123 +1,83 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
-import 'package:scanner/api.dart';
+import 'package:provider/provider.dart';
+import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
+import 'package:scanner/resources/stock_mutation_item_repository.dart';
 
 class ReservedList extends StatefulWidget {
-  ReservedList(this.line, this.onCancel, {Key? key}) : super(key: key);
+  ReservedList(this.line, this.cancelledItems, {Key? key}) : super(key: key);
 
   final PicklistLine line;
-  final void Function(StockMutationItem item) onCancel;
+  final List<CancelledStockMutationItem> cancelledItems;
 
   @override
   _ReservedListState createState() => _ReservedListState();
 }
 
 class _ReservedListState extends State<ReservedList> {
-  Future<List<StockMutationItem>>? _future;
+  bool _active = false;
 
   @override
   Widget build(BuildContext context) {
     var line = widget.line;
-    if (_future != null) {
-      return _futureBuilder();
-    } else if (line.pickedAmount > 0) {
-      return SliverToBoxAdapter(
-        child: ListTile(
-          title: ElevatedButton(
-            child: Text('${line.pickedAmount} ${line.product.unit} verwerkt'),
-            onPressed: () {
-              setState(() {
-                _future = getStockMutation(line.picklistId, line.product.id)
-                    .then((response) =>
-                        (response.data!['data'] as List<dynamic>)
-                            .map((json) => StockMutationItem.fromJson(json))
-                            .toList());
-              });
-            },
-          ),
-        ),
-      );
-    } else {
-      return SliverToBoxAdapter();
-    }
-  }
-
-  _futureBuilder() {
-    return FutureBuilder<List<StockMutationItem>>(
-        future: _future,
+    final repository = context.read<StockMutationItemRepository>();
+    return StreamBuilder<List<StockMutationItem>>(
+        stream: _active
+            ? repository.getStockMutationItemsStream(
+                line.picklistId,
+                line.product.id,
+              )
+            : null,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Center(child: CircularProgressIndicator()),
+          List<Widget> list = [];
+          if (snapshot.connectionState == ConnectionState.none &&
+              line.pickedAmount > 0) {
+            list = [
+              Center(
+                child: ElevatedButton(
+                  child: Text(
+                    '${line.pickedAmount} ${line.product.unit} verwerkt',
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _active = true;
+                    });
+                  },
+                ),
               ),
-            );
+            ];
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            list = [
+              Center(child: CircularProgressIndicator()),
+            ];
           }
           if (snapshot.hasData) {
             var items = snapshot.data!.toList();
-            return SliverList(
-                delegate: SliverChildListDelegate(items
-                    .map((item) => Column(
-                          children: [
-                            _itemTile(item, () {
-                              setState(() {
-                                _future = Future.sync(() {
-                                  final index = items.indexOf(item);
-                                  if (index != -1) {
-                                    items.replaceRange(index, index + 1, [
-                                      StockMutationItem(
-                                        productId: item.productId,
-                                        amount: item.amount,
-                                        batch: item.batch,
-                                        productionDate: item.productionDate,
-                                        expirationDate: item.expirationDate,
-                                        stickerCode: item.stickerCode,
-                                        status:
-                                            StockMutationItemStatus.Cancelled,
-                                        createdDate: item.createdDate,
-                                      ),
-                                    ]);
-                                  }
-                                  return items;
-                                });
-                              });
-                              cancelStockMutation(item.id!).then((response) {
-                                final snackBar = SnackBar(
-                                  backgroundColor:
-                                      response.data!['success'] as bool
-                                          ? Colors.green
-                                          : Colors.red,
-                                  content: Text(response.data!['message']),
-                                );
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(snackBar);
-                              });
-                              widget.onCancel(item);
-                            }),
-                            Divider(height: 1),
-                          ],
-                        ))
-                    .toList()));
+            list = items
+                .map((item) => Column(
+                      children: [
+                        _itemTile(item, () {
+                          repository.tryCancelItem(item);
+                        }),
+                        Divider(height: 1),
+                      ],
+                    ))
+                .toList();
           }
-          return SliverFillRemaining();
+          return SliverList(delegate: SliverChildListDelegate(list));
         });
   }
 
-  _itemTile(
-    StockMutationItem item,
-    void Function() onCancel,
-  ) {
+  _itemTile(StockMutationItem item, void Function() onCancel) {
     return ListTile(
       title: Text(
         '${item.amount} x ${item.batch} | ${item.stickerCode}       ${item.createdDate != null ? DateFormat('yy-MM-dd HH:mm').format(item.createdDate!) : ''}',
       ),
-      trailing: item.isReserved()
+      trailing: item.isReserved() &&
+              !widget.cancelledItems.any((cancelled) => cancelled.id == item.id)
           ? IconButton(
               icon: Icon(Icons.cancel_outlined, color: Colors.amber),
               onPressed: onCancel,

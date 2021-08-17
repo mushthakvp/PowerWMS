@@ -14,7 +14,7 @@ class PicklistLine {
   final String? lineDate;
   final num pickAmount;
   final num? canceledAmount;
-  num pickedAmount;
+  final num pickedAmount;
   final num available;
   final String descriptionA;
   final String descriptionB;

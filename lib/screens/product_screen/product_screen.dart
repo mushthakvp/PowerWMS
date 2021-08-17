@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
-import 'package:scanner/models/stock_mutation.dart';
+import 'package:scanner/resources/stock_mutation_item_repository.dart';
 import 'package:scanner/screens/product_screen/widgets/line_info.dart';
 import 'package:scanner/screens/product_screen/widgets/product_view.dart';
 import 'package:scanner/screens/product_screen/widgets/reserved_list.dart';
@@ -17,27 +18,19 @@ class ProductScreen extends StatelessWidget {
     return Scaffold(
       appBar: WMSAppBar(
         _line.location ?? '',
-        context: context,
       ),
-      body: FutureBuilder<StockMutation>(
-        future: StockMutation.fromMemory(_line),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            var mutation = snapshot.data!;
-            return ChangeNotifierProvider<StockMutation>.value(
-              value: mutation,
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  LineInfo(_line),
-                  ProductView(),
-                  ReservedList(_line, (item) {
-                    mutation.changeLinePickedAmount(-item.amount.abs());
-                  }),
-                ],
-              ),
-            );
-          }
-          return Container();
+      body: StreamBuilder<List<CancelledStockMutationItem>>(
+        stream: context
+            .read<StockMutationItemRepository>()
+            .getCancelledStockMutationItemsStream(_line.product.id),
+        builder: (_, snapshot) {
+          return CustomScrollView(
+            slivers: <Widget>[
+              LineInfo(_line),
+              ProductView(_line, snapshot.data ?? []),
+              ReservedList(_line, snapshot.data ?? []),
+            ],
+          );
         },
       ),
     );

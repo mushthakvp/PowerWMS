@@ -24,7 +24,6 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: WMSAppBar(
         'Extracom',
-        context: context,
       ),
       body: CustomScrollView(
         slivers: <Widget>[

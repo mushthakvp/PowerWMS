@@ -1,13 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scanner/models/picklist.dart';
+import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/screens/picklists_screen/widgets/picklist_view.dart';
+import 'package:scanner/screens/picklists_screen/widgets/search_field.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PicklistsScreen extends StatefulWidget {
   const PicklistsScreen({Key? key}) : super(key: key);
@@ -17,29 +17,19 @@ class PicklistsScreen extends StatefulWidget {
 }
 
 class _PicklistScreenState extends State<PicklistsScreen> {
-  Timer? _searchOnStoppedTyping;
-  Future<List<Picklist>>? _future;
-  TextEditingController controller = TextEditingController();
-
-  @override
-  void initState() {
-    _search(null);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
+  final _refreshController = RefreshController(initialRefresh: false);
+  String _search = '';
 
   @override
   Widget build(BuildContext context) {
+    final repository = context.read<PicklistRepository>();
+    final lineRepository = context.read<PicklistLineRepository>();
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: WMSAppBar(
           'Extracom',
+          preferredSize: kToolbarHeight + 100,
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(100),
             child: Column(
@@ -58,66 +48,68 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                     ),
                   ],
                 ),
-                Container(
-                  child: TextField(
-                    controller: controller,
-                    onChanged: _onChangeHandler,
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context)!.picklistsSearch,
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                    ),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(color: Colors.white),
-                )
+                SearchField(_search, (value) {
+                  setState(() {
+                    _search = value;
+                  });
+                }),
               ],
             ),
           ),
-          context: context,
         ),
-        body: TabBarView(
-          children: [
-            PicklistView(_future!,
-                (Picklist element) => [1, 2].contains(element.status)),
-            PicklistView(_future!, (Picklist element) => element.status == 4),
-          ],
+        body: StreamBuilder<List<Picklist>>(
+          stream: repository.getPicklistsStream(_search),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasData) {
+              final notPicked = snapshot.data!
+                  .where((element) => element.isNotPicked())
+                  .toList();
+              final picked = snapshot.data!
+                  .where((element) => element.isPicked())
+                  .toList();
+              if (notPicked.length == 1) {
+                setState(() {
+                  _search = '';
+                });
+                Navigator.pushNamed(context, '/picklist',
+                    arguments: notPicked.first);
+              }
+              return TabBarView(
+                children: [
+                  PicklistView(
+                    notPicked,
+                    _refreshController,
+                    () async {
+                      await Future.wait([
+                        repository.clear(),
+                        lineRepository.clear(),
+                      ]);
+                      _refreshController.refreshCompleted();
+                      setState(() {});
+                    },
+                  ),
+                  PicklistView(
+                    picked,
+                    _refreshController,
+                    () async {
+                      await Future.wait([
+                        repository.clear(),
+                        lineRepository.clear(),
+                      ]);
+                      _refreshController.refreshCompleted();
+                      setState(() {});
+                    },
+                  ),
+                ],
+              );
+            }
+            return Container();
+          },
         ),
       ),
     );
-  }
-
-  _search(String? value) async {
-    final repository = context.read<PicklistRepository>();
-    try {
-      setState(() {
-        _future = repository.getPicklists(value)
-          ..then((value) {
-            if (value.length == 1) {
-              controller.clear();
-              _search('');
-              Navigator.pushNamed(context, '/picklist', arguments: value.first);
-            }
-          });
-      });
-    } catch (e) {
-      final prefs = await SharedPreferences.getInstance();
-      prefs.clear();
-      Navigator.pushReplacementNamed(context, '/');
-    }
-  }
-
-  _onChangeHandler(value) {
-    const duration = Duration(milliseconds: 700);
-    if (_searchOnStoppedTyping != null) {
-      setState(() => _searchOnStoppedTyping!.cancel());
-    }
-    setState(() {
-      _searchOnStoppedTyping = new Timer(duration, () => _search(value));
-    });
   }
 }

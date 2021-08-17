@@ -12,7 +12,6 @@ class LogScreen extends StatelessWidget {
     return Scaffold(
       appBar: WMSAppBar(
         'Logs',
-        context: context,
       ),
       body: FutureBuilder<List<Log>>(
         future: FLog.getAllLogs(),

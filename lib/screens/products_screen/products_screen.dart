@@ -44,7 +44,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
     return Scaffold(
       appBar: WMSAppBar(
         AppLocalizations.of(context)!.products,
-        context: context,
       ),
       body: CustomScrollView(
         slivers: <Widget>[
