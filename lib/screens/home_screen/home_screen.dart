@@ -61,6 +61,24 @@ class HomeScreen extends StatelessWidget {
       drawer: Drawer(
         child: ListView(
           children: [
+            DrawerHeader(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Image.asset('assets/images/logo_blue.png', height: 34),
+                  FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Text(
+                            'Version ${snapshot.data?.version}+${snapshot.data?.buildNumber}');
+                      }
+                      return Container();
+                    },
+                  )
+                ],
+              ),
+            ),
             ListTile(
               title: Text('Logs'),
               onTap: () {
