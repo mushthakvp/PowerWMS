@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:package_info/package_info.dart';
 import 'package:scanner/screens/home_screen/widgets/grid_item.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
