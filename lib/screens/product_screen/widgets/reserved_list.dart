@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/log.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
@@ -53,6 +54,10 @@ class _ReservedListState extends State<ReservedList> {
             list = [
               Center(child: CircularProgressIndicator()),
             ];
+          }
+          if (snapshot.hasError) {
+            log(snapshot.error, snapshot.stackTrace);
+            list = [Text('Something is wrong.')];
           }
           if (snapshot.hasData) {
             var items = snapshot.data!.toList();

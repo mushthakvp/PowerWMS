@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:scanner/log.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_body.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_header.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PicklistView extends StatefulWidget {
   const PicklistView(this.picklist, {Key? key}) : super(key: key);
@@ -33,10 +33,10 @@ class _PicklistViewState extends State<PicklistView> {
           return Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          SharedPreferences.getInstance().then((prefs) {
-            prefs.clear();
-            Navigator.pushReplacementNamed(context, '/');
-          });
+          log(snapshot.error, snapshot.stackTrace);
+          return Container(
+            child: Text('${snapshot.error}\n${snapshot.stackTrace}'),
+          );
         }
         if (snapshot.hasData) {
           return SmartRefresher(
@@ -56,7 +56,9 @@ class _PicklistViewState extends State<PicklistView> {
             ),
           );
         }
-        return Container();
+        return Container(
+          child: Text('Something is wrong.'),
+        );
       },
     );
   }

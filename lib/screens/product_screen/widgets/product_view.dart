@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/log.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
@@ -30,13 +31,16 @@ class ProductView extends StatelessWidget {
           create: (_) =>
               mutationRepository.getStockMutationsStream(line.picklistId),
           initialData: null,
+          catchError: (_, err) {
+            log(err, null);
+            return null;
+          },
         ),
         FutureProvider<List<StockMutationItem>?>(
           create: (_) async {
             final prefs = await SharedPreferences.getInstance();
             final json = prefs.getString('${line.id}');
             if (json != null) {
-              print(json);
               return (jsonDecode(json) as List<dynamic>)
                   .map((json) => StockMutationItem.fromJson(json))
                   .toList();
@@ -45,6 +49,10 @@ class ProductView extends StatelessWidget {
             }
           },
           initialData: null,
+          catchError: (_, err) {
+            log(err, null);
+            return null;
+          },
         ),
         ListenableProxyProvider2<List<StockMutationItem>?,
             Map<int, StockMutation>?, MutationProvider?>(
