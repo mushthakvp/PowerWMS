@@ -12,10 +12,10 @@ void initLogs() {
     ..formatType = FormatType.FORMAT_CURLY
     ..logLevelsEnabled = [LogLevel.INFO, LogLevel.ERROR]
     ..dataLogTypes = [
-      DataLogType.DEFAULT.toString(),
-      DataLogType.DEVICE.toString(),
-      DataLogType.NETWORK.toString(),
-      DataLogType.ERRORS.toString(),
+      'DEFAULT',
+      'DEVICE',
+      'NETWORK',
+      'ERRORS',
     ]
     ..timestampFormat = TimestampFormat.TIME_FORMAT_READABLE;
   FLog.applyConfigurations(config);
@@ -28,6 +28,8 @@ void initLogs() {
 
 void log(dynamic exception, StackTrace? stack) {
   FLog.error(
+    className: 'None',
+    methodName: 'noop',
     dataLogType: 'DEFAULT',
     exception: exception,
     stacktrace: stack,
