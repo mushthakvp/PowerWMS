@@ -53,7 +53,7 @@ class _PicklistBodyState extends State<PicklistBody> {
           final lines = widget.lines;
           final settings = value.value;
           if (settings.finishedProductsAtBottom) {
-            lines.sort((a, b) => a.status - b.status);
+            lines.sort((a, b) => a.status.name - b.status.name);
           }
           return SliverList(
               delegate: SliverChildListDelegate(
