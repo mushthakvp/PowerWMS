@@ -11,7 +11,7 @@ PicklistLine _$PicklistLineFromJson(Map<String, dynamic> json) {
     picklist: json['picklist'] as String,
     picklistId: json['picklistId'] as int,
     line: json['line'] as int,
-    uid: json['uid'] as String,
+    uid: json['uid'] as String?,
     warehouse: json['warehouse'] as String,
     warehouseId: json['warehouseId'] as int,
     lineDate: json['lineDate'] as String?,
@@ -19,10 +19,10 @@ PicklistLine _$PicklistLineFromJson(Map<String, dynamic> json) {
     canceledAmount: json['canceledAmount'] as num?,
     pickedAmount: json['pickedAmount'] as num,
     available: json['available'] as num,
-    descriptionA: json['descriptionA'] as String,
-    descriptionB: json['descriptionB'] as String,
-    internalMemo: json['internalMemo'] as String,
-    status: json['status'] as int,
+    descriptionA: json['descriptionA'] as String?,
+    descriptionB: json['descriptionB'] as String?,
+    internalMemo: json['internalMemo'] as String?,
+    status: _$enumDecode(_$PicklistLineStatusEnumMap, json['status']),
     product: Product.fromJson(json['product'] as Map<String, dynamic>),
     location: json['location'] as String?,
     id: json['id'] as int,
@@ -46,9 +46,41 @@ Map<String, dynamic> _$PicklistLineToJson(PicklistLine instance) =>
       'descriptionA': instance.descriptionA,
       'descriptionB': instance.descriptionB,
       'internalMemo': instance.internalMemo,
-      'status': instance.status,
+      'status': _$PicklistLineStatusEnumMap[instance.status],
       'product': instance.product.toJson(),
       'location': instance.location,
       'id': instance.id,
       'isNew': instance.isNew,
     };
+
+K _$enumDecode<K, V>(
+  Map<K, V> enumValues,
+  Object? source, {
+  K? unknownValue,
+}) {
+  if (source == null) {
+    throw ArgumentError(
+      'A value must be provided. Supported values: '
+      '${enumValues.values.join(', ')}',
+    );
+  }
+
+  return enumValues.entries.singleWhere(
+    (e) => e.value == source,
+    orElse: () {
+      if (unknownValue == null) {
+        throw ArgumentError(
+          '`$source` is not one of the supported values: '
+          '${enumValues.values.join(', ')}',
+        );
+      }
+      return MapEntry(unknownValue, enumValues.values.first);
+    },
+  ).key;
+}
+
+const _$PicklistLineStatusEnumMap = {
+  PicklistLineStatus.added: 1,
+  PicklistLineStatus.inProgress: 2,
+  PicklistLineStatus.picked: 3,
+};

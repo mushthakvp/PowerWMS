@@ -20,12 +20,15 @@ class PicklistLineDbProvider {
           final record = _store.record(mutation.lineId);
           final line = await record.get(transaction);
           if (line != null) {
+            final amount = (line['pickedAmount'] as num) +
+                mutation.items.fold(0, (result, item) => result + item.amount);
             await record.update(
               transaction,
               {
-                'pickedAmount': (line['pickedAmount'] as num) +
-                    mutation.items
-                        .fold(0, (result, item) => result + item.amount),
+                'pickedAmount': amount,
+                'status': amount >= (line['pickAmount'] as num)
+                    ? PicklistLineStatus.picked.name
+                    : line['status'],
               },
             );
           }
