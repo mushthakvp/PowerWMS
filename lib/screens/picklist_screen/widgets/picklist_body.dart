@@ -59,7 +59,9 @@ class _PicklistBodyState extends State<PicklistBody> {
               delegate: SliverChildListDelegate(
                   lines.where(filter(_search)).map((line) {
             var fullyPicked = line.isFullyPicked();
+            var key = Key(line.product.id.toString());
             return Column(
+              key: key,
               children: [
                 ListTile(
                   tileColor: fullyPicked ? blue : null,
@@ -67,7 +69,11 @@ class _PicklistBodyState extends State<PicklistBody> {
                     Navigator.of(context)
                         .pushNamed('/product', arguments: line);
                   },
-                  leading: ProductImage(line.product.id, width: 60),
+                  leading: ProductImage(
+                    line.product.id,
+                    width: 60,
+                    key: key,
+                  ),
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
