@@ -16,10 +16,11 @@ class MutationProvider extends ChangeNotifier {
     List<CancelledStockMutationItem> cancelledItems,
     List<StockMutation> queuedMutations,
   ) {
-    final packaging = line.product.packagings.firstWhere(
-      (packaging) => packaging.packagingUnitId == 1,
-      orElse: null,
-    );
+    Packaging? packaging;
+    try {
+      packaging = line.product.packagings
+          .firstWhere((packaging) => packaging.packagingUnitId == 1);
+    } catch (e) {}
     final provider = MutationProvider._(
       line,
       idleItems,
