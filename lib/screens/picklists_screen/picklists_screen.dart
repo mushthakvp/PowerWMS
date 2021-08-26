@@ -71,11 +71,13 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                   .where((element) => element.isPicked())
                   .toList();
               if (notPicked.length == 1) {
-                setState(() {
-                  _search = '';
+                Future.microtask(() {
+                  setState(() {
+                    _search = '';
+                  });
+                  Navigator.pushNamed(context, '/picklist',
+                      arguments: notPicked.first);
                 });
-                Navigator.pushNamed(context, '/picklist',
-                    arguments: notPicked.first);
               }
               return TabBarView(
                 children: [
