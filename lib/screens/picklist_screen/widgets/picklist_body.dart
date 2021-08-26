@@ -71,6 +71,15 @@ class _PicklistBodyState extends State<PicklistBody> {
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (line.location != null)
+                        Text(
+                          line.location!,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900,
+                            color: fullyPicked ? white : black,
+                          ),
+                        ),
                       Text(
                         line.product.uid,
                         style: TextStyle(
@@ -96,15 +105,6 @@ class _PicklistBodyState extends State<PicklistBody> {
                       ),
                     ],
                   ),
-                  subtitle: line.location != null
-                      ? Text(
-                          line.location!,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: fullyPicked ? white : Colors.grey[400],
-                          ),
-                        )
-                      : null,
                   trailing: Icon(
                     Icons.chevron_right,
                     color: fullyPicked ? white : black,
