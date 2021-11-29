@@ -15,6 +15,11 @@ final List<Map<String, dynamic>> items = [
     'icon': Icons.list_alt,
     'route': '/picklists',
   },
+  {
+    'title': (context) => AppLocalizations.of(context)!.warehouseReceipts,
+    'icon': Icons.countertops,
+    'route': '/picklists',
+  },
 ];
 
 class HomeScreen extends StatelessWidget {
