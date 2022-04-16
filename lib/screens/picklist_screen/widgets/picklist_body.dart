@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
+import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -37,8 +38,9 @@ class _PicklistBodyState extends State<PicklistBody> {
                   setState(() {
                     final lines = widget.lines.where(filter(value));
                     if (lines.length == 1) {
-                      Navigator.of(context)
-                          .pushNamed('/product', arguments: lines.first);
+                      Navigator.of(context).pushNamed(
+                          PicklistProductScreen.routeName,
+                          arguments: lines.first);
                     } else {
                       _search = value;
                     }
@@ -66,8 +68,9 @@ class _PicklistBodyState extends State<PicklistBody> {
                 ListTile(
                   tileColor: fullyPicked ? blue : null,
                   onTap: () {
-                    Navigator.of(context)
-                        .pushNamed('/product', arguments: line);
+                    Navigator.of(context).pushNamed(
+                        PicklistProductScreen.routeName,
+                        arguments: line);
                   },
                   leading: ProductImage(
                     line.product.id,

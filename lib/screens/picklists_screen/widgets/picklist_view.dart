@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scanner/models/picklist.dart';
+import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
 
 class PicklistView extends StatelessWidget {
   const PicklistView(
@@ -27,7 +28,7 @@ class PicklistView extends StatelessWidget {
                   children: [
                     ListTile(
                       onTap: () {
-                        Navigator.pushNamed(context, '/picklist',
+                        Navigator.pushNamed(context, PicklistScreen.routeName,
                             arguments: picklist);
                       },
                       leading: Container(

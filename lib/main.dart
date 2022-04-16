@@ -19,9 +19,9 @@ import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
+import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
 import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
 import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
-import 'package:scanner/screens/product_screen/product_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -117,19 +117,19 @@ class WMSApp extends StatelessWidget {
                 },
               ),
               routes: {
-                '/products': (context) => ProductsScreen(),
-                '/product': (context) {
+                ProductsScreen.routeName: (context) => ProductsScreen(),
+                PicklistProductScreen.routeName: (context) {
                   final line = ModalRoute.of(context)!.settings.arguments
                       as PicklistLine;
-                  return ProductScreen(line);
+                  return PicklistProductScreen(line);
                 },
-                '/picklists': (context) => PicklistsScreen(),
-                '/picklist': (context) {
+                PicklistsScreen.routeName: (context) => PicklistsScreen(),
+                PicklistScreen.routeName: (context) {
                   final picklist =
                       ModalRoute.of(context)!.settings.arguments as Picklist;
                   return PicklistScreen(picklist);
                 },
-                '/logs': (context) => LogScreen(),
+                LogScreen.routeName: (context) => LogScreen(),
               },
             ),
           );

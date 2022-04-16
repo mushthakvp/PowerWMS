@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +15,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 final parser = GS1BarcodeParser.defaultParser();
 
 class ProductsScreen extends StatefulWidget {
+  static const routeName = '/products';
+
   const ProductsScreen({Key? key}) : super(key: key);
 
   @override
@@ -119,7 +120,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       );
                     } catch (e) {
                       return Text(
-                          AppLocalizations.of(context)!.productNotFound);
+                        AppLocalizations.of(context)!.productNotFound,
+                      );
                     }
                   } else {
                     return Container();

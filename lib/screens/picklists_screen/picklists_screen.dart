@@ -5,11 +5,14 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
+import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
 import 'package:scanner/screens/picklists_screen/widgets/picklist_view.dart';
 import 'package:scanner/screens/picklists_screen/widgets/search_field.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
 class PicklistsScreen extends StatefulWidget {
+  static const routeName = '/picklists';
+
   const PicklistsScreen({Key? key}) : super(key: key);
 
   @override
@@ -75,7 +78,7 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                   setState(() {
                     _search = '';
                   });
-                  Navigator.pushNamed(context, '/picklist',
+                  Navigator.pushNamed(context, PicklistScreen.routeName,
                       arguments: notPicked.first);
                 });
               }

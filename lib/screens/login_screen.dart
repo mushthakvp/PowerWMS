@@ -5,6 +5,8 @@ import 'package:scanner/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
+  static const routeName = '/login';
+
   final _authData = {
     'username': '',
     'password': '',

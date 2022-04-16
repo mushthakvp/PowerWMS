@@ -2,27 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:package_info/package_info.dart';
 import 'package:scanner/screens/home_screen/widgets/grid_item.dart';
+import 'package:scanner/screens/log_screen/log_screen.dart';
+import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
+import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
 final List<Map<String, dynamic>> items = [
   {
     'title': (context) => AppLocalizations.of(context)!.products,
     'icon': Icons.inventory_2,
-    'route': '/products',
+    'route': ProductsScreen.routeName,
   },
   {
     'title': (context) => AppLocalizations.of(context)!.warehouseReceipts,
     'icon': Icons.list_alt,
-    'route': '/picklists',
+    'route': PicklistsScreen.routeName,
   },
   {
     'title': (context) => AppLocalizations.of(context)!.warehouseReceipts,
     'icon': Icons.countertops,
-    'route': '/picklists',
+    'route': PicklistsScreen.routeName,
   },
 ];
 
 class HomeScreen extends StatelessWidget {
+  static const routeName = '/';
+
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
@@ -88,7 +93,7 @@ class HomeScreen extends StatelessWidget {
             ListTile(
               title: Text('Logs'),
               onTap: () {
-                Navigator.of(context).pushNamed('/logs');
+                Navigator.of(context).pushNamed(LogScreen.routeName);
               },
             ),
           ],

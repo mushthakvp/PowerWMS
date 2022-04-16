@@ -1,10 +1,11 @@
 import 'package:f_logs/f_logs.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:scanner/screens/log_screen/widgets/log_tile.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
 class LogScreen extends StatelessWidget {
+  static const routeName = '/logs';
+
   const LogScreen({Key? key}) : super(key: key);
 
   @override
