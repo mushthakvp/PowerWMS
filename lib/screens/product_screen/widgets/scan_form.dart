@@ -103,7 +103,12 @@ class ScanForm extends StatelessWidget {
           AppLocalizations.of(context)!.productWrongProduct,
         );
       }
-      int amount = _calculateAmount(mutation, ean, settings);
+      int amount;
+      if (mutation.amount > 0) {
+        amount = mutation.amount;
+      } else {
+        amount = _calculateAmount(mutation, ean, settings);
+      }
       if (amount == 0) {
         throw new DomainException('Amount should be greater than 0');
       }
