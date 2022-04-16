@@ -32,7 +32,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
     final repository = context.read<ProductRepository>();
     _future = repository.getProducts(null).catchError((_) {
       SharedPreferences.getInstance().then((prefs) {
-        prefs.clear();
+        prefs.getKeys().forEach((key) {
+          if (key != 'server') {
+            prefs.remove(key);
+          }
+        });
         Navigator.pushReplacementNamed(context, '/');
       });
     });

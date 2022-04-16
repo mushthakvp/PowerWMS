@@ -10,7 +10,9 @@ class LoginScreen extends StatelessWidget {
     'password': '',
   };
 
-  LoginScreen({Key? key}) : super(key: key);
+  LoginScreen({Key? key, required this.prefs}) : super(key: key);
+
+  final SharedPreferences prefs;
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +38,14 @@ class LoginScreen extends StatelessWidget {
                     labelText: 'Server',
                   ),
                   keyboardType: TextInputType.url,
-                  initialValue: 'http://powerwms.nl',
+                  initialValue:
+                      prefs.getString('server') ?? 'http://powerwms.nl',
                   validator: (value) {
                     return null;
                   },
                   onSaved: (value) {
                     dio.options.baseUrl = '$value/api';
-                    SharedPreferences.getInstance().then(
-                        (prefs) => prefs.setString('server', '$value/api'));
+                    prefs.setString('server', value!);
                   },
                 ),
                 TextFormField(
@@ -103,8 +105,6 @@ class LoginScreen extends StatelessWidget {
                         dio.options.headers = {
                           'authorization': 'Bearer ${response.data}',
                         };
-                        SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
                         prefs.setString('token', response.data);
                         Navigator.pushReplacementNamed(context, '/');
                       } catch (e, stack) {

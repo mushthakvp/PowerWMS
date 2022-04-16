@@ -41,14 +41,17 @@ class WMSApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Settings>(
-      future: Settings.fromMemory(),
+    return FutureBuilder<List<dynamic>>(
+      future:
+          Future.wait([Settings.fromMemory(), SharedPreferences.getInstance()]),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          final settings = snapshot.data![0] as Settings;
+          final prefs = snapshot.data![1] as SharedPreferences;
           return MultiProvider(
             providers: [
               ChangeNotifierProvider<ValueNotifier<Settings>>(
-                create: (_) => ValueNotifier<Settings>(snapshot.data!),
+                create: (_) => ValueNotifier<Settings>(settings),
               ),
               Provider<PicklistRepository>(
                 create: (_) => PicklistRepository(_db),
@@ -99,20 +102,17 @@ class WMSApp extends StatelessWidget {
                   ),
                 ),
               ),
-              home: FutureBuilder<SharedPreferences>(
-                future: SharedPreferences.getInstance(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData &&
-                      snapshot.data!.getString('token') != null &&
-                      snapshot.data!.getString('server') != null) {
-                    dio.options.baseUrl = snapshot.data!.getString('server')!;
+              home: Builder(
+                builder: (context) {
+                  if (prefs.getString('token') != null &&
+                      prefs.getString('server') != null) {
+                    dio.options.baseUrl = '${prefs.getString('server')!}/api';
                     dio.options.headers = {
-                      'authorization':
-                          'Bearer ${snapshot.data!.getString('token')}',
+                      'authorization': 'Bearer ${prefs.getString('token')}',
                     };
                     return HomeScreen();
                   } else {
-                    return LoginScreen();
+                    return LoginScreen(prefs: prefs);
                   }
                 },
               ),

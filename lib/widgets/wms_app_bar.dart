@@ -68,7 +68,11 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
               icon: Icon(Icons.logout),
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.clear();
+                prefs.getKeys().forEach((key) {
+                  if (key != 'server') {
+                    prefs.remove(key);
+                  }
+                });
                 Navigator.pushReplacementNamed(context, '/');
               },
             )
