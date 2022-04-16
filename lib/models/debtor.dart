@@ -21,7 +21,7 @@ class Debtor {
   int? organisationId;
   int? addressId;
   String? paymentConditionId;
-  String statusFormatted;
+  String? statusFormatted;
   String? address;
   String? googleQuery;
   int id;

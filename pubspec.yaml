@@ -40,7 +40,7 @@ dependencies:
 
   flutter_barcode_scanner: ^2.0.0
 
-  assets_audio_player: ^3.0.3+3
+  assets_audio_player: ^3.0.4+1
 
   flutter_cache_manager: ^3.1.1
 
@@ -48,15 +48,14 @@ dependencies:
 
   sliver_tools: ^0.2.5
 
-  f_logs:
-    git:
-      url: git://github.com/draganjovanovic1/Flogs
+  f_logs: ^2.0.0
   sembast: ^3.1.0+2
   path: ^1.8.0
   path_provider: ^2.0.2
   connectivity_plus: ^1.0.6
   pull_to_refresh: ^2.0.0
   package_info: ^2.0.2
+  platform: ^3.1.0
 
 dev_dependencies:
   flutter_test:

@@ -25,7 +25,7 @@ Debtor _$DebtorFromJson(Map<String, dynamic> json) {
     organisationId: json['organisationId'] as int?,
     addressId: json['addressId'] as int?,
     paymentConditionId: json['paymentConditionId'] as String?,
-    statusFormatted: json['statusFormatted'] as String,
+    statusFormatted: json['statusFormatted'] as String?,
     address: json['address'] as String?,
     googleQuery: json['googleQuery'] as String?,
     id: json['id'] as int,
