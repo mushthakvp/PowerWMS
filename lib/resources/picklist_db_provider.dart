@@ -33,11 +33,11 @@ class PicklistDbProvider {
 
   Stream<List<Picklist>> getPicklistsStream(String? search) {
     var finder = Finder(
-        filter: search == ''
+        filter: search == '' || search == null
             ? null
             : Filter.or([
-                Filter.equals('uid', search),
-                Filter.equals('debtor.name', search),
+                Filter.matches('uid', search),
+                Filter.matches('debtor.name', search),
               ]));
     return _store.query(finder: finder).onSnapshots(db).transform(
         StreamTransformer.fromHandlers(handleData: (snapshotList, sink) {
