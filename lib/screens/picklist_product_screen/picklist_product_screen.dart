@@ -4,9 +4,9 @@ import 'package:scanner/log.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/resources/stock_mutation_item_repository.dart';
-import 'package:scanner/screens/product_screen/widgets/line_info.dart';
-import 'package:scanner/screens/product_screen/widgets/product_view.dart';
-import 'package:scanner/screens/product_screen/widgets/reserved_list.dart';
+import 'package:scanner/screens/picklist_product_screen/widgets/line_info.dart';
+import 'package:scanner/screens/picklist_product_screen/widgets/product_view.dart';
+import 'package:scanner/screens/picklist_product_screen/widgets/reserved_list.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
 class PicklistProductScreen extends StatelessWidget {

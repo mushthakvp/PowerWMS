@@ -17,6 +17,11 @@ class Product {
   final int status;
   final num stock;
   final bool hasImage;
+  final String? extra1;
+  final String? extra2;
+  final String? extra3;
+  final String? extra4;
+  final String? extra5;
   final List<Packaging> packagings;
   final int id;
   final bool isNew;
@@ -34,6 +39,11 @@ class Product {
     required this.status,
     required this.stock,
     required this.hasImage,
+    required this.extra1,
+    required this.extra2,
+    required this.extra3,
+    required this.extra4,
+    required this.extra5,
     required this.packagings,
     required this.id,
     required this.isNew,

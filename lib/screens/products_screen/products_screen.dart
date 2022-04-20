@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
 import 'package:scanner/models/product.dart';
 import 'package:scanner/resources/product_repository.dart';
+import 'package:scanner/screens/product_screen/product_screen.dart';
 import 'package:scanner/screens/products_screen/widgets/amount.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
@@ -98,25 +99,34 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   }
                   if (snapshot.hasData) {
                     try {
-                      final product = snapshot.data!
-                          .firstWhere((product) => product.ean == _result);
+                      final product = snapshot.data!.firstWhere((product) =>
+                          product.ean == _result || product.uid == _result);
                       var headline6 = Theme.of(context).textTheme.headline6;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (product.description != null)
+                      return InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => ProductScreen(product),
+                            ),
+                          );
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (product.description != null)
+                              Text(
+                                product.description!,
+                                style: headline6,
+                              ),
                             Text(
-                              product.description!,
+                              '${product.ean} | ${product.uid}',
                               style: headline6,
                             ),
-                          Text(
-                            '${product.ean} | ${product.uid}',
-                            style: headline6,
-                          ),
-                          ProductImage(product.id),
-                          Amount(1, (value) {}),
-                          Divider(height: 1),
-                        ],
+                            ProductImage(product.id),
+                            Amount(1, (value) {}),
+                            Divider(height: 1),
+                          ],
+                        ),
                       );
                     } catch (e) {
                       return Text(
@@ -131,64 +141,74 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ),
           ),
           FutureBuilder<List<Product>>(
-              future: _future,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final repository = context.read<ProductRepository>();
-                  try {
-                    final product = snapshot.data!
-                        .firstWhere((product) => product.ean == _result);
-                    var headline5 = Theme.of(context).textTheme.headline5;
-                    return FutureBuilder<List<Product>>(
-                      future: repository.getProducts(product.uid),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          final products = snapshot.data!
-                              .where((element) => element.ean != product.ean)
-                              .toList();
-                          return SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                final product = products[index];
-                                return Column(
-                                  children: [
-                                    ListTile(
-                                      title: Text(
-                                        product.unit,
-                                        textAlign: TextAlign.center,
-                                        style: headline5,
-                                      ),
-                                      subtitle: Row(
-                                        children: [
-                                          ProductImage(
-                                            product.id,
-                                            width: 60,
-                                          ),
-                                          SizedBox(width: 20),
-                                          Expanded(
-                                              child: Amount(1, (value) {})),
-                                        ],
-                                      ),
+            future: _future,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final repository = context.read<ProductRepository>();
+                try {
+                  final product = snapshot.data!
+                      .firstWhere((product) => product.ean == _result);
+                  var headline5 = Theme.of(context).textTheme.headline5;
+                  return FutureBuilder<List<Product>>(
+                    future: repository.getProducts(product.uid),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final products = snapshot.data!
+                            .where((element) => element.ean != product.ean)
+                            .toList();
+                        return SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final product = products[index];
+                              return Column(
+                                children: [
+                                  ListTile(
+                                    title: Text(
+                                      product.unit,
+                                      textAlign: TextAlign.center,
+                                      style: headline5,
                                     ),
-                                    Divider(height: 1),
-                                  ],
-                                );
-                              },
-                              childCount: products.length,
-                            ),
-                          );
-                        }
+                                    subtitle: Row(
+                                      children: [
+                                        ProductImage(
+                                          product.id,
+                                          width: 60,
+                                        ),
+                                        SizedBox(width: 20),
+                                        Expanded(
+                                          child: Amount(1, (value) {}),
+                                        ),
+                                      ],
+                                    ),
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              ProductScreen(product),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  Divider(height: 1),
+                                ],
+                              );
+                            },
+                            childCount: products.length,
+                          ),
+                        );
+                      }
 
-                        return SliverFillRemaining();
-                      },
-                    );
-                  } catch (e, stack) {
-                    print('$e\n$stack');
-                  }
+                      return SliverFillRemaining();
+                    },
+                  );
+                } catch (e, stack) {
+                  print('$e\n$stack');
                 }
+              }
 
-                return SliverFillRemaining();
-              }),
+              return SliverFillRemaining();
+            },
+          ),
         ],
       ),
     );

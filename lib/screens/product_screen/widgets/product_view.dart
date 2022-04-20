@@ -1,240 +1,77 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
-import 'package:scanner/log.dart';
-import 'package:scanner/models/cancelled_stock_mutation_item.dart';
-import 'package:scanner/models/picklist_line.dart';
-import 'package:scanner/models/stock_mutation.dart';
-import 'package:scanner/models/stock_mutation_item.dart';
-import 'package:scanner/providers/mutation_provider.dart';
-import 'package:scanner/resources/stock_mutation_repository.dart';
-import 'package:scanner/screens/product_screen/widgets/scan_form.dart';
+import 'package:scanner/models/product.dart';
 import 'package:scanner/widgets/product_image.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductView extends StatelessWidget {
-  const ProductView(this.line, this.cancelledItems, {Key? key})
-      : super(key: key);
+  const ProductView(this.product, {Key? key}) : super(key: key);
 
-  final PicklistLine line;
-  final List<CancelledStockMutationItem> cancelledItems;
+  final Product product;
 
   @override
   Widget build(BuildContext context) {
-    var mutationRepository = context.read<StockMutationRepository>();
-    return MultiProvider(
-      providers: [
-        StreamProvider<Map<int, StockMutation>?>(
-          create: (_) =>
-              mutationRepository.getStockMutationsStream(line.picklistId),
-          initialData: null,
-          catchError: (_, err) {
-            log(err, null);
-            return null;
-          },
-        ),
-        FutureProvider<List<StockMutationItem>?>(
-          create: (_) async {
-            final prefs = await SharedPreferences.getInstance();
-            final json = prefs.getString('${line.id}');
-            if (json != null) {
-              return (jsonDecode(json) as List<dynamic>)
-                  .map((json) => StockMutationItem.fromJson(json))
-                  .toList();
-            } else {
-              return [];
-            }
-          },
-          initialData: null,
-          catchError: (_, err) {
-            log(err, null);
-            return null;
-          },
-        ),
-        ListenableProxyProvider2<List<StockMutationItem>?,
-            Map<int, StockMutation>?, MutationProvider?>(
-          update: (context, idleItems, queuedMutations, _) {
-            if (idleItems == null || queuedMutations == null) {
-              return null;
-            }
-            return MutationProvider.create(
-              line,
-              idleItems,
-              cancelledItems,
-              queuedMutations.values.toList(),
-            );
-          },
-        ),
-      ],
-      child: Consumer<MutationProvider?>(
-        builder: (context, provider, _) {
-          if (provider == null) {
-            return SliverToBoxAdapter(
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          return SliverList(
-            delegate: SliverChildListDelegate([
-              ListTile(
-                title: Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${AppLocalizations.of(context)!.productProductNumber}:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(line.product.uid),
-                        SizedBox(height: 10),
-                        const Text(
-                          'GTIN / EAN:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(line.product.ean),
-                      ],
-                    ),
-                    Spacer(),
-                    ProductImage(line.product.id, width: 120),
-                  ],
-                ),
-              ),
-              Divider(height: 1),
-              _pickTile(provider, context),
-              Divider(height: 1),
-              ScanForm(
-                (process) {
-                  if (process) {
-                    _onProcessHandler(provider, context);
-                  }
-                },
-              ),
-              ListTile(
-                visualDensity: VisualDensity.compact,
-                trailing: ElevatedButton(
-                  child: Text(AppLocalizations.of(context)!
-                      .productProcess
-                      .toUpperCase()),
-                  onPressed: provider.idleItems.length > 0
-                      ? () {
-                          _onProcessHandler(provider, context);
-                        }
-                      : null,
-                ),
-              ),
-              Divider(height: 1),
-              ..._itemsBuilder(provider, context),
-            ]),
-          );
-        },
-      ),
-    );
-  }
-
-  _pickTile(MutationProvider provider, BuildContext context) {
-    return ListTile(
-      visualDensity: VisualDensity.compact,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
+    return SliverList(
+      delegate: SliverChildListDelegate([
+        ListTile(
+          title: Row(
             children: [
-              Text(
-                AppLocalizations.of(context)!
-                    .productAmountAsked(provider.line.product.unit),
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  '${provider.askedAmount}',
-                  style: TextStyle(
-                    fontSize: 50,
-                    color: Colors.black54,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${AppLocalizations.of(context)!.productProductNumber}:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
+                  Text(product.uid),
+                  SizedBox(height: 10),
+                  const Text(
+                    'GTIN / EAN:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(product.ean),
+                ],
               ),
-              Text(
-                AppLocalizations.of(context)!
-                    .productAmountBoxes(provider.askedPackagingAmount)
-                    .toUpperCase(),
-              ),
+              Spacer(),
+              ProductImage(product.id, width: 120),
             ],
           ),
-          Spacer(),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                AppLocalizations.of(context)!
-                    .productAmountToPick(provider.line.product.unit),
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  '${provider.toPickAmount}',
-                  style: TextStyle(
-                    fontSize: 50,
-                    color:
-                        provider.toPickAmount < 0 ? Colors.red : Colors.black54,
-                  ),
-                ),
-              ),
-              Text(
-                AppLocalizations.of(context)!
-                    .productAmountBoxes(provider.toPickPackagingAmount)
-                    .toUpperCase(),
-              ),
-            ],
+        ),
+        Divider(height: 1),
+        ListTile(
+          dense: true,
+          title: Text('Packaging'),
+        ),
+        ...product.packagings.map((packaging) => ListTile(
+              dense: true,
+              title: Text('${packaging.uid} ${packaging.defaultAmount}'),
+            )),
+        Divider(height: 1),
+        if (product.extra1 != null)
+          ListTile(
+            dense: true,
+            title: Text('Extra 1: ${product.extra1}'),
           ),
-        ],
-      ),
+        if (product.extra2 != null)
+          ListTile(
+            dense: true,
+            title: Text('Extra 2: ${product.extra2}'),
+          ),
+        if (product.extra3 != null)
+          ListTile(
+            dense: true,
+            title: Text('Extra 3: ${product.extra3}'),
+          ),
+        if (product.extra4 != null)
+          ListTile(
+            dense: true,
+            title: Text('Extra 4: ${product.extra4}'),
+          ),
+        if (product.extra5 != null)
+          ListTile(
+            dense: true,
+            title: Text('Extra 5: ${product.extra5}'),
+          ),
+      ]),
     );
-  }
-
-  _onProcessHandler(MutationProvider provider, BuildContext context) {
-    context
-        .read<StockMutationRepository>()
-        .saveMutation(provider.getStockMutation())
-        .then((value) {
-      provider.clear();
-      Navigator.of(context).pop();
-    });
-  }
-
-  _itemsBuilder(MutationProvider mutation, BuildContext context) {
-    return mutation.idleItems.map((item) {
-      return Dismissible(
-        key: Key(item.batch),
-        onDismissed: (direction) {
-          mutation.removeItem(item);
-        },
-        background: Container(
-          color: Colors.red,
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: Icon(Icons.delete, color: Colors.white),
-          ),
-        ),
-        child: Column(
-          children: [
-            ListTile(
-              title: Text(
-                '${item.amount} x ${item.batch} | ${item.stickerCode}',
-              ),
-            ),
-            Divider(height: 1),
-          ],
-        ),
-      );
-    });
   }
 }

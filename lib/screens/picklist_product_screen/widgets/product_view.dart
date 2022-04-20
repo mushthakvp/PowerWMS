@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/log.dart';
@@ -11,7 +10,7 @@ import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
-import 'package:scanner/screens/product_screen/widgets/scan_form.dart';
+import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
