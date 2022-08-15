@@ -1,6 +1,7 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
 import 'package:scanner/exceptions/domain_exception.dart';
@@ -114,8 +115,32 @@ class ScanForm extends StatelessWidget {
       }
       final serial = barcode?.getAIData('21');
       final batch = barcode?.getAIData('10');
-      final productionDate = barcode?.getAIData('11');
-      final expirationDate = barcode?.getAIData('17') as DateTime?;
+      // Production date
+      final productionDateFormat = barcode?.getAIData('11') as DateTime?;
+      String? productionDate;
+      // Validate the prod date
+      if (productionDateFormat != null) {
+        productionDate = DateFormat('yyMMdd').format(productionDateFormat);
+        if (productionDate.length != 6) {
+          throw new DomainException(
+            AppLocalizations.of(context)!.dateNotCorrect,
+          );
+        }
+      }
+
+      // Expired date
+      final expirationDateFormat = barcode?.getAIData('17') as DateTime?;
+      String? expirationDate;
+      // Validate the expired date
+      if (expirationDateFormat != null) {
+        expirationDate = DateFormat('yyMMdd').format(expirationDateFormat);
+        if (expirationDate.length != 6) {
+          throw new DomainException(
+            AppLocalizations.of(context)!.dateNotCorrect,
+          );
+        }
+      }
+
       if (barcode != null &&
           serial != null &&
           mutation.idleItems.any((item) => item.stickerCode == serial)) {
@@ -128,7 +153,7 @@ class ScanForm extends StatelessWidget {
           return !mutation.needToScan() ||
               (item.batch == batch &&
                   item.productionDate == productionDate &&
-                  item.expirationDate == expirationDate?.toString() &&
+                  item.expirationDate == expirationDate &&
                   item.stickerCode == serial);
         });
         mutation.replaceItem(
@@ -139,7 +164,7 @@ class ScanForm extends StatelessWidget {
             batch: batch ?? '',
             amount: amount + item.amount,
             productionDate: productionDate,
-            expirationDate: expirationDate?.toString(),
+            expirationDate: expirationDate,
             stickerCode: serial,
             picklistLineId: mutation.line.id,
           ),
@@ -150,7 +175,7 @@ class ScanForm extends StatelessWidget {
           batch: batch ?? '',
           amount: amount,
           productionDate: productionDate,
-          expirationDate: expirationDate?.toString(),
+          expirationDate: expirationDate,
           stickerCode: serial,
           picklistLineId: mutation.line.id,
         ));

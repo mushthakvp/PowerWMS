@@ -64,5 +64,6 @@
   "productWrongProduct": "Verkeerd product gescand",
   "products": "Producten",
   "settingsDirectlyProcess": "Direct verwerken",
-  "warehouseReceipts": "Magazijnbonnen"
+  "warehouseReceipts": "Magazijnbonnen",
+  "dateNotCorrect": "Datum niet correct"
 }

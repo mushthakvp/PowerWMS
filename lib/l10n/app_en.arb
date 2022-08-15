@@ -64,5 +64,6 @@
   "productWrongProduct": "Wrong product scanned",
   "products": "Products",
   "settingsDirectlyProcess": "Directly process",
-  "warehouseReceipts": "Warehouse receipts"
+  "warehouseReceipts": "Warehouse receipts",
+  "dateNotCorrect": "Date not correct"
 }
