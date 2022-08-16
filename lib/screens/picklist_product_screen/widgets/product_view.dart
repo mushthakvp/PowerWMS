@@ -8,6 +8,7 @@ import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
+import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/providers/process_product_provider.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
@@ -27,6 +28,9 @@ class ProductView extends StatelessWidget {
     var mutationRepository = context.read<StockMutationRepository>();
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider<AddProductProvider>(
+            create: (_) => AddProductProvider()
+        ),
         StreamProvider<Map<int, StockMutation>?>(
           create: (_) =>
               mutationRepository.getStockMutationsStream(line.picklistId),

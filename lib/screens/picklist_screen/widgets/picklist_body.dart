@@ -45,7 +45,7 @@ class _PicklistBodyState extends State<PicklistBody> {
                       _search = value;
                     }
                   });
-                }),
+                }, (String barcode) { }),
               ),
               Divider(),
             ],

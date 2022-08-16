@@ -4,11 +4,14 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
 
 final parser = GS1BarcodeParser.defaultParser();
+typedef OnBarCodeChanged = Function(String);
 
 class BarcodeInput extends StatefulWidget {
   final void Function(String value, GS1Barcode? barcode) onParse;
+  final OnBarCodeChanged? onBarCodeChanged;
 
-  const BarcodeInput(this.onParse, {Key? key}) : super(key: key);
+  const BarcodeInput(this.onParse, this.onBarCodeChanged,
+      {Key? key}) : super(key: key);
 
   @override
   _BarcodeInputState createState() => _BarcodeInputState();
@@ -45,6 +48,7 @@ class _BarcodeInputState extends State<BarcodeInput> {
               focusNode: focusNode,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(hintText: 'Barcode'),
+              onChanged: widget.onBarCodeChanged,
             ),
           ),
           IconButton(

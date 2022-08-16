@@ -7,6 +7,7 @@ import 'package:scanner/barcode_parser/barcode_parser.dart';
 import 'package:scanner/exceptions/domain_exception.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
+import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/screens/products_screen/widgets/amount.dart';
 import 'package:scanner/widgets/barcode_input.dart';
@@ -34,18 +35,28 @@ class ScanForm extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Flexible(
-                    child: ElevatedButton(
-                      child: Text(
-                        AppLocalizations.of(context)!.productAdd.toUpperCase(),
-                      ),
-                      onPressed: provider.needToScan()
-                          ? null
-                          : () {
-                              formKey.currentState?.save();
-                            },
-                    ),
-                    flex: 2,
+                  Selector<AddProductProvider, bool>(
+                    selector: (_, p) => p.canAdd,
+                    builder: (context, enable, _) {
+                      return Flexible(
+                        flex: 2,
+                        child: ElevatedButton(
+                          child: Text(
+                            AppLocalizations.of(context)!.productAdd.toUpperCase(),
+                          ),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                enable ? Colors.blue : Colors.grey
+                            ),
+                          ),
+                          onPressed: provider.needToScan() || !enable
+                              ? null
+                              : () {
+                            formKey.currentState?.save();
+                          },
+                        ),
+                      );
+                    },
                   ),
                   Flexible(
                     flex: 3,
@@ -53,6 +64,14 @@ class ScanForm extends StatelessWidget {
                       if (!provider.needToScan() || value.length > 0) {
                         _parseHandler(context, provider, value, barcode);
                       }
+                    }, (String barcode) {
+                      if (barcode.isEmpty) {
+                        context.read<AddProductProvider>().canAdd = false;
+                        return;
+                      }
+                      bool enableAddButton = provider.line.product.uid == barcode
+                          || provider.line.product.ean == barcode;
+                      context.read<AddProductProvider>().canAdd = enableAddButton;
                     }),
                   ),
                 ],
