@@ -155,11 +155,15 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
         title: Column(
           children: [
             Amount(
-                _productAmount,
-                (amount) {
-                  setProductAmount(amount);
+              _productAmount,
+              (amount) {
+                setProductAmount(amount);
               },
-              autofocus: true
+              autofocus: true,
+              onCompleteEditing: (int amount) {
+                widget.onConfirmAmount(amount);
+                Navigator.pop(context);
+              },
             ),
           ],
         ),

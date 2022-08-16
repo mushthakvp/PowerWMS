@@ -4,10 +4,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class Amount extends StatefulWidget {
-  const Amount(this._value, this._onChange, {required this.autofocus, Key? key}) : super(key: key);
+  const Amount(this._value, this._onChange, {
+    required this.autofocus,
+    required this.onCompleteEditing, Key? key
+  }) : super(key: key);
 
   final int _value;
   final void Function(int value) _onChange;
+  final void Function(int value) onCompleteEditing;
   final bool? autofocus;
 
   @override
@@ -70,6 +74,9 @@ class _AmountState extends State<Amount> {
             keyboardType: TextInputType.number,
             textAlign: TextAlign.center,
             autofocus: widget.autofocus ?? false,
+            onEditingComplete: () {
+              widget.onCompleteEditing(widget._value);
+            },
             style: TextStyle(
               fontSize: 24,
               height: 2.0,
