@@ -12,6 +12,7 @@ import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/providers/process_product_provider.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
+import 'package:scanner/screens/picklist_product_screen/widgets/product_adjustment.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -116,7 +117,9 @@ class ProductView extends StatelessWidget {
               ),
               Divider(height: 1),
               _pickTile(provider, context),
+              SizedBox(height: 8),
               Divider(height: 1),
+              /// Barcode
               ScanForm(
                 (process) {
                   if (process) {
@@ -124,6 +127,7 @@ class ProductView extends StatelessWidget {
                   }
                 },
               ),
+              SizedBox(height: 8),
               Divider(height: 1),
               ..._itemsBuilder(provider, context),
             ]),
@@ -143,6 +147,7 @@ class ProductView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              /// Amount to asked
               Text(
                 AppLocalizations.of(context)!
                     .productAmountAsked(provider.line.product.unit),
@@ -166,32 +171,43 @@ class ProductView extends StatelessWidget {
             ],
           ),
           Spacer(),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                AppLocalizations.of(context)!
-                    .productAmountToPick(provider.line.product.unit),
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  '${provider.toPickAmount}',
-                  style: TextStyle(
-                    fontSize: 50,
-                    color:
-                        provider.toPickAmount < 0 ? Colors.red : Colors.black54,
+          /// Amount to pick
+          InkWell(
+            onTap: () {
+              showProductAdjustmentPopup(
+                  context: context,
+                  mutationProvider: provider,
+                  onConfirmAmount: (int amount) {
+                    provider.changeAmount(amount);
+              });
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!
+                      .productAmountToPick(provider.line.product.unit),
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(
+                    '${provider.toPickAmount}',
+                    style: TextStyle(
+                      fontSize: 50,
+                      color:
+                          provider.toPickAmount < 0 ? Colors.red : Colors.black54,
+                    ),
                   ),
                 ),
-              ),
-              Text(
-                AppLocalizations.of(context)!
-                    .productAmountBoxes(provider.toPickPackagingAmount)
-                    .toUpperCase(),
-              ),
-            ],
+                Text(
+                  AppLocalizations.of(context)!
+                      .productAmountBoxes(provider.toPickPackagingAmount)
+                      .toUpperCase(),
+                ),
+              ],
+            ),
           ),
         ],
       ),

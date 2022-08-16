@@ -50,6 +50,8 @@
   "productAmountToPick": "Amount to pick ({unit})",
   "productAvailable": "Available",
   "productConfirmDelete": "Are you sure you want to delete this item?",
+  "productCancelRestAmount" : "Cancel rest amount",
+  "productConfirm": "Confirm",
   "productDelete": "Delete",
   "productNotFound": "Product is not found",
   "productOrderline": "Order line",

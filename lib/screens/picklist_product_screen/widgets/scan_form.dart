@@ -27,7 +27,6 @@ class ScanForm extends StatelessWidget {
       visualDensity: VisualDensity.compact,
       title: Column(
         children: [
-          if (!provider.needToScan()) ..._amountInput(context, provider),
           Container(
             width: double.infinity,
             child: Form(
@@ -81,30 +80,6 @@ class ScanForm extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  _amountInput(BuildContext context, MutationProvider mutation) {
-    var unit = mutation.line.product.unit;
-    return [
-      ListTile(
-        visualDensity: VisualDensity.compact,
-        title: Column(
-          children: [
-            Text(
-              AppLocalizations.of(context)!.productAmountPicked(unit),
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Amount(
-              mutation.amount,
-              (amount) {
-                mutation.changeAmount(amount);
-              },
-            ),
-          ],
-        ),
-      ),
-      Divider(height: 1),
-    ];
   }
 
   _parseHandler(

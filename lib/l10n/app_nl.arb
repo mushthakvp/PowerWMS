@@ -50,6 +50,8 @@
   "productAmountToPick": "Te picken ({unit})",
   "productAvailable": "Beschikbaar",
   "productConfirmDelete": "Weet je zeker dat je dit item wilt verwijderen?",
+  "productCancelRestAmount": "Restbedrag annuleren",
+  "productConfirm": "Bevestigen",
   "productDelete": "Verwijderen",
   "productNotFound": "Product niet gevonden",
   "productOrderline": "Orderregel",
