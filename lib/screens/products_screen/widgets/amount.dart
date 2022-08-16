@@ -4,12 +4,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class Amount extends StatefulWidget {
-  const Amount(this._value, this._onChange, {
+  const Amount(this._productAmount, this._onChange, {
     required this.autofocus,
     required this.onCompleteEditing, Key? key
   }) : super(key: key);
 
-  final int _value;
+  final int _productAmount;
   final void Function(int value) _onChange;
   final void Function(int value) onCompleteEditing;
   final bool? autofocus;
@@ -20,7 +20,36 @@ class Amount extends StatefulWidget {
 
 class _AmountState extends State<Amount> {
   final controller = TextEditingController(text: '');
+  int productAmount = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    productAmount = widget._productAmount;
+  }
+
+  _updateProductCount({required bool isIncrease}) {
+    _updateTextField() {
+      controller.text = productAmount.toString();
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.text.length),
+      );
+    }
+    if (!isIncrease) {
+      productAmount = max<int>(0, productAmount - 1);
+      _updateTextField();
+    }
+    if (isIncrease) {
+      if (productAmount < 0) {
+        productAmount = 0;
+      }
+      productAmount += 1;
+      _updateTextField();
+    }
+    widget._onChange(productAmount);
+  }
+
+  /*
   @override
   void didChangeDependencies() {
     controller.text = widget._value.toString();
@@ -51,6 +80,7 @@ class _AmountState extends State<Amount> {
     }
     super.didUpdateWidget(oldWidget);
   }
+   */
 
   @override
   void dispose() {
@@ -65,7 +95,7 @@ class _AmountState extends State<Amount> {
         ElevatedButton(
           child: Icon(Icons.remove),
           onPressed: () {
-            widget._onChange(max<int>(0, widget._value - 1));
+            _updateProductCount(isIncrease: false);
           },
         ),
         Expanded(
@@ -75,18 +105,26 @@ class _AmountState extends State<Amount> {
             textAlign: TextAlign.center,
             autofocus: widget.autofocus ?? false,
             onEditingComplete: () {
-              widget.onCompleteEditing(widget._value);
+              widget.onCompleteEditing(productAmount);
             },
             style: TextStyle(
               fontSize: 24,
               height: 2.0,
             ),
+            onChanged: (String txt) {
+              if (txt != '') {
+                productAmount = int.parse(txt);
+              } else {
+                productAmount = 0;
+              }
+              widget._onChange(productAmount);
+            },
           ),
         ),
         ElevatedButton(
           child: Icon(Icons.add),
           onPressed: () {
-            widget._onChange(widget._value + 1);
+            _updateProductCount(isIncrease: true);
           },
         ),
       ],
