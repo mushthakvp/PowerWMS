@@ -11,6 +11,7 @@ import 'package:scanner/log.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
+import 'package:scanner/providers/process_product_provider.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/resources/product_repository.dart';
@@ -71,6 +72,9 @@ class WMSApp extends StatelessWidget {
               StreamProvider<ConnectivityResult?>(
                 create: (_) => Connectivity().onConnectivityChanged,
                 initialData: null,
+              ),
+              ChangeNotifierProvider<ProcessProductProvider>(
+                  create: (_) => ProcessProductProvider()
               ),
             ],
             child: MaterialApp(

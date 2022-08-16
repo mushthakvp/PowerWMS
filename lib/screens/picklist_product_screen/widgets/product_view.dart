@@ -9,6 +9,7 @@ import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/mutation_provider.dart';
+import 'package:scanner/providers/process_product_provider.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
 import 'package:scanner/widgets/product_image.dart';
@@ -70,6 +71,14 @@ class ProductView extends StatelessWidget {
       ],
       child: Consumer<MutationProvider?>(
         builder: (context, provider, _) {
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (provider != null) {
+              context.read<ProcessProductProvider>()
+                  .canProcess = provider.idleItems.length > 0;
+              context.read<ProcessProductProvider>()
+                  .mutationProvider = provider;
+            }
+          });
           if (provider == null) {
             return SliverToBoxAdapter(
               child: Center(child: CircularProgressIndicator()),
@@ -110,19 +119,6 @@ class ProductView extends StatelessWidget {
                     _onProcessHandler(provider, context);
                   }
                 },
-              ),
-              ListTile(
-                visualDensity: VisualDensity.compact,
-                trailing: ElevatedButton(
-                  child: Text(AppLocalizations.of(context)!
-                      .productProcess
-                      .toUpperCase()),
-                  onPressed: provider.idleItems.length > 0
-                      ? () {
-                          _onProcessHandler(provider, context);
-                        }
-                      : null,
-                ),
               ),
               Divider(height: 1),
               ..._itemsBuilder(provider, context),
