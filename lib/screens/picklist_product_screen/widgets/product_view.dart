@@ -181,6 +181,10 @@ class ProductView extends StatelessWidget {
                   mutationProvider: provider,
                   onConfirmAmount: (int amount, bool isCancel) {
                     provider.changeAmount(amount, isCancel);
+                    // handle local storage
+                    provider.handleProductCancelAmount(
+                        isCancel ? CacheProductStatus.set : CacheProductStatus.remove
+                    );
                   });
             },
             child: Column(

@@ -9,6 +9,10 @@ import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum CacheProductStatus {
+  set, get, remove
+}
+
 class MutationProvider extends ChangeNotifier {
   factory MutationProvider.create(
     PicklistLine line,
@@ -39,7 +43,9 @@ class MutationProvider extends ChangeNotifier {
     this.cancelledItems,
     this.queuedMutations,
     this.packaging,
-  );
+  ) {
+    handleProductCancelAmount(CacheProductStatus.get);
+  }
 
   final PicklistLine line;
   final List<StockMutationItem> idleItems;
@@ -85,7 +91,7 @@ class MutationProvider extends ChangeNotifier {
 
   int get showToPickAmount {
     if (this.isCancelRestProductAmount) {
-      return toPickAmount - cancelRestProductAmount;
+      return max<int>(0, toPickAmount - cancelRestProductAmount);
     } else {
       return amount;
     }
@@ -150,6 +156,26 @@ class MutationProvider extends ChangeNotifier {
     this.cancelRestProductAmount = toPickAmount - amount;
     this.isCancelRestProductAmount = isCancel;
     notifyListeners();
+  }
+
+  handleProductCancelAmount(CacheProductStatus status) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '${line.id}_${line.product.id}';
+    switch (status) {
+      case CacheProductStatus.set:
+        prefs.setInt(key, this.cancelRestProductAmount);
+        break;
+      case CacheProductStatus.get:
+        int? count = prefs.getInt(key);
+        if (count != null) {
+          this.cancelRestProductAmount = count;
+          notifyListeners();
+        }
+        break;
+      case CacheProductStatus.remove:
+        prefs.remove(key);
+        break;
+    }
   }
 
   _cacheData() async {
