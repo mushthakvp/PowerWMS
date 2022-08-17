@@ -67,5 +67,6 @@
   "products": "Producten",
   "settingsDirectlyProcess": "Direct verwerken",
   "warehouseReceipts": "Magazijnbonnen",
-  "dateNotCorrect": "Datum niet correct"
+  "dateNotCorrect": "Datum niet correct",
+  "productWillBeCancel" : "Geannuleerd"
 }

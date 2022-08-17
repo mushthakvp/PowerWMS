@@ -67,5 +67,6 @@
   "products": "Products",
   "settingsDirectlyProcess": "Directly process",
   "warehouseReceipts": "Picklists",
-  "dateNotCorrect": "Date not correct"
+  "dateNotCorrect": "Date not correct",
+  "productWillBeCancel" : "Cancelled"
 }

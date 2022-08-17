@@ -119,6 +119,8 @@ class ProductView extends StatelessWidget {
               _pickTile(provider, context),
               SizedBox(height: 8),
               Divider(height: 1),
+              /// Cancel rest product amount
+              _cancelProductAmount(provider, context),
               /// Barcode
               ScanForm(
                 (process) {
@@ -177,9 +179,9 @@ class ProductView extends StatelessWidget {
               showProductAdjustmentPopup(
                   context: context,
                   mutationProvider: provider,
-                  onConfirmAmount: (int amount) {
-                    provider.changeAmount(amount);
-              });
+                  onConfirmAmount: (int amount, bool isCancel) {
+                    provider.changeAmount(amount, isCancel);
+                  });
             },
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -193,7 +195,7 @@ class ProductView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Text(
-                    '${provider.toPickAmount}',
+                    '${provider.showToPickAmount}',
                     style: TextStyle(
                       fontSize: 50,
                       color:
@@ -212,6 +214,25 @@ class ProductView extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  _cancelProductAmount(MutationProvider provider, BuildContext context) {
+    return provider.showCancelRestProductAmount ? Column(
+      children: <Widget>[
+        Container(
+          margin: EdgeInsets.symmetric(vertical: 10.0),
+          alignment: Alignment.center,
+          child: Text('${provider.cancelRestProductAmount!} ${AppLocalizations.of(context)!.productWillBeCancel.toUpperCase()}',
+              style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 24.0
+              )
+          ),
+        ),
+        SizedBox(height: 4),
+        Divider(height: 1),
+      ],
+    ) : SizedBox();
   }
 
   _onProcessHandler(MutationProvider provider, BuildContext context) {

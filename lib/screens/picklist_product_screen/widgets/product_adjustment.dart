@@ -3,7 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/screens/products_screen/widgets/amount.dart';
 
-typedef OnConfirmAmount = Function(int amount);
+typedef OnConfirmAmount = Function(int amount, bool isCancel);
 
 Future<void> showProductAdjustmentPopup({
     required BuildContext context,
@@ -48,7 +48,7 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
   }
 
   String get productAmount {
-    return '${widget.mutationProvider.amount}';
+    return '${widget.mutationProvider.showToPickAmount}';
   }
 
   int _productAmount = 0;
@@ -62,9 +62,9 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
 
   bool _isCancelRestProduct = true;
 
-  setCancelRestProduct(bool isCancel) {
+  setCancelRestProduct() {
     setState(() {
-      _isCancelRestProduct = isCancel;
+      _isCancelRestProduct = !_isCancelRestProduct;
     });
   }
 
@@ -119,8 +119,8 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
             children: [
               Checkbox(
                   value: _isCancelRestProduct,
-                  onChanged: (bool? value){
-                    setCancelRestProduct(value ?? false);
+                  onChanged: (bool? value) {
+                    setCancelRestProduct();
                   }
               ),
               Text(AppLocalizations.of(context)!.productCancelRestAmount)
@@ -139,7 +139,7 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
               ),
             ),
             onPressed: () {
-              widget.onConfirmAmount(_productAmount);
+              widget.onConfirmAmount(_productAmount, _isCancelRestProduct);
               Navigator.pop(context);
             },
           ),
@@ -161,7 +161,7 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
               },
               autofocus: true,
               onCompleteEditing: (int amount) {
-                widget.onConfirmAmount(amount);
+                widget.onConfirmAmount(amount, _isCancelRestProduct);
                 Navigator.pop(context);
               },
             ),

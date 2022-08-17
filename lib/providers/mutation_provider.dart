@@ -49,6 +49,16 @@ class MutationProvider extends ChangeNotifier {
   bool? allowBelowZero;
   int amount = 0;
 
+  // the status of cancel rest of product amount checkbox
+  bool isCancelRestProductAmount = true;
+
+  // the cancel product amount
+  int cancelRestProductAmount = 0;
+
+  bool get showCancelRestProductAmount {
+    return isCancelRestProductAmount && cancelRestProductAmount != 0;
+  }
+
   getStockMutation() => StockMutation(
         line.warehouseId,
         line.picklistId,
@@ -71,6 +81,14 @@ class MutationProvider extends ChangeNotifier {
 
   int get toPickAmount {
     return (line.pickAmount - totalPickedAmount).round() - totalAmount;
+  }
+
+  int get showToPickAmount {
+    if (this.isCancelRestProductAmount) {
+      return toPickAmount - cancelRestProductAmount;
+    } else {
+      return amount;
+    }
   }
 
   int get askedAmount {
@@ -127,8 +145,10 @@ class MutationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  changeAmount(int value) {
-    amount = value;
+  changeAmount(int value, bool isCancel) {
+    this.amount = value;
+    this.cancelRestProductAmount = toPickAmount - amount;
+    this.isCancelRestProductAmount = isCancel;
     notifyListeners();
   }
 
