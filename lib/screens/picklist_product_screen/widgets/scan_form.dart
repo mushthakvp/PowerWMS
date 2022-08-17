@@ -52,6 +52,7 @@ class ScanForm extends StatelessWidget {
                               ? null
                               : () {
                             formKey.currentState?.save();
+                            context.read<AddProductProvider>().canAdd = false;
                           },
                         ),
                       );
