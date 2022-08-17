@@ -27,6 +27,8 @@ import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+RouteObserver<ModalRoute<void>> navigationObserver = RouteObserver<ModalRoute<void>>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   initLogs();
@@ -80,6 +82,7 @@ class WMSApp extends StatelessWidget {
             child: MaterialApp(
               debugShowCheckedModeBanner: false,
               title: 'Extracom WMS',
+              navigatorObservers: [navigationObserver],
               localizationsDelegates: [
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
