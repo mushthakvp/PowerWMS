@@ -15,12 +15,12 @@ class StockMutationItemRepository {
 
   Stream<List<StockMutationItem>> getStockMutationItemsStream(
     int picklistId,
-    int productId,
+    int picklistLineId,
   ) async* {
-    final stream = _dbProvider.getStockMutationItems(productId);
-    if (await _dbProvider.countStockMutationItems(productId) == 0) {
+    final stream = _dbProvider.getStockMutationItems(picklistLineId);
+    if (await _dbProvider.countStockMutationItems(picklistLineId) == 0) {
       final list =
-          await _apiProvider.getStockMutationItems(picklistId, productId);
+          await _apiProvider.getStockMutationItems(picklistId, picklistLineId);
       try {
         await _dbProvider.saveCancelledItems(list);
       } catch (e) {

@@ -81,7 +81,7 @@ class _BarcodeInputState extends State<BarcodeInput> {
   }
 
   void _parse(String? value) {
-    if (value != null) {
+    if (value != null && value.isNotEmpty) {
       try {
         var barcode = parser.parse(value);
         if (barcode.hasAI('01')) {

@@ -28,7 +28,7 @@ class _ReservedListState extends State<ReservedList> {
         stream: _active
             ? repository.getStockMutationItemsStream(
                 line.picklistId,
-                line.product.id,
+                line.id,
               )
             : null,
         builder: (context, snapshot) {

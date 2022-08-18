@@ -7,13 +7,13 @@ import 'package:scanner/models/stock_mutation_item.dart';
 class StockMutationItemApiProvider {
   Future<List<StockMutationItem>> getStockMutationItems(
     int picklistId,
-    int productId,
+    int picklistLineId,
   ) {
     return dio.post(
       '/stockmutation/list',
       data: {
-        'productId': productId,
         'picklistId': picklistId,
+        'picklistLineId': picklistLineId,
         'skipPaging': true,
       },
     ).then((response) => (response.data!['data'] as List<dynamic>)
