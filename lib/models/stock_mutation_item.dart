@@ -64,7 +64,7 @@ class StockMutationItem {
   final DateTime? createdDate;
   final int productId;
   final String? stickerCode;
-  final int picklistLineId;
+  final int? picklistLineId;
   final StockMutationItemStatus? status;
 
   isNew() => status == StockMutationItemStatus.New;

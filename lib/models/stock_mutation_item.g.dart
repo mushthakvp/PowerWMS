@@ -15,7 +15,7 @@ StockMutationItem _$StockMutationItemFromJson(Map<String, dynamic> json) {
     expirationDate: json['expirationDate'] as String?,
     productId: json['productId'] as int,
     stickerCode: json['stickerCode'] as String?,
-    picklistLineId: json['picklistLineId'] as int,
+    picklistLineId: json['picklistLineId'] as int?,
     status:
         _$enumDecodeNullable(_$StockMutationItemStatusEnumMap, json['status']),
     createdDate: dateFromJson(json['createdDate'] as String?),
