@@ -92,7 +92,11 @@ class MutationProvider extends ChangeNotifier {
 
   int get showToPickAmount {
     if (this.isCancelRestProductAmount) {
-      return max<int>(0, toPickAmount - cancelRestProductAmount);
+      if (cancelRestProductAmount > 0) {
+        return toPickAmount - cancelRestProductAmount;
+      } else {
+        return amount;
+      }
     } else {
       return amount;
     }
@@ -154,7 +158,7 @@ class MutationProvider extends ChangeNotifier {
 
   changeAmount(int value, bool isCancel) {
     this.amount = value;
-    this.cancelRestProductAmount = toPickAmount - amount;
+    this.cancelRestProductAmount = max<int>(0, toPickAmount - amount);
     this.isCancelRestProductAmount = isCancel;
     notifyListeners();
   }
