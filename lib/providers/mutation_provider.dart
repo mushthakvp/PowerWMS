@@ -118,6 +118,17 @@ class MutationProvider extends ChangeNotifier {
         : 0;
   }
 
+  bool get shallAllowScan {
+    if (askedAmount >= 0 && askedAmount <= idleItems
+        .map((e) => e.amount)
+        .toList()
+        .fold(0, (p, c) => p + c))
+    {
+      return false;
+    }
+    return true;
+  }
+
   needToScan() {
     return line.product.productGroupBatchField != null &&
         line.product.productGroupBatchField! > 0;
@@ -160,10 +171,16 @@ class MutationProvider extends ChangeNotifier {
     this.amount = value;
     this.cancelRestProductAmount = max<int>(0, toPickAmount - amount);
     this.isCancelRestProductAmount = isCancel;
+    // In case picked amount is a negative number
+    // Then, cancel amount doesn't effected
+    if (askedAmount < 0) {
+      this.cancelRestProductAmount = 0;
+    }
     notifyListeners();
   }
 
   handleProductCancelAmount(CacheProductStatus status) async {
+    if (askedAmount < 0) { return; }
     final prefs = await SharedPreferences.getInstance();
     final key = '${line.id}_${line.product.id}';
     switch (status) {

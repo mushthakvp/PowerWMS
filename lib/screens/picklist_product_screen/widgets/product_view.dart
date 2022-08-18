@@ -176,16 +176,24 @@ class ProductView extends StatelessWidget {
           /// Amount to pick
           InkWell(
             onTap: () {
-              showProductAdjustmentPopup(
-                  context: context,
-                  mutationProvider: provider,
-                  onConfirmAmount: (int amount, bool isCancel) {
-                    provider.changeAmount(amount, isCancel);
-                    // handle local storage
-                    provider.handleProductCancelAmount(
-                        isCancel ? CacheProductStatus.set : CacheProductStatus.remove
-                    );
-                  });
+              if (provider.shallAllowScan) {
+                showProductAdjustmentPopup(
+                    context: context,
+                    mutationProvider: provider,
+                    onConfirmAmount: (int amount, bool isCancel) {
+                      provider.changeAmount(amount, isCancel);
+                      // handle local storage
+                      provider.handleProductCancelAmount(
+                          isCancel ? CacheProductStatus.set : CacheProductStatus.remove
+                      );
+                    });
+              } else {
+                final snackBar = SnackBar(
+                  content: Text(AppLocalizations.of(context)!.productCannotScan),
+                  duration: Duration(seconds: 2),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }
             },
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

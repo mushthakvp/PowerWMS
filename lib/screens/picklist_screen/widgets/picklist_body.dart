@@ -202,7 +202,10 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
     // case 2: pickAmount = the amount of process product
     List<StockMutationItem> idleList = _getIdleAmount(line);
     if (idleList.isNotEmpty) {
-      if (line.pickAmount == idleList.first.amount) {
+      if (line.pickAmount >= 0 && line.pickAmount <= idleList
+          .map((e) => e.amount)
+          .toList()
+          .fold(0, (p, c) => p + c)) {
         return blue;
       }
     }

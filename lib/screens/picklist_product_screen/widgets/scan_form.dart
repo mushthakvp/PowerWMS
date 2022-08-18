@@ -95,9 +95,14 @@ class ScanForm extends StatelessWidget {
           (mutation.line.product.ean != ean &&
               mutation.line.product.uid != ean &&
               mutation.packaging?.uid != ean)) {
+        context.read<AddProductProvider>().canAdd = false;
         throw new DomainException(
           AppLocalizations.of(context)!.productWrongProduct,
         );
+      }
+      if (!mutation.shallAllowScan) {
+        context.read<AddProductProvider>().canAdd = false;
+        throw new DomainException(AppLocalizations.of(context)!.productCannotScan);
       }
       int amount;
       if (mutation.amount > 0) {

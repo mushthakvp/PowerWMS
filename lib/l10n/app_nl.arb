@@ -68,5 +68,6 @@
   "settingsDirectlyProcess": "Direct verwerken",
   "warehouseReceipts": "Magazijnbonnen",
   "dateNotCorrect": "Datum niet correct",
-  "productWillBeCancel" : "Geannuleerd"
+  "productWillBeCancel" : "Geannuleerd",
+  "productCannotScan": "Scannen is met dit product niet meer toegestaan."
 }

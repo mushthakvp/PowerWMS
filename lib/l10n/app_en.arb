@@ -68,5 +68,6 @@
   "settingsDirectlyProcess": "Directly process",
   "warehouseReceipts": "Picklists",
   "dateNotCorrect": "Date not correct",
-  "productWillBeCancel" : "Cancelled"
+  "productWillBeCancel" : "Cancelled",
+  "productCannotScan": "Scanning is no longer permitted with this product."
 }
