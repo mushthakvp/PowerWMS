@@ -53,13 +53,8 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
           bottom: bottom,
           leading: IconButton(
             onPressed: () {
-              showDialog<void>(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  return SettingsDialog();
-                },
-              );
+              Navigator.of(context).pushNamed(
+                  SettingsDialog.routeName);
             },
             icon: Icon(Icons.settings),
           ),

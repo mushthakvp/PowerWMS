@@ -12,6 +12,7 @@ import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/providers/process_product_provider.dart';
+import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/resources/product_repository.dart';
@@ -24,6 +25,7 @@ import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.
 import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
 import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
+import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -70,6 +72,9 @@ class WMSApp extends StatelessWidget {
               ),
               Provider<StockMutationRepository>(
                 create: (_) => StockMutationRepository(_db),
+              ),
+              ChangeNotifierProvider<SettingProvider>(
+                create: (_) => SettingProvider(_db),
               ),
               StreamProvider<ConnectivityResult?>(
                 create: (_) => Connectivity().onConnectivityChanged,
@@ -124,6 +129,7 @@ class WMSApp extends StatelessWidget {
                 },
               ),
               routes: {
+                SettingsDialog.routeName: (context) => SettingsDialog(),
                 ProductsScreen.routeName: (context) => ProductsScreen(),
                 PicklistProductScreen.routeName: (context) {
                   final line = ModalRoute.of(context)!.settings.arguments
