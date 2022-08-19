@@ -155,7 +155,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 onPressed: () async {
                   context.read<ValueNotifier<Settings>>().value = provider.settingsLocal;
                   await provider.saveSettingInfo();
-                  Navigator.of(context).pop();
+                  await Future.delayed(Duration(milliseconds: 500), () {
+                    Navigator.of(context).pop();
+                  });
                 },
               ),
             ),

@@ -52,7 +52,6 @@ class SettingProvider extends ChangeNotifier {
     var _apiProvider = SettingsApiProvider(db);
     settingsRemote = await _apiProvider.getSettingsRemote();
     saveSettingLocal();
-    notifyListeners();
   }
 
   Future<void> saveSettingInfo() async {
@@ -72,5 +71,6 @@ class SettingProvider extends ChangeNotifier {
 
   saveSettingLocal() {
     settingsLocal.save();
+    notifyListeners();
   }
 }
