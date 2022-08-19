@@ -20,6 +20,12 @@ class SettingsApiProvider {
       try {
         final response = await dio.get('/account/defaults');
         if (response.statusCode == 200) {
+          var data = SettingsRemote.fromJson(response.data);
+          if (await _getSettingsRemoteFromLocal() == null) {
+            _saveSettings(data);
+          } else {
+            _updateSettings(data);
+          }
           return SettingsRemote.fromJson(response.data);
         } else {
           return null;
@@ -39,5 +45,13 @@ class SettingsApiProvider {
       return null;
     }
     return SettingsRemote.fromJson(jsn);
+  }
+
+  Future<void> _saveSettings(SettingsRemote settingsRemote) async {
+    await store.record(settings_key).add(db, settingsRemote.toJson());
+  }
+
+  Future<void> _updateSettings(SettingsRemote settingsRemote) async {
+    await store.record(settings_key).update(db, settingsRemote.toJson());
   }
 }
