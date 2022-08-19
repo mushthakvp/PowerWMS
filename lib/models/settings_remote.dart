@@ -34,6 +34,28 @@ class SettingsRemote {
   bool? oneScanPickAll;
   bool? directProcessing;
 
+  SettingsRemote copyWith({
+    int? picklistSorting,
+    bool? finishedProductsAtBottom,
+    bool? oneScanPickAll,
+    bool? directProcessing,
+  }) =>
+      SettingsRemote(
+        warehouseId: this.warehouseId,
+        fromWarehouseId: this.fromWarehouseId,
+        toWarehouseId: this.toWarehouseId,
+        stockListWarehouseId: this.stockListWarehouseId,
+        defaultPackagingUnitId: this.defaultPackagingUnitId,
+        action: this.action,
+        limitToDefaultAction: this.limitToDefaultAction,
+        directScanning: this.directScanning,
+        continuousScanning: this.continuousScanning,
+        picklistSorting: picklistSorting ?? this.picklistSorting,
+        finishedProductsAtBottom: finishedProductsAtBottom ?? this.finishedProductsAtBottom,
+        oneScanPickAll: oneScanPickAll ?? this.oneScanPickAll,
+        directProcessing: directProcessing ?? this.directProcessing,
+      );
+
   factory SettingsRemote.fromJson(Map<String, dynamic> json) =>
       _$SettingsRemoteFromJson(json);
   Map<String, dynamic> toJson() => _$SettingsRemoteToJson(this);

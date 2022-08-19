@@ -11,6 +11,20 @@ class SettingsApiProvider {
 
   final Database db;
 
+  Future<void> saveSettingsRemote(SettingsRemote settingsRemote) async {
+    final data = settingsRemote.toJson();
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi ||
+        connectivityResult == ConnectivityResult.ethernet
+    ) {
+      final response = await dio.post('/account/defaults', data: data);
+      print(response.data);
+    } else {
+      print('NO INTERNET');
+    }
+  }
+
   Future<SettingsRemote?> getSettingsRemote() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.mobile ||
@@ -22,9 +36,9 @@ class SettingsApiProvider {
         if (response.statusCode == 200) {
           var data = SettingsRemote.fromJson(response.data);
           if (await _getSettingsRemoteFromLocal() == null) {
-            _saveSettings(data);
+            _saveSettingsRemote(data);
           } else {
-            _updateSettings(data);
+            _updateSettingsRemote(data);
           }
           return SettingsRemote.fromJson(response.data);
         } else {
@@ -47,11 +61,11 @@ class SettingsApiProvider {
     return SettingsRemote.fromJson(jsn);
   }
 
-  Future<void> _saveSettings(SettingsRemote settingsRemote) async {
+  Future<void> _saveSettingsRemote(SettingsRemote settingsRemote) async {
     await store.record(settings_key).add(db, settingsRemote.toJson());
   }
 
-  Future<void> _updateSettings(SettingsRemote settingsRemote) async {
+  Future<void> _updateSettingsRemote(SettingsRemote settingsRemote) async {
     await store.record(settings_key).update(db, settingsRemote.toJson());
   }
 }
