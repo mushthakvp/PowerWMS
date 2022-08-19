@@ -88,11 +88,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             value: PicklistSort.productNumber,
                             groupValue: provider.picklistSort,
                             onChanged: (value) {
-                              setState(() {
-                                provider.picklistSort = value!;
-                              });
+                              
                             },
                           ),
+                          /*
                           RadioListTile<PicklistSort>(
                             title: const Text('Sort on warehouse location'),
                             value: PicklistSort.warehouseLocation,
@@ -103,6 +102,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               });
                             },
                           ),
+                           */
                           SwitchListTile(
                             title: Text('Finished lines at the bottom'),
                             controlAffinity: ListTileControlAffinity.leading,
