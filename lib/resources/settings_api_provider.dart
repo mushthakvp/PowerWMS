@@ -21,6 +21,7 @@ class SettingsApiProvider {
       final response = await dio.post('/account/defaults', data: data);
       print(response.data);
     } else {
+      _updateSettingsRemote(settingsRemote);
       print('NO INTERNET');
     }
   }

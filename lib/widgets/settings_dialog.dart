@@ -48,11 +48,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 ),
                               ),
                               Spacer(),
-                              InkWell(
-                                child: Icon(Icons.close),
-                                onTap: () {
-                                  Navigator.of(context).pop();
-                                },
+                              Container(
+                                width: 32,
+                                height: 32,
+                                child: InkWell(
+                                  child: Icon(Icons.close),
+                                  onTap: () async {
+                                    Navigator.of(context).pop();
+                                    await provider.getSettingInfo();
+                                  },
+                                ),
                               ),
                             ],
                           ),
@@ -88,7 +93,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             value: PicklistSort.productNumber,
                             groupValue: provider.picklistSort,
                             onChanged: (value) {
-                              
+
                             },
                           ),
                           /*
