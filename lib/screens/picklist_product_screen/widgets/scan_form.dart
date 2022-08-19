@@ -63,6 +63,7 @@ class ScanForm extends StatelessWidget {
                     child: BarcodeInput((value, barcode) {
                       if (!provider.needToScan() || value.length > 0) {
                         _parseHandler(context, provider, value, barcode);
+                        context.read<AddProductProvider>().canAdd = false;
                       }
                     }, (String barcode) {
                       if (barcode.isEmpty) {
@@ -212,7 +213,10 @@ class ScanForm extends StatelessWidget {
       }
     } catch (e, stack) {
       AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
-        final snackBar = SnackBar(content: Text(e.toString()));
+        final snackBar = SnackBar(
+          content: Text(e.toString()),
+          duration: Duration(seconds: 2),
+        );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       });
       print('$e\n$stack');

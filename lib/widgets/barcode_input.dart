@@ -86,12 +86,14 @@ class _BarcodeInputState extends State<BarcodeInput> {
         var barcode = parser.parse(value);
         if (barcode.hasAI('01')) {
           widget.onParse(barcode.getAIData('01'), barcode);
+        } else {
+          widget.onParse(value, null);
         }
       } catch (e) {
         widget.onParse(value, null);
       }
       setState(() {
-        controller.text = '';
+        // controller.text = '';
         focusNode.requestFocus();
       });
     }
