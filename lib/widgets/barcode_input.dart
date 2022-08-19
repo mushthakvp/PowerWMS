@@ -29,54 +29,45 @@ class _BarcodeInputState extends State<BarcodeInput> {
 
   @override
   Widget build(BuildContext context) {
-    return RawKeyboardListener(
-      focusNode: FocusNode(),
-      onKey: (event) {
-        if (event.runtimeType == RawKeyDownEvent &&
-            (event.logicalKey.keyLabel == 'Enter')) {
-          _parse(controller.text);
-        }
-      },
-      child: Row(
-        children: [
-          Expanded(
-            child: TextFormField(
-              controller: controller,
-              onFieldSubmitted: _parse,
-              onSaved: _parse,
-              autofocus: true,
-              focusNode: focusNode,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(hintText: 'Barcode'),
-              onChanged: widget.onBarCodeChanged,
-            ),
+    return Row(
+      children: [
+        Expanded(
+          child: TextFormField(
+            controller: controller,
+            onFieldSubmitted: _parse,
+            onSaved: _parse,
+            autofocus: true,
+            focusNode: focusNode,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(hintText: 'Barcode'),
+            onChanged: widget.onBarCodeChanged,
           ),
-          IconButton(
-            onPressed: () {
-              controller.clear();
-              _parse('');
-            },
-            icon: Icon(Icons.clear),
-          ),
-          IconButton(
-            icon: Icon(Icons.photo_camera_rounded),
-            onPressed: () async {
-              String value = await FlutterBarcodeScanner.scanBarcode(
-                "#ff6666",
-                "Cancel",
-                false,
-                ScanMode.DEFAULT,
-              );
-              if (value != '-1') {
-                setState(() {
-                  controller.text = value;
-                });
-                _parse(value);
-              }
-            },
-          ),
-        ],
-      ),
+        ),
+        IconButton(
+          onPressed: () {
+            controller.clear();
+            _parse('');
+          },
+          icon: Icon(Icons.clear),
+        ),
+        IconButton(
+          icon: Icon(Icons.photo_camera_rounded),
+          onPressed: () async {
+            String value = await FlutterBarcodeScanner.scanBarcode(
+              "#ff6666",
+              "Cancel",
+              false,
+              ScanMode.DEFAULT,
+            );
+            if (value != '-1') {
+              setState(() {
+                controller.text = value;
+              });
+              _parse(value);
+            }
+          },
+        ),
+      ],
     );
   }
 
