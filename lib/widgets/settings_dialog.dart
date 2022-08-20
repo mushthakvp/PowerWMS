@@ -69,6 +69,24 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               height: 1,
                               color: Colors.grey,
                             ),
+                            Container(
+                              margin: EdgeInsets.only(
+                                  right: 16
+                              ),
+                              child: Text(
+                                provider.getUserInfoName,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 20,
+                                  color: Colors.blueAccent
+                                ),
+                              )
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 16, bottom: 16),
+                              height: 1,
+                              color: Colors.grey,
+                            ),
                             Text(
                               'Default warehouse',
                               style: TextStyle(fontWeight: FontWeight.bold,
@@ -76,8 +94,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             ),
                             Container(
                               margin: EdgeInsets.only(
-                                  top: 16,
-                                  bottom: 8,
                                   left: 8,
                                   right: 100
                               ),
@@ -209,7 +225,7 @@ class SettingsWareHouses extends StatelessWidget {
             .map<DropdownMenuItem<Warehouse>>((Warehouse value) {
           return DropdownMenuItem<Warehouse>(
             value: value, child: Text(
-            value.name ?? '', style: TextStyle(fontWeight: FontWeight.w500,
+            value.name ?? 'Loading', style: TextStyle(fontWeight: FontWeight.w500,
               fontSize: 15)),
           );
         }).toList(),

@@ -35,7 +35,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   _getSettingInfo() async {
     await Future.wait([
       context.read<SettingProvider>().getSettingInfo(),
-      context.read<SettingProvider>().getWarehouses()
+      context.read<SettingProvider>().getWarehouses(),
+      context.read<SettingProvider>().getUserInfo()
     ]);
   }
 

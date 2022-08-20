@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/settings_remote.dart';
+import 'package:scanner/models/user_info.dart';
 import 'package:scanner/models/warehouse.dart';
 import 'package:scanner/resources/settings_api_provider.dart';
 import 'package:sembast/sembast.dart';
@@ -8,6 +9,7 @@ import 'package:sembast/sembast.dart';
 class SettingProvider extends ChangeNotifier {
   SettingProvider(this.db);
 
+  UserInfo? userInfo;
   List<Warehouse>? warehouses;
   SettingsRemote? settingsRemote;
   final Database db;
@@ -91,5 +93,16 @@ class SettingProvider extends ChangeNotifier {
   Warehouse? get currentWareHouse {
     return this.warehouses
         ?.firstWhere((w) => w.id == this.settingsRemote?.warehouseId);
+  }
+
+  // User Info API
+  Future<void> getUserInfo() async {
+    var _apiProvider = SettingsApiProvider(db);
+    userInfo = await _apiProvider.getUserInfo();
+    notifyListeners();
+  }
+
+  String get getUserInfoName {
+    return '${userInfo?.firstName ?? 'Loading'} ${userInfo?.lastName ?? ''}';
   }
 }
