@@ -23,6 +23,7 @@ class _PicklistScreenState extends State<PicklistsScreen> {
   final _refreshController = RefreshController(initialRefresh: false);
   String _search = '';
   final TextEditingController textEditingController = TextEditingController();
+  final FocusNode focusNode = FocusNode();
 
   _moveToPickList(Picklist picklist) {
     Future.microtask(() {
@@ -33,6 +34,13 @@ class _PicklistScreenState extends State<PicklistsScreen> {
       Navigator.pushNamed(context, PicklistScreen.routeName,
           arguments: picklist);
     });
+  }
+
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    focusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -66,8 +74,14 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                 SearchField(_search, (value) {
                   setState(() {
                     _search = value;
+                    if (value == '' || value.isEmpty) {
+                      // In case user click on enter keyboard
+                      FocusScope.of(context).requestFocus(focusNode);
+                      // In case user hide keyboard physically
+                      FocusScope.of(context).nextFocus();
+                    }
                   });
-                }, textEditingController),
+                },textEditingController, this.focusNode),
               ],
             ),
           ),

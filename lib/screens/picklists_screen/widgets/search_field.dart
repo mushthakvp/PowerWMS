@@ -4,12 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SearchField extends StatefulWidget {
-  const SearchField(this.value, this.onChange, this.controller,
+  const SearchField(
+      this.value,
+      this.onChange,
+      this.controller,
+      this.focusNode,
       {Key? key}) : super(key: key);
 
   final String value;
   final void Function(String value) onChange;
   final TextEditingController controller;
+  final FocusNode focusNode;
 
   @override
   _SearchFieldState createState() => _SearchFieldState();
@@ -36,6 +41,7 @@ class _SearchFieldState extends State<SearchField> {
   Widget build(BuildContext context) {
     return Container(
       child: TextField(
+        focusNode: widget.focusNode,
         controller: widget.controller,
         onChanged: _onChangeHandler,
         autofocus: true,

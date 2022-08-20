@@ -37,7 +37,6 @@ class SettingsApiProvider {
       print('NO INTERNET');
       return await _getUserInfoFromLocal();
     }
-    return null;
   }
 
   Future<UserInfo?> _getUserInfoFromLocal() async {
