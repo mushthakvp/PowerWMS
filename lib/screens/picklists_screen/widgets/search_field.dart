@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SearchField extends StatefulWidget {
-  const SearchField(this.value, this.onChange, {Key? key}) : super(key: key);
+  const SearchField(this.value, this.onChange, this.controller,
+      {Key? key}) : super(key: key);
 
   final String value;
   final void Function(String value) onChange;
+  final TextEditingController controller;
 
   @override
   _SearchFieldState createState() => _SearchFieldState();
@@ -15,19 +17,18 @@ class SearchField extends StatefulWidget {
 
 class _SearchFieldState extends State<SearchField> {
   Timer? searchOnStoppedTyping;
-  TextEditingController controller = TextEditingController();
 
   @override
   void didChangeDependencies() {
-    if (widget.value != controller.text) {
-      controller.text = widget.value;
+    if (widget.value != widget.controller.text) {
+      widget.controller.text = widget.value;
     }
     super.didChangeDependencies();
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    widget.controller.dispose();
     super.dispose();
   }
 
@@ -35,7 +36,7 @@ class _SearchFieldState extends State<SearchField> {
   Widget build(BuildContext context) {
     return Container(
       child: TextField(
-        controller: controller,
+        controller: widget.controller,
         onChanged: _onChangeHandler,
         autofocus: true,
         decoration: InputDecoration(
@@ -45,8 +46,18 @@ class _SearchFieldState extends State<SearchField> {
           enabledBorder: InputBorder.none,
           errorBorder: InputBorder.none,
           disabledBorder: InputBorder.none,
+          suffixIcon: widget.controller.text.isEmpty ? null : IconButton(
+              hoverColor: Colors.white,
+              splashColor: Colors.white,
+              highlightColor: Colors.white,
+              icon: const Icon(Icons.clear),
+              onPressed: () {
+                widget.controller.clear();
+                _onChangeHandler('');
+              },
+          ), // Show the clear button if the text field has something
         ),
-      ),
+        ),
       padding: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(color: Colors.white),
     );

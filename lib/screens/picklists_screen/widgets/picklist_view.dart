@@ -8,12 +8,14 @@ class PicklistView extends StatelessWidget {
     this._list,
     this._refreshController,
     this.onRefresh, {
+    required this.onTap,
     Key? key,
   }) : super(key: key);
 
   final List<Picklist> _list;
   final void Function() onRefresh;
   final RefreshController _refreshController;
+  final Function(Picklist) onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +30,7 @@ class PicklistView extends StatelessWidget {
                   children: [
                     ListTile(
                       onTap: () {
-                        Navigator.pushNamed(context, PicklistScreen.routeName,
-                            arguments: picklist);
+                         onTap(picklist);
                       },
                       leading: Container(
                         width: 40,

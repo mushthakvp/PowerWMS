@@ -22,6 +22,18 @@ class PicklistsScreen extends StatefulWidget {
 class _PicklistScreenState extends State<PicklistsScreen> {
   final _refreshController = RefreshController(initialRefresh: false);
   String _search = '';
+  final TextEditingController textEditingController = TextEditingController();
+
+  _moveToPickList(Picklist picklist) {
+    Future.microtask(() {
+      setState(() {
+        textEditingController.clear();
+        _search = '';
+      });
+      Navigator.pushNamed(context, PicklistScreen.routeName,
+          arguments: picklist);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +67,7 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                   setState(() {
                     _search = value;
                   });
-                }),
+                }, textEditingController),
               ],
             ),
           ),
@@ -74,13 +86,7 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                   .where((element) => element.isPicked())
                   .toList();
               if (notPicked.length == 1) {
-                Future.microtask(() {
-                  setState(() {
-                    _search = '';
-                  });
-                  Navigator.pushNamed(context, PicklistScreen.routeName,
-                      arguments: notPicked.first);
-                });
+                _moveToPickList(notPicked.first);
               }
               return TabBarView(
                 children: [
@@ -95,6 +101,9 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                       _refreshController.refreshCompleted();
                       setState(() {});
                     },
+                    onTap: (Picklist picklist) {
+                      _moveToPickList(picklist);
+                    },
                   ),
                   PicklistView(
                     picked,
@@ -106,6 +115,9 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                       ]);
                       _refreshController.refreshCompleted();
                       setState(() {});
+                    },
+                    onTap: (Picklist picklist) {
+                      _moveToPickList(picklist);
                     },
                   ),
                 ],
