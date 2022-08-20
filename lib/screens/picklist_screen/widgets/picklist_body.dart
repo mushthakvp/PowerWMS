@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/main.dart';
@@ -14,6 +14,11 @@ import 'package:sliver_tools/sliver_tools.dart';
 
 filter(String search) => (PicklistLine line) =>
     search == '' || line.product.ean == search || line.product.uid == search;
+
+List<PicklistLine> scanFilter(String search, List<PicklistLine> line) {
+  return line
+      .where((l) => l.product.ean == search || l.product.uid == search).toList();
+}
 
 const blue = Color(0xFF034784);
 const white = Colors.white;
@@ -74,13 +79,20 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
               ListTile(
                 title: BarcodeInput((value, barcode) {
                   setState(() {
-                    final lines = widget.lines.where(filter(value));
-                    if (lines.length == 1) {
+                    final lineList = scanFilter(value, widget.lines);
+                    if (lineList.length == 1) {
                       Navigator.of(context).pushNamed(
                           PicklistProductScreen.routeName,
-                          arguments: lines.first);
+                          arguments: lineList.first);
                     } else {
-                      _search = value;
+                      _search = '';
+                      if (lineList.isEmpty) {
+                        final snackBar = SnackBar(
+                          content: Text(AppLocalizations.of(context)!.productNotFound),
+                          duration: Duration(seconds: 2),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      }
                     }
                   });
                 }, (String barcode) {}),

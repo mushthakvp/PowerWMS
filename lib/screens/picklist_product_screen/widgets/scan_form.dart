@@ -9,7 +9,6 @@ import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
-import 'package:scanner/screens/products_screen/widgets/amount.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 
 final audio = Audio('assets/error.mp3');
