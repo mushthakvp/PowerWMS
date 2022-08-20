@@ -33,7 +33,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   _getSettingInfo() async {
-    await context.read<SettingProvider>().getSettingInfo();
+    await Future.wait([
+      context.read<SettingProvider>().getSettingInfo(),
+      context.read<SettingProvider>().getWarehouses()
+    ]);
   }
 
   @override

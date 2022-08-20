@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/settings_remote.dart';
+import 'package:scanner/models/warehouse.dart';
 import 'package:scanner/resources/settings_api_provider.dart';
 import 'package:sembast/sembast.dart';
 
 class SettingProvider extends ChangeNotifier {
   SettingProvider(this.db);
 
+  List<Warehouse>? warehouses;
   SettingsRemote? settingsRemote;
   final Database db;
 
@@ -36,6 +38,11 @@ class SettingProvider extends ChangeNotifier {
 
   setDirectProcessing(bool value) {
     settingsRemote?.directProcessing = value;
+    notifyListeners();
+  }
+
+  setCurrentWarehouse(Warehouse value) {
+    settingsRemote?.warehouseId = value.id;
     notifyListeners();
   }
 
@@ -72,5 +79,17 @@ class SettingProvider extends ChangeNotifier {
   saveSettingLocal() {
     settingsLocal.save();
     notifyListeners();
+  }
+
+  /// Warehouse API
+  Future<void> getWarehouses() async {
+    var _apiProvider = SettingsApiProvider(db);
+    warehouses = await _apiProvider.getWarehouses();
+    notifyListeners();
+  }
+
+  Warehouse? get currentWareHouse {
+    return this.warehouses
+        ?.firstWhere((w) => w.id == this.settingsRemote?.warehouseId);
   }
 }
