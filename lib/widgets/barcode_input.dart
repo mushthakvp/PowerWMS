@@ -84,7 +84,7 @@ class _BarcodeInputState extends State<BarcodeInput> {
         widget.onParse(value, null);
       }
       setState(() {
-        // controller.text = '';
+        controller.clear();
         focusNode.requestFocus();
       });
     }
