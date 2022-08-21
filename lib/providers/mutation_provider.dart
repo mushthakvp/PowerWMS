@@ -119,11 +119,15 @@ class MutationProvider extends ChangeNotifier {
   }
 
   bool get shallAllowScan {
+    // When item is not yet processed
     if (askedAmount >= 0 && askedAmount <= idleItems
         .map((e) => e.amount)
         .toList()
         .fold(0, (p, c) => p + c))
     {
+      return false;
+    // When item was processed
+    } else if (askedAmount >= 0 && askedAmount <= totalPickedAmount) {
       return false;
     }
     return true;
