@@ -212,6 +212,7 @@ class ScanForm extends StatelessWidget {
       }
       if (settings.directlyProcess
           && mutation.isCancelRestProductAmount
+          && mutation.cancelRestProductAmount != 0
           && mutation.showToPickAmount == 0
       ) {
         Navigator.of(context).pop();
