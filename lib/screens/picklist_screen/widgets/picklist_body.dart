@@ -142,15 +142,16 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                                   Text(
                                     line.location!,
                                     style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w900,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
                                       color: fullyPicked ? white : black,
                                     ),
                                   ),
                                 Text(
                                   line.product.uid,
                                   style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
                                     color: fullyPicked ? white : black,
                                   ),
                                 ),
@@ -158,7 +159,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                                   Text(
                                     line.product.description!,
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 15,
                                       color: fullyPicked ? white : black,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -166,7 +167,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                                 Text(
                                   '${line.pickAmount} (${line.product.unit})',
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
                                     color: fullyPicked ? white : black,
                                   ),
                                 ),
