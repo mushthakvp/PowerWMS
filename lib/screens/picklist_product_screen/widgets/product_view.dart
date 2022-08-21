@@ -276,7 +276,7 @@ class ProductView extends StatelessWidget {
           children: [
             ListTile(
               title: Text(
-                '${item.amount} x ${item.batch} | ${item.stickerCode}',
+                '${mutation.askedAmount < 0 && item.amount > 0 ? '-' : ''}${item.amount} x ${item.batch} | ${item.stickerCode}',
               ),
             ),
             Divider(height: 1),
