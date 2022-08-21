@@ -210,6 +210,12 @@ class ScanForm extends StatelessWidget {
       } else {
         onParse(settings.directlyProcess && mutation.toPickAmount == 0);
       }
+      if (settings.directlyProcess
+          && mutation.isCancelRestProductAmount
+          && mutation.showToPickAmount == 0
+      ) {
+        Navigator.of(context).pop();
+      }
     } catch (e, stack) {
       AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
         final snackBar = SnackBar(

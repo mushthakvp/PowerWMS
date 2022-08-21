@@ -184,7 +184,7 @@ class MutationProvider extends ChangeNotifier {
     this.isCancelRestProductAmount = isCancel;
     // In case picked amount is a negative number
     // Then, cancel amount doesn't effected
-    if (askedAmount < 0) {
+    if (askedAmount < 0 || !isCancel) {
       this.cancelRestProductAmount = 0;
     }
     notifyListeners();
