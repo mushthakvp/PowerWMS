@@ -154,7 +154,11 @@ class MutationProvider extends ChangeNotifier {
 
   removeItem(StockMutationItem value) {
     idleItems.remove(value);
-    amount = toPickAmount;
+    if (this.isCancelRestProductAmount) {
+      amount = toPickAmount - cancelRestProductAmount;
+    } else {
+      amount = toPickAmount;
+    }
     _cacheData();
     notifyListeners();
   }
@@ -203,8 +207,11 @@ class MutationProvider extends ChangeNotifier {
         if (count != null) {
           this.cancelRestProductAmount = count;
           this.amount -= count;
-          notifyListeners();
+          this.isCancelRestProductAmount = count != 0;
+        } else {
+          this.isCancelRestProductAmount = false;
         }
+        notifyListeners();
         break;
       case CacheProductStatus.remove:
         prefs.remove(key);

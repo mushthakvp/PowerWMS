@@ -24,6 +24,7 @@ class SettingsApiProvider {
   /// User info API
   ///
   Future<UserInfo?> getUserInfo() async {
+    print('AUTH TOKEN: ${dio.options.headers['authorization']}');
     if (await connectivityAvailable()) {
       final response = await dio.post('/account/info');
       var result = UserInfo.fromJson(response.data);

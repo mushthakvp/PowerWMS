@@ -106,7 +106,8 @@ class ScanForm extends StatelessWidget {
       }
       int amount;
       if (mutation.amount > 0) {
-        amount = mutation.amount;
+        // amount = mutation.amount;
+        amount = _calculatePositiveAmount(mutation, ean, settings);
       } else {
         amount = _calculateAmount(mutation, ean, settings);
       }
@@ -244,6 +245,22 @@ class ScanForm extends StatelessWidget {
       }
     } else if (provider.packaging != null && provider.packaging!.uid == ean) {
       amount = provider.packaging!.defaultAmount.round();
+    } else {
+      amount = provider.amount;
+    }
+    return amount;
+  }
+
+  int _calculatePositiveAmount(
+      MutationProvider provider,
+      String ean,
+      Settings settings,
+  ) {
+    int amount = 0;
+    if (!provider.isCancelRestProductAmount) {
+      amount = provider.needToScan() || !settings.oneScanPickAll
+          ? 1
+          : provider.toPickAmount;
     } else {
       amount = provider.amount;
     }
