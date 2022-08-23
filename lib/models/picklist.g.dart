@@ -84,4 +84,5 @@ const _$PicklistStatusEnumMap = {
   PicklistStatus.inactive: 3,
   PicklistStatus.picked: 4,
   PicklistStatus.completed: 5,
+  PicklistStatus.archived: 6,
 };
