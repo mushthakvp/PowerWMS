@@ -92,11 +92,7 @@ class MutationProvider extends ChangeNotifier {
 
   int get showToPickAmount {
     if (this.isCancelRestProductAmount) {
-      if (cancelRestProductAmount > 0) {
-        return toPickAmount - cancelRestProductAmount;
-      } else {
-        return amount;
-      }
+      return toPickAmount - cancelRestProductAmount;
     } else {
       return amount;
     }
@@ -188,14 +184,16 @@ class MutationProvider extends ChangeNotifier {
     this.isCancelRestProductAmount = isCancel;
     // In case picked amount is a negative number
     // Then, cancel amount doesn't effected
-    if (askedAmount < 0 || !isCancel) {
+    if (askedAmount < 0) {
+      this.cancelRestProductAmount = toPickAmount - amount;
+    }
+    if (!isCancel) {
       this.cancelRestProductAmount = 0;
     }
     notifyListeners();
   }
 
   handleProductCancelAmount(CacheProductStatus status) async {
-    if (askedAmount < 0) { return; }
     final prefs = await SharedPreferences.getInstance();
     final key = '${line.id}_${line.product.id}';
     switch (status) {

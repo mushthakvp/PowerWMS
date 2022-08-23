@@ -237,11 +237,12 @@ class ScanForm extends StatelessWidget {
   ) {
     var amount = 0;
     if (provider.line.product.ean == ean || provider.line.product.uid == ean) {
-      amount = provider.needToScan() || !settings.oneScanPickAll
-          ? 1
-          : provider.toPickAmount;
       if (provider.isCancelRestProductAmount) {
-        amount -= provider.cancelRestProductAmount;
+        amount = provider.amount;
+      } else {
+        amount = provider.needToScan() || !settings.oneScanPickAll
+            ? -1
+            : provider.toPickAmount;
       }
     } else if (provider.packaging != null && provider.packaging!.uid == ean) {
       amount = provider.packaging!.defaultAmount.round();
