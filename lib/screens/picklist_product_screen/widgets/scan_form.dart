@@ -168,6 +168,9 @@ class ScanForm extends StatelessWidget {
             expirationDate: expirationDate,
             stickerCode: serial,
             picklistLineId: mutation.line.id,
+            picklistId: mutation.line.picklistId,
+            warehouse: mutation.line.warehouse,
+            warehouseCode: mutation.line.lineWarehouseCode
           ),
         );
       } catch (e) {
@@ -179,6 +182,9 @@ class ScanForm extends StatelessWidget {
           expirationDate: expirationDate,
           stickerCode: serial,
           picklistLineId: mutation.line.id,
+            picklistId: mutation.line.picklistId,
+            warehouse: mutation.line.warehouse,
+            warehouseCode: mutation.line.lineWarehouseCode
         ));
       }
       if (mutation.maxAmountToPick <= mutation.totalAmount &&

@@ -14,8 +14,11 @@ StockMutationItem _$StockMutationItemFromJson(Map<String, dynamic> json) {
     productionDate: json['productionDate'] as String?,
     expirationDate: json['expirationDate'] as String?,
     productId: json['productId'] as int,
+    picklistId: json['picklistId'] as int,
     stickerCode: json['stickerCode'] as String?,
     picklistLineId: json['picklistLineId'] as int?,
+    warehouse: json['warehouse'] as String?,
+    warehouseCode: json['warehouseCode'] as String?,
     status:
         _$enumDecodeNullable(_$StockMutationItemStatusEnumMap, json['status']),
     createdDate: dateFromJson(json['createdDate'] as String?),
@@ -31,7 +34,10 @@ Map<String, dynamic> _$StockMutationItemToJson(StockMutationItem instance) =>
       'expirationDate': instance.expirationDate,
       'createdDate': instance.createdDate?.toIso8601String(),
       'productId': instance.productId,
+      'picklistId': instance.picklistId,
       'stickerCode': instance.stickerCode,
+      'warehouse': instance.warehouse,
+      'warehouseCode': instance.warehouseCode,
       'picklistLineId': instance.picklistLineId,
       'status': _$StockMutationItemStatusEnumMap[instance.status],
     };

@@ -48,8 +48,11 @@ class StockMutationItem {
     required this.productionDate,
     required this.expirationDate,
     required this.productId,
+    required this.picklistId,
     required this.stickerCode,
     required this.picklistLineId,
+    required this.warehouse,
+    required this.warehouseCode,
     this.status = StockMutationItemStatus.New,
     this.createdDate,
   });
@@ -63,7 +66,10 @@ class StockMutationItem {
   @JsonKey(fromJson: dateFromJson)
   final DateTime? createdDate;
   final int productId;
+  final int picklistId;
   final String? stickerCode;
+  final String? warehouse;
+  final String? warehouseCode;
   final int? picklistLineId;
   final StockMutationItemStatus? status;
 
