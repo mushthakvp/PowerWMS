@@ -6,6 +6,7 @@ import 'package:scanner/main.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
+import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 import 'package:scanner/widgets/product_image.dart';
@@ -69,6 +70,24 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
     super.dispose();
   }
 
+  bool isCurrentWarehouse(PicklistLine line) {
+    return context.read<SettingProvider>().currentWareHouse?.code == line.lineWarehouseCode;
+  }
+
+  _moveToProduct(PicklistLine line) {
+    if (isCurrentWarehouse(line)) {
+      Navigator.of(context).pushNamed(
+          PicklistProductScreen.routeName,
+          arguments: line);
+    } else {
+      final snackBar = SnackBar(
+        content: Text(AppLocalizations.of(context)!.otherWarehouse(line.lineWarehouseCode ?? '')),
+        duration: Duration(seconds: 2),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiSliver(
@@ -81,9 +100,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                   setState(() {
                     final lineList = scanFilter(value, widget.lines);
                     if (lineList.length == 1) {
-                      Navigator.of(context).pushNamed(
-                          PicklistProductScreen.routeName,
-                          arguments: lineList.first);
+                      _moveToProduct(lineList.first);
                     } else {
                       _search = '';
                       if (lineList.isEmpty) {
@@ -126,9 +143,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                           ListTile(
                             tileColor: bgColor,
                             onTap: () {
-                              Navigator.of(context).pushNamed(
-                                  PicklistProductScreen.routeName,
-                                  arguments: line);
+                              _moveToProduct(line);
                             },
                             leading: ProductImage(
                               line.product.id,
@@ -140,7 +155,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                               children: [
                                 if (line.location != null)
                                   Text(
-                                    line.location!,
+                                    line.lineLocationCode!,
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
@@ -208,6 +223,9 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
   }
 
   Color? _getBackgroundColor(PicklistLine line) {
+    if (!this.isCurrentWarehouse(line)) {
+      return Colors.grey;
+    }
     // case 1: the pickAmount == pickedAmount
     if (line.isFullyPicked()) {
       return blue;

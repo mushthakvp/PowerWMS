@@ -25,6 +25,8 @@ PicklistLine _$PicklistLineFromJson(Map<String, dynamic> json) {
     status: _$enumDecode(_$PicklistLineStatusEnumMap, json['status']),
     product: Product.fromJson(json['product'] as Map<String, dynamic>),
     location: json['location'] as String?,
+    lineLocationCode: json['lineLocationCode'] as String?,
+    lineWarehouseCode: json['lineWarehouseCode'] as String?,
     id: json['id'] as int,
     isNew: json['isNew'] as bool,
   );
@@ -49,6 +51,8 @@ Map<String, dynamic> _$PicklistLineToJson(PicklistLine instance) =>
       'status': _$PicklistLineStatusEnumMap[instance.status],
       'product': instance.product.toJson(),
       'location': instance.location,
+      'lineLocationCode': instance.lineLocationCode,
+      'lineWarehouseCode': instance.lineWarehouseCode,
       'id': instance.id,
       'isNew': instance.isNew,
     };

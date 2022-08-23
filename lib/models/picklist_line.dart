@@ -46,6 +46,8 @@ class PicklistLine {
   final PicklistLineStatus status;
   final Product product;
   final String? location;
+  final String? lineLocationCode;
+  final String? lineWarehouseCode;
   final int id;
   final bool isNew;
 
@@ -67,6 +69,8 @@ class PicklistLine {
     required this.status,
     required this.product,
     this.location,
+    this.lineLocationCode,
+    this.lineWarehouseCode,
     required this.id,
     required this.isNew,
   });

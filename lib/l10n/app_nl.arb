@@ -29,6 +29,13 @@
       }
     }
   },
+  "@otherWarehouse": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "back": "Terug",
   "barcode": "Barcode",
   "barcodeHelp": "Scan a barcode to search for a product.",
@@ -69,5 +76,6 @@
   "warehouseReceipts": "Magazijnbonnen",
   "dateNotCorrect": "Datum niet correct",
   "productWillBeCancel" : "Geannuleerd",
-  "productCannotScan": "Scannen is met dit product niet meer toegestaan."
+  "productCannotScan": "Scannen is met dit product niet meer toegestaan.",
+  "otherWarehouse": "Nog een magazijn {unit}"
 }

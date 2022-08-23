@@ -29,6 +29,13 @@
       }
     }
   },
+  "@otherWarehouse": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "back": "Back",
   "barcode": "Barcode",
   "barcodeHelp": "Scan a barcode to search for a product.",
@@ -69,5 +76,6 @@
   "warehouseReceipts": "Picklists",
   "dateNotCorrect": "Date not correct",
   "productWillBeCancel" : "Cancelled",
-  "productCannotScan": "Scanning is no longer permitted with this product."
+  "productCannotScan": "Scanning is no longer permitted with this product.",
+  "otherWarehouse": "Other warehouse {unit}"
 }
