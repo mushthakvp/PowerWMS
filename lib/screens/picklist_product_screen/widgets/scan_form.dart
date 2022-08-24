@@ -268,6 +268,12 @@ class ScanForm extends StatelessWidget {
       amount = provider.needToScan() || !settings.oneScanPickAll
           ? 1
           : provider.toPickAmount;
+      // packaging case
+      if (provider.packaging != null && provider.packaging!.uid == ean) {
+        if (!settings.oneScanPickAll) {
+          amount = provider.packaging!.defaultAmount.round();
+        }
+      }
     } else {
       amount = provider.amount;
     }
