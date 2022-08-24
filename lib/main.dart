@@ -12,6 +12,7 @@ import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/providers/process_product_provider.dart';
+import 'package:scanner/providers/reversed_provider.dart';
 import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
@@ -82,6 +83,9 @@ class WMSApp extends StatelessWidget {
               ),
               ChangeNotifierProvider<ProcessProductProvider>(
                   create: (_) => ProcessProductProvider()
+              ),
+              ChangeNotifierProvider<ReservedListProvider>(
+                  create: (_) => ReservedListProvider(_db)
               ),
             ],
             child: MaterialApp(

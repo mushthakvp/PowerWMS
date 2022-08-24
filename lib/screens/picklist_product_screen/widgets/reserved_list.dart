@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/log.dart';
+import 'package:scanner/main.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
+import 'package:scanner/providers/reversed_provider.dart';
 import 'package:scanner/resources/stock_mutation_item_repository.dart';
 
 class ReservedList extends StatefulWidget {
@@ -17,24 +19,35 @@ class ReservedList extends StatefulWidget {
   _ReservedListState createState() => _ReservedListState();
 }
 
-class _ReservedListState extends State<ReservedList> {
-  bool _active = false;
+class _ReservedListState extends State<ReservedList> with RouteAware {
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe routeAware
+    navigationObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPop() {
+    context.read<ReservedListProvider>().reset();
+    super.didPop();
+  }
+
+  @override
+  void dispose() {
+    // Unsubscribe routeAware
+    navigationObserver.unsubscribe(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     var line = widget.line;
-    final repository = context.read<StockMutationItemRepository>();
-    return StreamBuilder<List<StockMutationItem>>(
-        stream: _active
-            ? repository.getStockMutationItemsStream(
-                line.picklistId,
-                line.id,
-                line.product.id
-              )
-            : null,
-        builder: (context, snapshot) {
+    return Consumer<ReservedListProvider>(
+        builder: (context, provider, _) {
           List<Widget> list = [];
-          if (snapshot.connectionState == ConnectionState.none &&
+          if (provider.stocks == null &&
               line.pickedAmount > 0) {
             list = [
               Center(
@@ -42,39 +55,37 @@ class _ReservedListState extends State<ReservedList> {
                   child: Text(
                     '${line.pickedAmount} ${line.product.unit} verwerkt',
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _active = true;
-                    });
+                  onPressed: () async {
+                    await provider.getMutationList(
+                        line.picklistId,
+                        line.id
+                    );
                   },
                 ),
               ),
             ];
           }
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (provider.stocks == null && provider.isLoading) {
             list = [
               Center(child: CircularProgressIndicator()),
             ];
           }
-          if (snapshot.hasError) {
-            log(snapshot.error, snapshot.stackTrace);
-            list = [Text('Something is wrong.')];
+          if (provider.stocks == [] && !provider.isLoading) {
+            list = [Text('Data is empty.')];
           }
-          if (snapshot.hasData) {
-            var items = snapshot.data!.toList();
-            list = items
-                .map((item) => Column(
-                      children: [
-                        _itemTile(item, () {
-                          repository.tryCancelItem(item);
-                        }),
-                        Divider(height: 1),
-                      ],
-                    ))
-                .toList();
+          if (provider.stocks != null && provider.stocks!.isNotEmpty && !provider.isLoading) {
+            var items = provider.stocks!;
+            list = items.map((stock) => Column(
+              children: [
+                _itemTile(stock, () async {
+                  await provider.cancelledMutation(stock.id!, line);
+                }),
+                Divider(height: 1),
+              ],
+            )).toList();
           }
           return SliverList(delegate: SliverChildListDelegate(list));
-        });
+    });
   }
 
   _itemTile(StockMutationItem item, void Function() onCancel) {
@@ -82,9 +93,7 @@ class _ReservedListState extends State<ReservedList> {
       title: Text(
         '${item.amount} x ${item.batch} | ${item.stickerCode}       ${item.createdDate != null ? DateFormat('yy-MM-dd HH:mm').format(item.createdDate!) : ''}',
       ),
-      trailing: item.isReserved() &&
-              !widget.cancelledItems.any((cancelled) => cancelled.id == item.id)
-          ? IconButton(
+      trailing: item.isReserved() ? IconButton(
               icon: Icon(Icons.cancel_outlined, color: Colors.amber),
               onPressed: onCancel,
             )

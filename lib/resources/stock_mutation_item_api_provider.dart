@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:dio/dio.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 
@@ -21,7 +19,7 @@ class StockMutationItemApiProvider {
         .toList());
   }
 
-  Future<Response<Map<String, dynamic>>> cancelStockMutationItem(int id) {
-    return dio.post('/stockmutation/$id/cancel');
+  Future<void> cancelStockMutationItem(int id) async {
+    await dio.post('/stockmutation/$id/cancel');
   }
 }
