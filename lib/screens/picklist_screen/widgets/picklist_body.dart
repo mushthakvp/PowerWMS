@@ -25,6 +25,13 @@ const blue = Color(0xFF034784);
 const white = Colors.white;
 final black = Colors.grey[900];
 
+const List<Color?> picklistColors = [
+  null,
+  Colors.grey,
+  Colors.yellow,
+  Color(0xFF034784)
+];
+
 class PicklistBody extends StatefulWidget {
   const PicklistBody(this.lines, {Key? key}) : super(key: key);
 
@@ -91,7 +98,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
   @override
   Widget build(BuildContext context) {
     return MultiSliver(
-      children: [
+      children: <Widget>[
         SliverToBoxAdapter(
           child: Column(
             children: [
@@ -121,92 +128,125 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
         Consumer<ValueNotifier<Settings>>(builder: (_, value, __) {
           final lines = widget.lines;
           final settings = value.value;
-          if (settings.finishedProductsAtBottom) {
-            lines.sort((a, b) {
-              print("SORTING: ${a.status}  ${a.location} and $b");
-              // return  a.status.name - b.status.name;
-              return  a.location == null ? 1:b.location == null ? -1: a.location!.compareTo(b.location!);
-            });
-          }
-          return SliverList(
-              delegate: SliverChildListDelegate(
-                  lines.where(filter(_search)).map((line) {
-                    var key = Key(line.product.id.toString());
-                    var bgColor = _getBackgroundColor(line);
-                    var fullyPicked = bgColor == blue;
-                    if (prefs == null) {
-                      return Container();
-                    } else {
-                      return Column(
+          lines.asMap().forEach((index, line) {
+            lines[index].priority = line.getPriority(
+                prefs,
+                this.isCurrentWarehouse(line));
+          });
+          lines.sort((a, b) => a.priority.compareTo(b.priority));
+          Widget getWidget(bool isFinishAtBottom) {
+            var children = lines.where((e) => isFinishAtBottom ? e.priority <= 1 : e.priority > 1)
+                .where(filter(_search))
+                .map((line) {
+              var key = Key(line.product.id.toString());
+              var bgColor = picklistColors[line.priority];
+              var fullyPicked = bgColor == blue;
+              if (prefs == null) {
+                return Container();
+              } else {
+                return Column(
+                  key: key,
+                  children: [
+                    ListTile(
+                      tileColor: bgColor,
+                      onTap: () {
+                        _moveToProduct(line);
+                      },
+                      leading: ProductImage(
+                        line.product.id,
+                        width: 60,
                         key: key,
+                      ),
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ListTile(
-                            tileColor: bgColor,
-                            onTap: () {
-                              _moveToProduct(line);
-                            },
-                            leading: ProductImage(
-                              line.product.id,
-                              width: 60,
-                              key: key,
+                          if (line.location != null)
+                            Text(
+                              line.lineLocationCode!,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: fullyPicked ? white : black,
+                              ),
                             ),
-                            title: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (line.location != null)
-                                  Text(
-                                    line.lineLocationCode!,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: fullyPicked ? white : black,
-                                    ),
-                                  ),
-                                Text(
-                                  line.product.uid,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: fullyPicked ? white : black,
-                                  ),
-                                ),
-                                if (line.product.description != null)
-                                  Text(
-                                    line.product.description!,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: fullyPicked ? white : black,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                Text(
-                                  '${line.pickAmount} (${line.product.unit})',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: fullyPicked ? white : black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            trailing: Icon(
-                              Icons.chevron_right,
+                          Text(
+                            line.product.uid,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                               color: fullyPicked ? white : black,
                             ),
                           ),
-                          Divider(
-                            height: 1,
-                            color: fullyPicked ? blue : null,
+                          if (line.product.description != null)
+                            Text(
+                              line.product.description!,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: fullyPicked ? white : black,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          Text(
+                            '${line.pickAmount} (${line.product.unit})',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: fullyPicked ? white : black,
+                            ),
                           ),
                         ],
-                      );
-                    }
-                  }).toList()));
+                      ),
+                      trailing: Icon(
+                        Icons.chevron_right,
+                        color: fullyPicked ? white : black,
+                      ),
+                    ),
+                    Divider(
+                      height: 1,
+                      color: fullyPicked ? blue : null,
+                    ),
+                  ],
+                );
+              }
+            }).toList();
+            return Column(
+              children: <Widget>[
+                if (children.isNotEmpty)
+                Container(
+                  child: Text(
+                    isFinishAtBottom ? 'To Pick' : 'Picked',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: black,
+                    ),
+                  ),
+                  padding: EdgeInsets.all(16),
+                  alignment: Alignment.centerLeft,
+                ),
+                Column(
+                  children: children
+                ),
+              ],
+            );
+          }
+          return SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  getWidget(settings.finishedProductsAtBottom),
+                  getWidget(!settings.finishedProductsAtBottom)
+                ],
+              )
+          );
         }),
       ],
     );
   }
+}
 
-  List<StockMutationItem> _getIdleAmount(PicklistLine line) {
+extension PicklistLineColor on PicklistLine {
+  List<StockMutationItem> _getIdleAmount(SharedPreferences? prefs, PicklistLine line) {
     final json = prefs?.getString('${line.id}');
     if (json != null) {
       return (jsonDecode(json) as List<dynamic>)
@@ -217,44 +257,48 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
     }
   }
 
-  int? getCancelProductAmount(PicklistLine line) {
+  int? getCancelProductAmount(SharedPreferences? prefs, PicklistLine line) {
     final key = '${line.id}_${line.product.id}';
     return prefs?.getInt(key);
   }
 
-  Color? _getBackgroundColor(PicklistLine line) {
-    if (!this.isCurrentWarehouse(line)) {
-      return Colors.grey;
+  // 0 - none background
+  // 1 - grey
+  // 2 - yellow
+  // 3 - blue
+  int getPriority(SharedPreferences? prefs, bool isCurrentWarehouse) {
+    if (!isCurrentWarehouse) {
+      return 1;
     }
     // case 1: the pickAmount == pickedAmount
-    if (line.isFullyPicked()) {
-      return blue;
+    if (this.isFullyPicked()) {
+      return 3;
     }
     // case 2: pickAmount = the amount of process product
-    List<StockMutationItem> idleList = _getIdleAmount(line);
+    List<StockMutationItem> idleList = _getIdleAmount(prefs, this);
     if (idleList.isNotEmpty) {
-      if (line.pickAmount >= 0 && line.pickAmount <= idleList
+      if (this.pickAmount >= 0 && this.pickAmount <= idleList
           .map((e) => e.amount)
           .toList()
           .fold(0, (p, c) => p + c)) {
-        return blue;
+        return 3;
       }
     }
-
-    int? cancelProductAmount = getCancelProductAmount(line);
+    // case 3: pickAmount = the amount of process product + picked amount + cancelled amount
+    int? cancelProductAmount = getCancelProductAmount(prefs, this);
     if (cancelProductAmount != null) {
       if (idleList.isNotEmpty) {
-        if (cancelProductAmount + line.pickedAmount + (idleList.first.amount)
-            == line.pickAmount) {
-          return Colors.yellow;
+        if (cancelProductAmount + this.pickedAmount + (idleList.first.amount)
+            == this.pickAmount) {
+          return 2;
         }
       } else {
-        if (cancelProductAmount + line.pickedAmount
-            == line.pickAmount) {
-          return Colors.yellow;
+        if (cancelProductAmount + this.pickedAmount
+            == this.pickAmount) {
+          return 2;
         }
       }
     }
-    return null;
+    return 0;
   }
 }

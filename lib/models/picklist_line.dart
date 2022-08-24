@@ -79,6 +79,8 @@ class PicklistLine {
     return pickAmount == pickedAmount;
   }
 
+  int priority = 0;
+
   factory PicklistLine.fromJson(Map<String, dynamic> json) =>
       _$PicklistLineFromJson(json);
   Map<String, dynamic> toJson() => _$PicklistLineToJson(this);
