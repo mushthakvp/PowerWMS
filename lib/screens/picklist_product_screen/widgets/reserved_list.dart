@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:scanner/log.dart';
 import 'package:scanner/main.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/reversed_provider.dart';
-import 'package:scanner/resources/stock_mutation_item_repository.dart';
 
 class ReservedList extends StatefulWidget {
   ReservedList(this.line, this.cancelledItems, {Key? key}) : super(key: key);

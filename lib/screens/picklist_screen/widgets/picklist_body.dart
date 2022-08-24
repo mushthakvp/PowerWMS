@@ -244,7 +244,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
     int? cancelProductAmount = getCancelProductAmount(line);
     if (cancelProductAmount != null) {
       if (idleList.isNotEmpty) {
-        if (cancelProductAmount + line.pickedAmount + (idleList.first.amount ?? 0)
+        if (cancelProductAmount + line.pickedAmount + (idleList.first.amount)
             == line.pickAmount) {
           return Colors.yellow;
         }

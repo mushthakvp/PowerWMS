@@ -234,7 +234,7 @@ class ProductView extends StatelessWidget {
         Container(
           margin: EdgeInsets.symmetric(vertical: 10.0),
           alignment: Alignment.center,
-          child: Text('${provider.cancelRestProductAmount!} ${AppLocalizations.of(context)!.productWillBeCancel.toUpperCase()}',
+          child: Text('${provider.cancelRestProductAmount} ${AppLocalizations.of(context)!.productWillBeCancel.toUpperCase()}',
               style: TextStyle(
                   color: Colors.red,
                   fontSize: 24.0
