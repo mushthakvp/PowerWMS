@@ -24,6 +24,7 @@ class _PicklistScreenState extends State<PicklistsScreen> {
   String _search = '';
   final TextEditingController textEditingController = TextEditingController();
   final FocusNode focusNode = FocusNode();
+  late PicklistLineRepository lineRepository;
 
   _moveToPickList(Picklist picklist) {
     Future.microtask(() {
@@ -37,16 +38,24 @@ class _PicklistScreenState extends State<PicklistsScreen> {
   }
 
   @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      lineRepository = context.read<PicklistLineRepository>();
+    });
+    super.initState();
+  }
+
+  @override
   void dispose() {
     textEditingController.dispose();
     focusNode.dispose();
+    _refreshController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final repository = context.read<PicklistRepository>();
-    final lineRepository = context.read<PicklistLineRepository>();
     return DefaultTabController(
       length: 2,
       child: Scaffold(

@@ -77,5 +77,5 @@
   "dateNotCorrect": "Datum niet correct",
   "productWillBeCancel" : "Geannuleerd",
   "productCannotScan": "Scannen is met dit product niet meer toegestaan.",
-  "otherWarehouse": "Nog een magazijn {unit}"
+  "otherWarehouse": "Verander uw magazijn naar: {unit}"
 }
