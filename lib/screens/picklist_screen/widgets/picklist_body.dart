@@ -160,15 +160,14 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (line.location != null)
-                            Text(
-                              line.lineLocationCode!,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: fullyPicked ? white : black,
-                              ),
+                          Text(
+                            line.lineLocationCode ?? line.location ?? '',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: fullyPicked ? white : black,
                             ),
+                          ),
                           Text(
                             line.product.uid,
                             style: TextStyle(
