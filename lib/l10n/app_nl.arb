@@ -78,5 +78,6 @@
   "productWillBeCancel" : "Geannuleerd",
   "productCannotScan": "Scannen is met dit product niet meer toegestaan.",
   "otherWarehouse": "Verander uw magazijn naar: {unit}",
-  "complete": "Afronden"
+  "complete": "Afronden",
+  "productScreenSearch": "Zoeken..."
 }

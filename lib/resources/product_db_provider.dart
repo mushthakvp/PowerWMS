@@ -12,10 +12,19 @@ class ProductDbProvider {
         filter: search == null
             ? null
             : Filter.or([
-                Filter.equals('uid', search),
-                Filter.equals('name', search),
-                Filter.equals('ean', search),
-              ]));
+          Filter.equals('uid', search),
+          Filter.equals('name', search),
+          Filter.equals('ean', search),
+          // Filter.custom((record) {
+          //   final value = record['ean'] as String;
+          //   return value.toLowerCase().contains(search);
+          // }),
+          Filter.custom((record) {
+            final value = record['description'] as String;
+            return value.toLowerCase().contains(search);
+          })
+        ]));
+
     return _store.find(db, finder: finder).then((records) =>
         records.map((snapshot) => Product.fromJson(snapshot.value)).toList());
   }
