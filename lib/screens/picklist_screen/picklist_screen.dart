@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scanner/models/picklist.dart';
+import 'package:scanner/screens/picklist_screen/widgets/picklist_footer.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_view.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
@@ -17,6 +18,9 @@ class PicklistScreen extends StatelessWidget {
         _picklist.uid,
       ),
       body: PicklistView(_picklist),
+      bottomNavigationBar: _picklist.isPicked()
+          ? PicklistFooter(_picklist)
+          : SizedBox(height: 1),
     );
   }
 }

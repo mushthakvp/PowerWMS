@@ -77,5 +77,6 @@
   "dateNotCorrect": "Date not correct",
   "productWillBeCancel" : "Cancelled",
   "productCannotScan": "Scanning is no longer permitted with this product.",
-  "otherWarehouse": "Change your warehouse to: {unit}"
+  "otherWarehouse": "Change your warehouse to: {unit}",
+  "complete": "Complete"
 }

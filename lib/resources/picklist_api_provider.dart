@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist.dart';
 
@@ -14,5 +15,14 @@ class PicklistApiProvider {
           .map((json) => Picklist.fromJson(json))
           .toList(),
     );
+  }
+
+  Future<String?> completePicklist(int id) async {
+    try {
+      await dio.post<Map<String, dynamic>>('/picklist/$id/complete');
+      return null;
+    } on DioError catch (e) {
+      return e.toString();
+    }
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:scanner/main.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
@@ -19,8 +20,9 @@ class PicklistsScreen extends StatefulWidget {
   _PicklistScreenState createState() => _PicklistScreenState();
 }
 
-class _PicklistScreenState extends State<PicklistsScreen> {
+class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
   final _refreshController = RefreshController(initialRefresh: false);
+  final _refreshControllerPicked = RefreshController(initialRefresh: false);
   String _search = '';
   final TextEditingController textEditingController = TextEditingController();
   final FocusNode focusNode = FocusNode();
@@ -46,10 +48,28 @@ class _PicklistScreenState extends State<PicklistsScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe routeAware
+    navigationObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() async {
+    setState(() {
+
+    });
+    super.didPopNext();
+  }
+
+  @override
   void dispose() {
     textEditingController.dispose();
     focusNode.dispose();
     _refreshController.dispose();
+    _refreshControllerPicked.dispose();
+    // Unsubscribe routeAware
+    navigationObserver.unsubscribe(this);
     super.dispose();
   }
 
@@ -130,13 +150,13 @@ class _PicklistScreenState extends State<PicklistsScreen> {
                   ),
                   PicklistView(
                     picked,
-                    _refreshController,
+                    _refreshControllerPicked,
                     () async {
                       await Future.wait([
                         repository.clear(),
                         lineRepository.clear(),
                       ]);
-                      _refreshController.refreshCompleted();
+                      _refreshControllerPicked.refreshCompleted();
                       setState(() {});
                     },
                     onTap: (Picklist picklist) {

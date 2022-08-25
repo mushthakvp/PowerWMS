@@ -163,7 +163,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                           Text(
                             line.lineLocationCode ?? line.location ?? '',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 14.5,
                               fontWeight: FontWeight.w600,
                               color: fullyPicked ? white : black,
                             ),
@@ -171,7 +171,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                           Text(
                             line.product.uid,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 14.5,
                               fontWeight: FontWeight.w600,
                               color: fullyPicked ? white : black,
                             ),
@@ -180,7 +180,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                             Text(
                               line.product.description!,
                               style: TextStyle(
-                                fontSize: 15,
+                                fontSize: 13,
                                 color: fullyPicked ? white : black,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -188,7 +188,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                           Text(
                             '${line.pickAmount} (${line.product.unit})',
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 13,
                               color: fullyPicked ? white : black,
                             ),
                           ),
@@ -214,12 +214,12 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                   child: Text(
                     isFinishAtBottom ? 'To Pick' : 'Picked',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 17,
                       fontWeight: FontWeight.w600,
                       color: black,
                     ),
                   ),
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.only(left: 16, top: 8, right: 16, bottom: 8),
                   alignment: Alignment.centerLeft,
                 ),
                 Column(
