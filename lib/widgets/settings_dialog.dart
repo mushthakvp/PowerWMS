@@ -110,26 +110,15 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               'Picklist screen',
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                             ),
-                            RadioListTile<PicklistSort>(
-                              title: const Text('Sort on product number'),
-                              value: PicklistSort.productNumber,
-                              groupValue: provider.picklistSort,
-                              onChanged: (value) {
-
-                              },
+                            Container(
+                              margin: EdgeInsets.only(
+                                  left: 8,
+                                  right: 100
+                              ),
+                              child: SettingsPicklistSorting(
+                                  picklistSortType: provider.picklistSortType()
+                              ),
                             ),
-                            /*
-                            RadioListTile<PicklistSort>(
-                              title: const Text('Sort on warehouse location'),
-                              value: PicklistSort.warehouseLocation,
-                              groupValue: provider.picklistSort,
-                              onChanged: (value) {
-                                setState(() {
-                                  provider.picklistSort = value!;
-                                });
-                              },
-                            ),
-                             */
                             SwitchListTile(
                               title: Text('Finished lines at the bottom'),
                               controlAffinity: ListTileControlAffinity.leading,
@@ -227,6 +216,42 @@ class SettingsWareHouses extends StatelessWidget {
             value: value, child: Text(
             value.name ?? 'Loading', style: TextStyle(fontWeight: FontWeight.w500,
               fontSize: 15)),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class SettingsPicklistSorting extends StatelessWidget {
+  const SettingsPicklistSorting({
+    required this.picklistSortType,
+    Key? key}) : super(key: key);
+
+  final PicklistSortType? picklistSortType;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: DropdownButton<PicklistSortType>(
+        value: picklistSortType,
+        alignment: AlignmentDirectional.center,
+        elevation: 8,
+        style: const TextStyle(color: Colors.black),
+        underline: Container(
+          height: 0,
+          color: Colors.transparent,
+        ),
+        onChanged: (value) {
+          if (value != null) {
+            context.read<SettingProvider>().setCurrentPicklistSorting(value);
+          }
+        },
+        items: PicklistSortType.values
+            .map<DropdownMenuItem<PicklistSortType>>((PicklistSortType value) {
+          return DropdownMenuItem<PicklistSortType>(
+            value: value,
+            child: Text(value.name, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
           );
         }).toList(),
       ),

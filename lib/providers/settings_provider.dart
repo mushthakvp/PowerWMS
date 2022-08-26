@@ -6,6 +6,23 @@ import 'package:scanner/models/warehouse.dart';
 import 'package:scanner/resources/settings_api_provider.dart';
 import 'package:sembast/sembast.dart';
 
+enum PicklistSortType {
+  warehouseLocation, productNumber, description
+}
+
+extension PicklistSortTypeExt on PicklistSortType {
+  String get name {
+    switch (this) {
+      case PicklistSortType.warehouseLocation:
+        return 'Sort on Warehouse Location';
+      case PicklistSortType.productNumber:
+        return 'Sort on Product Number';
+      case PicklistSortType.description:
+        return 'Sort on Description';
+    }
+  }
+}
+
 class SettingProvider extends ChangeNotifier {
   SettingProvider(this.db);
 
@@ -13,8 +30,6 @@ class SettingProvider extends ChangeNotifier {
   List<Warehouse>? warehouses;
   SettingsRemote? settingsRemote;
   final Database db;
-
-  PicklistSort picklistSort = PicklistSort.productNumber;
 
   bool get finishedProductsAtBottom {
     return settingsRemote!.finishedProductsAtBottom!;
@@ -50,7 +65,7 @@ class SettingProvider extends ChangeNotifier {
 
   Settings get settingsLocal {
     return Settings(
-      picklistSort: this.picklistSort,
+      picklistSort: this.picklistSortType(),
       finishedProductsAtBottom: this.finishedProductsAtBottom,
       oneScanPickAll: this.oneScanPickAll,
       directlyProcess: this.directProcessing,
@@ -68,7 +83,7 @@ class SettingProvider extends ChangeNotifier {
     saveSettingLocal();
     // Save to remote
     final data = settingsRemote!.copyWith(
-      picklistSorting: 3,
+      picklistSorting: this.picklistSortType().index + 1,
       finishedProductsAtBottom: this.finishedProductsAtBottom,
       oneScanPickAll: this.oneScanPickAll,
       directProcessing: this.directProcessing
@@ -104,5 +119,23 @@ class SettingProvider extends ChangeNotifier {
 
   String get getUserInfoName {
     return '${userInfo?.firstName ?? 'Loading'} ${userInfo?.lastName ?? ''}';
+  }
+
+  setCurrentPicklistSorting(PicklistSortType value) {
+    settingsRemote?.picklistSorting = (value.index + 1);
+    notifyListeners();
+  }
+
+  PicklistSortType picklistSortType() {
+    switch (settingsRemote?.picklistSorting ?? 1) {
+      case 1:
+        return PicklistSortType.warehouseLocation;
+      case 2:
+        return PicklistSortType.productNumber;
+      case 3:
+        return PicklistSortType.description;
+      default:
+        return PicklistSortType.productNumber;
+    }
   }
 }

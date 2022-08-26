@@ -1,23 +1,18 @@
 import 'dart:convert';
-
+import 'package:scanner/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum PicklistSort {
-  productNumber,
-  warehouseLocation,
-}
-
-PicklistSort getStatusFromString(String sort) {
-  for (PicklistSort element in PicklistSort.values) {
+PicklistSortType getStatusFromString(String sort) {
+  for (PicklistSortType element in PicklistSortType.values) {
     if (element.toString() == sort) {
       return element;
     }
   }
-  return PicklistSort.productNumber;
+  return PicklistSortType.productNumber;
 }
 
 class Settings {
-  final PicklistSort picklistSort;
+  final PicklistSortType picklistSort;
   final bool finishedProductsAtBottom;
   final bool oneScanPickAll;
   final bool directlyProcess;
@@ -33,7 +28,7 @@ class Settings {
   }
 
   Settings({
-    this.picklistSort = PicklistSort.productNumber,
+    this.picklistSort = PicklistSortType.productNumber,
     this.finishedProductsAtBottom = false,
     this.oneScanPickAll = true,
     this.directlyProcess = false,
