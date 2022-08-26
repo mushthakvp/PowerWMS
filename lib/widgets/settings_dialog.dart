@@ -251,7 +251,7 @@ class SettingsPicklistSorting extends StatelessWidget {
             .map<DropdownMenuItem<PicklistSortType>>((PicklistSortType value) {
           return DropdownMenuItem<PicklistSortType>(
             value: value,
-            child: Text(value.name, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+            child: Text(value.title, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
           );
         }).toList(),
       ),

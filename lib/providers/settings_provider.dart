@@ -11,7 +11,7 @@ enum PicklistSortType {
 }
 
 extension PicklistSortTypeExt on PicklistSortType {
-  String get name {
+  String get title {
     switch (this) {
       case PicklistSortType.warehouseLocation:
         return 'Sort on Warehouse Location';

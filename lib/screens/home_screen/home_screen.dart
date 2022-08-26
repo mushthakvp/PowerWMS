@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/main.dart';
+import 'package:scanner/models/settings.dart';
 import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/screens/home_screen/widgets/grid_item.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       context.read<SettingProvider>().getWarehouses(),
       context.read<SettingProvider>().getUserInfo()
     ]);
+    context.read<ValueNotifier<Settings>>().value = context.read<SettingProvider>().settingsLocal;
   }
 
   @override
