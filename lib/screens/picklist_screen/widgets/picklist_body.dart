@@ -133,24 +133,29 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                 prefs,
                 this.isCurrentWarehouse(line));
           });
-          if (!settings.finishedProductsAtBottom) {
-            switch (settings.picklistSort) {
-              case PicklistSortType.warehouseLocation:
-                lines.sort((a, b) {
-                  return  a.location == null ? 1:b.location == null ? -1: a.location!.compareTo(b.location!);
-                });
-                break;
-              case PicklistSortType.productNumber:
-                lines.sort((a, b) => a.product.uid.compareTo(b.product.uid));
-                break;
-              case PicklistSortType.description:
-                lines.sort((a, b) => (a.product.description ?? '').compareTo(b.product.description ?? ''));
-                break;
-            }
-          } else {
-            // Sort on priority
-            lines.sort((a, b) => a.priority.compareTo(b.priority));
+          switch (settings.picklistSort) {
+            case PicklistSortType.warehouseLocation:
+              lines.sort((a, b) {
+                var aLocation = a.lineLocationCode ?? a.location ?? '';
+                var bLocation = b.lineLocationCode ?? b.location ?? '';
+                print('====== $aLocation ======= $bLocation');
+                var compare = aLocation.compareTo(bLocation);
+                // In case warehouse location is similar
+                if (compare == 0) {
+                  return a.product.uid.compareTo(b.product.uid);
+                }
+                return  compare;
+              });
+              break;
+            case PicklistSortType.productNumber:
+              lines.sort((a, b) => a.product.uid.compareTo(b.product.uid));
+              break;
+            case PicklistSortType.description:
+              lines.sort((a, b) => (a.product.description ?? '').compareTo(b.product.description ?? ''));
+              break;
           }
+          // Sort on priority
+          lines.sort((a, b) => a.priority.compareTo(b.priority));
           Widget getWidget(bool isFinishAtBottom) {
             var children = lines.where((e) => isFinishAtBottom ? e.priority <= 1 : e.priority > 1)
                 .where(filter(_search))
