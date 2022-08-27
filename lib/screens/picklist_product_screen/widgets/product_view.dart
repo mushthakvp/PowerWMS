@@ -93,21 +93,27 @@ class ProductView extends StatelessWidget {
             delegate: SliverChildListDelegate([
               ListTile(
                 title: Row(
-                  children: [
+                  children: <Widget>[
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: <Widget>[
                         Text(
                           '${AppLocalizations.of(context)!.productProductNumber}:',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(line.product.uid),
-                        SizedBox(height: 10),
+                        SizedBox(height: 8),
                         const Text(
                           'GTIN / EAN:',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(line.product.ean),
+                        SizedBox(height: 8),
+                        const Text(
+                          'Batch',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(line.batchSuggestion ?? ''),
                       ],
                     ),
                     Spacer(),

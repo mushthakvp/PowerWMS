@@ -29,6 +29,7 @@ PicklistLine _$PicklistLineFromJson(Map<String, dynamic> json) {
     lineWarehouseCode: json['lineWarehouseCode'] as String?,
     id: json['id'] as int,
     isNew: json['isNew'] as bool,
+    batchSuggestion: json['batchSuggestion'] as String?,
   );
 }
 
@@ -55,6 +56,7 @@ Map<String, dynamic> _$PicklistLineToJson(PicklistLine instance) =>
       'lineWarehouseCode': instance.lineWarehouseCode,
       'id': instance.id,
       'isNew': instance.isNew,
+      'batchSuggestion': instance.batchSuggestion,
     };
 
 K _$enumDecode<K, V>(

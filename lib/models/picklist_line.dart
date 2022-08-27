@@ -50,6 +50,7 @@ class PicklistLine {
   final String? lineWarehouseCode;
   final int id;
   final bool isNew;
+  final String? batchSuggestion;
 
   PicklistLine({
     required this.picklist,
@@ -73,12 +74,14 @@ class PicklistLine {
     this.lineWarehouseCode,
     required this.id,
     required this.isNew,
+    required this.batchSuggestion
   });
 
   isFullyPicked() {
     return pickAmount == pickedAmount;
   }
 
+  @JsonKey(ignore: true)
   int priority = 0;
 
   factory PicklistLine.fromJson(Map<String, dynamic> json) =>
