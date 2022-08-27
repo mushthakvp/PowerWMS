@@ -37,6 +37,7 @@
     }
   },
   "back": "Terug",
+  "close": "Sluiten",
   "barcode": "Barcode",
   "barcodeHelp": "Scan a barcode to search for a product.",
   "cancel": "Cancel",

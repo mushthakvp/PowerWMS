@@ -25,6 +25,10 @@ class Product {
   final List<Packaging> packagings;
   final int id;
   final bool isNew;
+  final int? batchField;
+  final int? productionDateField;
+  final int? expirationDateField;
+  final bool? serialNumberField;
 
   Product({
     required this.uid,
@@ -47,6 +51,10 @@ class Product {
     required this.packagings,
     required this.id,
     required this.isNew,
+    required this.batchField,
+    required this.productionDateField,
+    required this.expirationDateField,
+    required this.serialNumberField
   });
 
   factory Product.fromJson(Map<String, dynamic> json) =>

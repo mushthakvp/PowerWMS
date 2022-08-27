@@ -32,6 +32,10 @@ Product _$ProductFromJson(Map<String, dynamic> json) {
         .toList(),
     id: json['id'] as int,
     isNew: json['isNew'] as bool,
+    batchField: json['batchField'] as int?,
+    productionDateField: json['productionDateField'] as int?,
+    expirationDateField: json['expirationDateField'] as int?,
+    serialNumberField: json['serialNumberField'] as bool?,
   );
 }
 
@@ -58,4 +62,8 @@ Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
       'packagings': instance.packagings.map((e) => e.toJson()).toList(),
       'id': instance.id,
       'isNew': instance.isNew,
+      'batchField': instance.batchField,
+      'productionDateField': instance.productionDateField,
+      'expirationDateField': instance.expirationDateField,
+      'serialNumberField': instance.serialNumberField,
     };

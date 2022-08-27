@@ -37,6 +37,7 @@
     }
   },
   "back": "Back",
+  "close": "Close",
   "barcode": "Barcode",
   "barcodeHelp": "Scan a barcode to search for a product.",
   "cancel": "Cancel",

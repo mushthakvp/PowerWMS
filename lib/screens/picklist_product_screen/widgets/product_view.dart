@@ -12,6 +12,7 @@ import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/providers/process_product_provider.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
+import 'package:scanner/screens/picklist_product_screen/widgets/error_barcode.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/product_adjustment.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
 import 'package:scanner/widgets/product_image.dart';

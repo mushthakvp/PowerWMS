@@ -9,6 +9,7 @@ import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
+import 'package:scanner/screens/picklist_product_screen/widgets/error_barcode.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 
 final audio = Audio('assets/error.mp3');
@@ -140,6 +141,20 @@ class ScanForm extends StatelessWidget {
             AppLocalizations.of(context)!.dateNotCorrect,
           );
         }
+      }
+
+      // Verify barcode
+      var verifiesList = verifyBarcode(
+        provider: mutation,
+        batch: batch,
+        productDate: productionDateFormat,
+        expirationDate: expirationDateFormat,
+        serialNo: serial,
+      );
+      if (verifiesList.isNotEmpty) {
+        ErrorBarcode().showOption(context, verifiesList);
+        AssetsAudioPlayer.newPlayer().open(audio, autoStart: true);
+        return;
       }
 
       if (barcode != null &&
@@ -278,5 +293,29 @@ class ScanForm extends StatelessWidget {
       amount = provider.amount;
     }
     return amount;
+  }
+
+  List<BarcodeRequired> verifyBarcode({
+    required MutationProvider provider,
+    required String? batch, // code 10
+    required DateTime? productDate, // code 11,
+    required DateTime? expirationDate, // code 17,
+    required String? serialNo, // code 21,
+  }) {
+    var product = provider.line.product;
+    List<BarcodeRequired> re = [];
+    if (product.batchField == 1 && batch == null) {
+      re.add(BarcodeRequired.batchField);
+    }
+    if (product.expirationDateField == 1 && expirationDate == null) {
+      re.add(BarcodeRequired.expirationField);
+    }
+    if (product.productionDateField == 1 && productDate == null) {
+      re.add(BarcodeRequired.productionField);
+    }
+    if (product.serialNumberField == true && serialNo == null) {
+      re.add(BarcodeRequired.serialNumber);
+    }
+    return re;
   }
 }
