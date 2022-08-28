@@ -151,7 +151,7 @@ class ScanForm extends StatelessWidget {
         expirationDate: expirationDateFormat,
         serialNo: serial,
       );
-      if (verifiesList.isNotEmpty) {
+      if (verifiesList.isNotEmpty && barcode != null) {
         ErrorBarcode().showOption(context, verifiesList);
         AssetsAudioPlayer.newPlayer().open(audio, autoStart: true);
         return;
