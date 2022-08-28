@@ -14,7 +14,9 @@ class PicklistApiProvider {
       (response) => (response.data!['data'] as List<dynamic>)
           .map((json) => Picklist.fromJson(json))
           .toList(),
-    );
+    ).catchError((error, stackTrace) {
+      print('============ $error');
+    });
   }
 
   Future<String?> completePicklist(int id) async {

@@ -118,6 +118,12 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
         body: StreamBuilder<List<Picklist>>(
           stream: repository.getPicklistsStream(_search),
           builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Container(
+                margin: EdgeInsets.all(16),
+                child: Text('Data is not available due to the loss of Internet connection.'),
+              );
+            }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
             }
