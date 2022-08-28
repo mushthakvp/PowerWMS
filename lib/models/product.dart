@@ -10,9 +10,6 @@ class Product {
   final String? description;
   final String ean;
   final String? productGroupName;
-  final int? productGroupBatchField;
-  final int? productGroupProductionDateField;
-  final int? productGroupExpirationDateField;
   final String unit;
   final int status;
   final num stock;
@@ -36,9 +33,6 @@ class Product {
     required this.description,
     required this.ean,
     required this.productGroupName,
-    required this.productGroupBatchField,
-    required this.productGroupProductionDateField,
-    required this.productGroupExpirationDateField,
     required this.unit,
     required this.status,
     required this.stock,

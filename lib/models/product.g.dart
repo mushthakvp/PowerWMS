@@ -13,11 +13,6 @@ Product _$ProductFromJson(Map<String, dynamic> json) {
     description: json['description'] as String?,
     ean: json['ean'] as String,
     productGroupName: json['productGroupName'] as String?,
-    productGroupBatchField: json['productGroupBatchField'] as int?,
-    productGroupProductionDateField:
-        json['productGroupProductionDateField'] as int?,
-    productGroupExpirationDateField:
-        json['productGroupExpirationDateField'] as int?,
     unit: json['unit'] as String,
     status: json['status'] as int,
     stock: json['stock'] as num,
@@ -45,11 +40,6 @@ Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
       'description': instance.description,
       'ean': instance.ean,
       'productGroupName': instance.productGroupName,
-      'productGroupBatchField': instance.productGroupBatchField,
-      'productGroupProductionDateField':
-          instance.productGroupProductionDateField,
-      'productGroupExpirationDateField':
-          instance.productGroupExpirationDateField,
       'unit': instance.unit,
       'status': instance.status,
       'stock': instance.stock,

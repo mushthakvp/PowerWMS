@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/log.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
@@ -266,8 +267,9 @@ class ProductView extends StatelessWidget {
 
   _itemsBuilder(MutationProvider mutation, BuildContext context) {
     return mutation.idleItems.map((item) {
+      var expirationDate = item.expirationDate != null ? '| ${item.expirationDate!}' : '';
       return Dismissible(
-        key: Key(item.batch),
+        key: item.stickerCode == null ? UniqueKey() : Key(item.stickerCode!),
         onDismissed: (direction) {
           mutation.removeItem(item);
         },
@@ -283,7 +285,7 @@ class ProductView extends StatelessWidget {
           children: [
             ListTile(
               title: Text(
-                '${mutation.askedAmount < 0 && item.amount > 0 ? '-' : ''}${item.amount} x ${item.batch} | ${item.stickerCode}',
+                '${mutation.askedAmount < 0 && item.amount > 0 ? '-' : ''}${item.amount} x ${item.batch} | ${item.stickerCode} $expirationDate',
               ),
             ),
             Divider(height: 1),
