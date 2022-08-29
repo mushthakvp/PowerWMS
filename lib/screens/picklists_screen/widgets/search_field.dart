@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SearchField extends StatefulWidget {
@@ -22,6 +23,7 @@ class SearchField extends StatefulWidget {
 
 class _SearchFieldState extends State<SearchField> {
   Timer? searchOnStoppedTyping;
+  bool willShowKeyboard = true;
 
   @override
   void didChangeDependencies() {
@@ -52,7 +54,7 @@ class _SearchFieldState extends State<SearchField> {
           enabledBorder: InputBorder.none,
           errorBorder: InputBorder.none,
           disabledBorder: InputBorder.none,
-          suffixIcon: widget.controller.text.isEmpty ? null : IconButton(
+          suffixIcon: widget.controller.text.isEmpty ? _toggleKeyboard() : IconButton(
               hoverColor: Colors.white,
               splashColor: Colors.white,
               highlightColor: Colors.white,
@@ -75,5 +77,28 @@ class _SearchFieldState extends State<SearchField> {
       searchOnStoppedTyping!.cancel();
     }
     searchOnStoppedTyping = new Timer(duration, () => widget.onChange(value));
+  }
+
+  _toggleKeyboard() {
+    return Container(
+      child: IconButton(
+        hoverColor: Colors.white,
+        splashColor: Colors.white,
+        highlightColor: Colors.white,
+        icon: Icon(
+            !willShowKeyboard ? Icons.keyboard_alt_outlined : Icons.keyboard_alt_rounded
+        ),
+        onPressed: () {
+          if (willShowKeyboard) {
+            FocusScope.of(context).unfocus();
+          } else {
+            widget.focusNode.requestFocus();
+          }
+          setState(() {
+            willShowKeyboard = !willShowKeyboard;
+          });
+        },
+      ),
+    );
   }
 }
