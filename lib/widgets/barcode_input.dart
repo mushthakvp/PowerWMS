@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
 
 final parser = GS1BarcodeParser.defaultParser();
@@ -19,9 +21,26 @@ class BarcodeInput extends StatefulWidget {
 class _BarcodeInputState extends State<BarcodeInput> {
   FocusNode focusNode = FocusNode();
   final controller = TextEditingController();
+  bool willShowKeyboard = true;
+  late StreamSubscription<bool> keyboardSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    var keyboardVisibilityController = KeyboardVisibilityController();
+    // Subscribe
+    keyboardSubscription = keyboardVisibilityController
+        .onChange
+        .listen((bool visible) {
+      setState(() {
+        willShowKeyboard = visible;
+      });
+    });
+  }
 
   @override
   void dispose() {
+    keyboardSubscription.cancel();
     controller.dispose();
     super.dispose();
   }
@@ -66,6 +85,7 @@ class _BarcodeInputState extends State<BarcodeInput> {
             }
           },
         ),
+        _keyboardButton()
       ],
     );
   }
@@ -87,5 +107,26 @@ class _BarcodeInputState extends State<BarcodeInput> {
         focusNode.requestFocus();
       });
     }
+  }
+
+  _keyboardButton() {
+    return IconButton(
+      hoverColor: Colors.white,
+      splashColor: Colors.white,
+      highlightColor: Colors.white,
+      icon: Icon(
+          !willShowKeyboard ? Icons.keyboard_alt_outlined : Icons.keyboard_alt_rounded
+      ),
+      onPressed: () {
+        if (willShowKeyboard) {
+          FocusScope.of(context).unfocus();
+        } else {
+          FocusScope.of(context).requestFocus(focusNode);
+        }
+        setState(() {
+          willShowKeyboard = !willShowKeyboard;
+        });
+      },
+    );
   }
 }

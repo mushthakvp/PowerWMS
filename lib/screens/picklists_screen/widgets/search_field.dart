@@ -1,8 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 class SearchField extends StatefulWidget {
   const SearchField(
@@ -24,6 +23,21 @@ class SearchField extends StatefulWidget {
 class _SearchFieldState extends State<SearchField> {
   Timer? searchOnStoppedTyping;
   bool willShowKeyboard = true;
+  late StreamSubscription<bool> keyboardSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    var keyboardVisibilityController = KeyboardVisibilityController();
+    // Subscribe
+    keyboardSubscription = keyboardVisibilityController
+        .onChange
+        .listen((bool visible) {
+      setState(() {
+        willShowKeyboard = visible;
+      });
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -35,6 +49,7 @@ class _SearchFieldState extends State<SearchField> {
 
   @override
   void dispose() {
+    keyboardSubscription.cancel();
     widget.controller.dispose();
     super.dispose();
   }
@@ -54,7 +69,7 @@ class _SearchFieldState extends State<SearchField> {
           enabledBorder: InputBorder.none,
           errorBorder: InputBorder.none,
           disabledBorder: InputBorder.none,
-          suffixIcon: widget.controller.text.isEmpty ? _toggleKeyboard() : IconButton(
+          suffixIcon: widget.controller.text.isEmpty ? _keyboardButton() : IconButton(
               hoverColor: Colors.white,
               splashColor: Colors.white,
               highlightColor: Colors.white,
@@ -79,26 +94,24 @@ class _SearchFieldState extends State<SearchField> {
     searchOnStoppedTyping = new Timer(duration, () => widget.onChange(value));
   }
 
-  _toggleKeyboard() {
-    return Container(
-      child: IconButton(
-        hoverColor: Colors.white,
-        splashColor: Colors.white,
-        highlightColor: Colors.white,
-        icon: Icon(
-            !willShowKeyboard ? Icons.keyboard_alt_outlined : Icons.keyboard_alt_rounded
-        ),
-        onPressed: () {
-          if (willShowKeyboard) {
-            FocusScope.of(context).unfocus();
-          } else {
-            widget.focusNode.requestFocus();
-          }
-          setState(() {
-            willShowKeyboard = !willShowKeyboard;
-          });
-        },
+  _keyboardButton() {
+    return IconButton(
+      hoverColor: Colors.white,
+      splashColor: Colors.white,
+      highlightColor: Colors.white,
+      icon: Icon(
+          !willShowKeyboard ? Icons.keyboard_alt_outlined : Icons.keyboard_alt_rounded
       ),
+      onPressed: () {
+        if (willShowKeyboard) {
+          FocusScope.of(context).unfocus();
+        } else {
+          widget.focusNode.requestFocus();
+        }
+        setState(() {
+          willShowKeyboard = !willShowKeyboard;
+        });
+      },
     );
   }
 }

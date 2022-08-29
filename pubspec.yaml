@@ -50,6 +50,8 @@ dependencies:
 
   qr_flutter: ^4.0.0
 
+  flutter_keyboard_visibility: ^5.3.0
+
   f_logs: ^2.0.0
   sembast: ^3.1.0+2
   path: ^1.8.0
