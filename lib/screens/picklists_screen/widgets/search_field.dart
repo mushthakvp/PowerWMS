@@ -102,11 +102,13 @@ class _SearchFieldState extends State<SearchField> {
       icon: Icon(
           !willShowKeyboard ? Icons.keyboard_alt_outlined : Icons.keyboard_alt_rounded
       ),
-      onPressed: () {
+      onPressed: () async {
         if (willShowKeyboard) {
           FocusScope.of(context).unfocus();
         } else {
-          widget.focusNode.requestFocus();
+          widget.focusNode.unfocus();
+          await Future<void>.delayed(Duration(milliseconds: 1));
+          FocusScope.of(context).requestFocus(widget.focusNode);
         }
         setState(() {
           willShowKeyboard = !willShowKeyboard;

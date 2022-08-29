@@ -117,10 +117,12 @@ class _BarcodeInputState extends State<BarcodeInput> {
       icon: Icon(
           !willShowKeyboard ? Icons.keyboard_alt_outlined : Icons.keyboard_alt_rounded
       ),
-      onPressed: () {
+      onPressed: () async {
         if (willShowKeyboard) {
           FocusScope.of(context).unfocus();
         } else {
+          focusNode.unfocus();
+          await Future<void>.delayed(Duration(milliseconds: 1));
           FocusScope.of(context).requestFocus(focusNode);
         }
         setState(() {
