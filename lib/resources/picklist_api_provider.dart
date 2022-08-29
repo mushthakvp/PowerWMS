@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/picklist.dart';
 
 class PicklistApiProvider {
@@ -19,12 +20,12 @@ class PicklistApiProvider {
     });
   }
 
-  Future<String?> completePicklist(int id) async {
+  Future<BaseResponse?> completePicklist(int id) async {
     try {
-      await dio.post<Map<String, dynamic>>('/picklist/$id/complete');
-      return null;
+      return await dio.post<Map<String, dynamic>>('/picklist/$id/complete')
+      .then((response) => BaseResponse.fromJson(response.data!));
     } on DioError catch (e) {
-      return e.toString();
+      return BaseResponse(success: false, message: e.toString());
     }
   }
 }
