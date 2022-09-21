@@ -5,20 +5,21 @@ import 'package:scanner/models/user_info.dart';
 import 'package:scanner/models/warehouse.dart';
 import 'package:scanner/resources/settings_api_provider.dart';
 import 'package:sembast/sembast.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 enum PicklistSortType {
   warehouseLocation, productNumber, description
 }
 
 extension PicklistSortTypeExt on PicklistSortType {
-  String get title {
+  String title(BuildContext context) {
     switch (this) {
       case PicklistSortType.warehouseLocation:
-        return 'Sort on Warehouse Location';
+        return AppLocalizations.of(context)!.warehouseLocation;
       case PicklistSortType.productNumber:
-        return 'Sort on Product Number';
+        return AppLocalizations.of(context)!.productNumber;
       case PicklistSortType.description:
-        return 'Sort on Description';
+        return AppLocalizations.of(context)!.description;
     }
   }
 }

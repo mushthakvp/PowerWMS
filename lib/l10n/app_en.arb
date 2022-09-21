@@ -38,6 +38,7 @@
   },
   "back": "Back",
   "close": "Close",
+  "save": "Save",
   "barcode": "Barcode",
   "barcodeHelp": "Scan a barcode to search for a product.",
   "cancel": "Cancel",
@@ -80,5 +81,14 @@
   "productCannotScan": "Scanning is no longer permitted with this product.",
   "otherWarehouse": "Change your warehouse to: {unit}",
   "complete": "Complete",
-  "productScreenSearch": "Search..."
+  "productScreenSearch": "Search...",
+  "settings": "Settings",
+  "defaultWarehouse": "Default warehouse",
+  "sortPicklistlinesOn": "Sort picklistlines on:",
+  "warehouseLocation": "Warehouse location",
+  "productNumber": "Product number",
+  "description": "Description",
+  "oneScanPicksAll": "One scan picks all",
+  "directMutation": "Direct mutation",
+  "processing": "Processing"
 }

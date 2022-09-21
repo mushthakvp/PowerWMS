@@ -46,7 +46,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               children: <Widget>[
                                 Container(
                                   child: Text(
-                                    'Settings',
+                                    AppLocalizations.of(context)!.settings,
                                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
                                   ),
                                 ),
@@ -88,7 +88,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               color: Colors.grey,
                             ),
                             Text(
-                              'Default warehouse',
+                              AppLocalizations.of(context)!.defaultWarehouse,
                               style: TextStyle(fontWeight: FontWeight.bold,
                                   fontSize: 18),
                             ),
@@ -106,8 +106,8 @@ class _SettingsDialogState extends State<SettingsDialog> {
                               height: 1,
                               color: Colors.grey,
                             ),
-                            const Text(
-                              'Picklist screen',
+                            Text(
+                              AppLocalizations.of(context)!.sortPicklistlinesOn,
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                             ),
                             Container(
@@ -119,6 +119,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                   picklistSortType: provider.picklistSortType()
                               ),
                             ),
+                            /*
                             SwitchListTile(
                               title: Text('Finished lines at the bottom'),
                               controlAffinity: ListTileControlAffinity.leading,
@@ -127,17 +128,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
                                 provider.setFinishedProductsAtBottom(value);
                               },
                             ),
+                             */
                             Container(
                               margin: EdgeInsets.only(top: 16, bottom: 24),
                               height: 1,
                               color: Colors.grey,
                             ),
-                            const Text(
-                              'Product screen',
+                            Text(
+                              AppLocalizations.of(context)!.processing,
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                             ),
                             SwitchListTile(
-                              title: Text('One scan pick all'),
+                              title: Text(AppLocalizations.of(context)!.oneScanPicksAll),
                               controlAffinity: ListTileControlAffinity.leading,
                               value: provider.oneScanPickAll,
                               onChanged: (value) {
@@ -146,7 +148,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                             ),
                             SwitchListTile(
                               title:
-                              Text(AppLocalizations.of(context)!.settingsDirectlyProcess),
+                              Text(AppLocalizations.of(context)!.directMutation),
                               controlAffinity: ListTileControlAffinity.leading,
                               value: provider.directProcessing,
                               onChanged: (value) {
@@ -167,7 +169,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
               bottomNavigationBar: Container(
                 margin: EdgeInsets.all(32),
                 child: ElevatedButton(
-                  child: const Text('Save'),
+                  child: Text(AppLocalizations.of(context)!.save),
                   onPressed: () async {
                     context.read<ValueNotifier<Settings>>().value = provider.settingsLocal;
                     await provider.saveSettingInfo();
@@ -251,7 +253,7 @@ class SettingsPicklistSorting extends StatelessWidget {
             .map<DropdownMenuItem<PicklistSortType>>((PicklistSortType value) {
           return DropdownMenuItem<PicklistSortType>(
             value: value,
-            child: Text(value.title, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+            child: Text(value.title(context), style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
           );
         }).toList(),
       ),

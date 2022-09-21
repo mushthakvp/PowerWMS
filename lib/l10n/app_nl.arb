@@ -38,6 +38,7 @@
   },
   "back": "Terug",
   "close": "Sluiten",
+  "save": "Opslaan",
   "barcode": "Barcode",
   "barcodeHelp": "Scan a barcode to search for a product.",
   "cancel": "Cancel",
@@ -80,5 +81,14 @@
   "productCannotScan": "Scannen is met dit product niet meer toegestaan.",
   "otherWarehouse": "Verander uw magazijn naar: {unit}",
   "complete": "Afronden",
-  "productScreenSearch": "Zoeken..."
+  "productScreenSearch": "Zoeken...",
+  "settings": "Instellingen",
+  "defaultWarehouse": "Standaard magazijn",
+  "sortPicklistlinesOn": "Sorteren magazijnbonregels op:",
+  "warehouseLocation": "Magazijnlocatie",
+  "productNumber": "Product nummer",
+  "description": "Product omschrijving",
+  "oneScanPicksAll": "Eén scan pakt alles",
+  "directMutation": "Directe mutatie",
+  "processing": "Verwerken"
 }
