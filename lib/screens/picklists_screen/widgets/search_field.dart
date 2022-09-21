@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:scanner/widgets/e_textfield.dart';
 
 class SearchField extends StatefulWidget {
   const SearchField(
@@ -22,7 +24,7 @@ class SearchField extends StatefulWidget {
 
 class _SearchFieldState extends State<SearchField> {
   Timer? searchOnStoppedTyping;
-  bool willShowKeyboard = true;
+  bool willShowKeyboard = false;
   late StreamSubscription<bool> keyboardSubscription;
 
   @override
@@ -50,17 +52,19 @@ class _SearchFieldState extends State<SearchField> {
   @override
   void dispose() {
     keyboardSubscription.cancel();
-    widget.controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: TextField(
+      child: ETextField(
         focusNode: widget.focusNode,
         controller: widget.controller,
         onChanged: _onChangeHandler,
+        onTap: () {
+          SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+        },
         autofocus: true,
         decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.picklistsSearch,
@@ -104,11 +108,9 @@ class _SearchFieldState extends State<SearchField> {
       ),
       onPressed: () async {
         if (willShowKeyboard) {
-          FocusScope.of(context).unfocus();
+          SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
         } else {
-          widget.focusNode.unfocus();
-          await Future<void>.delayed(Duration(milliseconds: 1));
-          FocusScope.of(context).requestFocus(widget.focusNode);
+          SystemChannels.textInput.invokeMethod<void>('TextInput.show');
         }
         setState(() {
           willShowKeyboard = !willShowKeyboard;

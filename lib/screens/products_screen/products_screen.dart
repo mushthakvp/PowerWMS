@@ -91,7 +91,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
               if (snapshot.hasData && _result.isNotEmpty) {
                 final repository = context.read<ProductRepository>();
                 try {
-                  var headline5 = Theme.of(context).textTheme.headline5;
                   return FutureBuilder<List<Product>>(
                     future: repository.getProducts(_result),
                     builder: (context, snapshot) {

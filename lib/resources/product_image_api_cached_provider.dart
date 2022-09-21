@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_cache_manager/src/storage/file_system/file_system_io.dart';
 import 'package:scanner/dio.dart';

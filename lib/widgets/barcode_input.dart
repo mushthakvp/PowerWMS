@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
+import 'package:scanner/widgets/e_formfield.dart';
+import 'package:scanner/widgets/e_textfield.dart';
 
 final parser = GS1BarcodeParser.defaultParser();
 typedef OnBarCodeChanged = Function(String);
@@ -21,7 +24,7 @@ class BarcodeInput extends StatefulWidget {
 class _BarcodeInputState extends State<BarcodeInput> {
   FocusNode focusNode = FocusNode();
   final controller = TextEditingController();
-  bool willShowKeyboard = true;
+  bool willShowKeyboard = false;
   late StreamSubscription<bool> keyboardSubscription;
 
   @override
@@ -50,10 +53,14 @@ class _BarcodeInputState extends State<BarcodeInput> {
     return Row(
       children: [
         Expanded(
-          child: TextFormField(
+          child: ETextField(
             controller: controller,
-            onFieldSubmitted: _parse,
-            onSaved: _parse,
+            // onFieldSubmitted: _parse,
+            // onSaved: _parse,
+            onTap: () {
+              SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+            },
+            onSubmitted: _parse,
             autofocus: true,
             focusNode: focusNode,
             keyboardType: TextInputType.number,
@@ -119,11 +126,9 @@ class _BarcodeInputState extends State<BarcodeInput> {
       ),
       onPressed: () async {
         if (willShowKeyboard) {
-          FocusScope.of(context).unfocus();
+          SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
         } else {
-          focusNode.unfocus();
-          await Future<void>.delayed(Duration(milliseconds: 1));
-          FocusScope.of(context).requestFocus(focusNode);
+          SystemChannels.textInput.invokeMethod<void>('TextInput.show');
         }
         setState(() {
           willShowKeyboard = !willShowKeyboard;

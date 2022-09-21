@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'scan_form.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 enum BarcodeRequired {
