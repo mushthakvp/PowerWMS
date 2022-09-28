@@ -251,7 +251,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ListTile(
               dense: true,
               title: Text(
-                  '${mylocale.languageCode == "en" ? packaging.packagingUnitTranslations.first.value : packaging.packagingUnitTranslations.last.value} (${packaging.defaultAmount} ${packaging.productUnit})'),
+                  '${mylocale.languageCode == "en" ? packaging.packagingUnitTranslations.first.value : packaging.packagingUnitTranslations.last.value} (${packaging.defaultAmount})'),
             ),
             // ...packaging.packagingUnitTranslations
             //     .map((translation) => ListTile(

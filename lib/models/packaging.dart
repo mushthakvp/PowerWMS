@@ -15,14 +15,6 @@ class Packaging {
   final num? width;
   final num? height;
   final String? dimensionMeasurementUnitId;
-  final String product;
-  final String productName;
-  final String productUnit;
-  final num? productDecimals;
-  final String productDescription;
-  final int batchField;
-  final int productionDateField;
-  final int expirationDateField;
   @JsonKey(name: 'packagingUnitTranlations')
   final List<PackagingUnitTranslation> packagingUnitTranslations;
   final String? translatedName;
@@ -41,14 +33,6 @@ class Packaging {
     required this.width,
     required this.height,
     required this.dimensionMeasurementUnitId,
-    required this.product,
-    required this.productName,
-    required this.productUnit,
-    required this.productDecimals,
-    required this.productDescription,
-    required this.batchField,
-    required this.productionDateField,
-    required this.expirationDateField,
     required this.packagingUnitTranslations,
     required this.translatedName,
     required this.formattedDimension,

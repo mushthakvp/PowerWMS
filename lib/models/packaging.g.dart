@@ -18,14 +18,6 @@ Packaging _$PackagingFromJson(Map<String, dynamic> json) {
     width: json['width'] as num?,
     height: json['height'] as num?,
     dimensionMeasurementUnitId: json['dimensionMeasurementUnitId'] as String?,
-    product: json['product'] as String,
-    productName: json['productName'] as String,
-    productUnit: json['productUnit'] as String,
-    productDecimals: json['productDecimals'] as num?,
-    productDescription: json['productDescription'] as String,
-    batchField: json['batchField'] as int,
-    productionDateField: json['productionDateField'] as int,
-    expirationDateField: json['expirationDateField'] as int,
     packagingUnitTranslations: (json['packagingUnitTranlations']
             as List<dynamic>)
         .map(
@@ -49,14 +41,6 @@ Map<String, dynamic> _$PackagingToJson(Packaging instance) => <String, dynamic>{
       'width': instance.width,
       'height': instance.height,
       'dimensionMeasurementUnitId': instance.dimensionMeasurementUnitId,
-      'product': instance.product,
-      'productName': instance.productName,
-      'productUnit': instance.productUnit,
-      'productDecimals': instance.productDecimals,
-      'productDescription': instance.productDescription,
-      'batchField': instance.batchField,
-      'productionDateField': instance.productionDateField,
-      'expirationDateField': instance.expirationDateField,
       'packagingUnitTranlations':
           instance.packagingUnitTranslations.map((e) => e.toJson()).toList(),
       'translatedName': instance.translatedName,
