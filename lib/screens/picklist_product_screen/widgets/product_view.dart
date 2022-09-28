@@ -107,12 +107,14 @@ class ProductView extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(line.product.ean),
-                        SizedBox(height: 8),
-                        const Text(
-                          'Batch',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(line.batchSuggestion ?? ''),
+                        if (line.batchSuggestion != null && line.batchSuggestion!.isNotEmpty) ...[
+                          SizedBox(height: 8),
+                          const Text(
+                            'Batch',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(line.batchSuggestion!),
+                        ]
                       ],
                     ),
                     Spacer(),
