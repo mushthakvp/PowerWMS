@@ -123,12 +123,12 @@ class MutationProvider extends ChangeNotifier {
     // When item was processed
     } else if (askedAmount >= 0 && askedAmount <= totalPickedAmount) {
       return false;
-    // When the canceled amount + (ready for process || processed)
+    // When total picked amount (ready for process || processed)
     // == asked amount
-    } else if (this.cancelRestProductAmount + idleItems
-            .map((e) => e.amount)
-            .toList()
-            .fold(0, (p, c) => p + c) + totalPickedAmount == askedAmount) {
+    } else if (totalPickedAmount + idleItems
+        .map((e) => e.amount)
+        .toList()
+        .fold(0, (p, c) => p + c) == askedAmount) {
       return false;
     }
     return true;
