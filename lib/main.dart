@@ -27,6 +27,7 @@ import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.
 import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
 import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
+import 'package:scanner/util/user_latest_session.dart';
 import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,6 +36,7 @@ RouteObserver<ModalRoute<void>> navigationObserver = RouteObserver<ModalRoute<vo
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await UserLatestSession.init();
   initLogs();
   final db = await createDb();
 
@@ -125,7 +127,9 @@ class WMSApp extends StatelessWidget {
               home: Builder(
                 builder: (context) {
                   if (prefs.getString('token') != null &&
-                      prefs.getString('server') != null) {
+                      prefs.getString('server') != null &&
+                      UserLatestSession.isOutOfSession() == false
+                  ) {
                     dio.options.baseUrl = '${prefs.getString('server')!}/api';
                     dio.options.headers = {
                       'authorization': 'Bearer ${prefs.getString('token')}',

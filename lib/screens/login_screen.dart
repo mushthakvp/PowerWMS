@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/util/user_latest_session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -94,6 +95,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
+                    await UserLatestSession.shared.removeTimestamp();
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
                       try {

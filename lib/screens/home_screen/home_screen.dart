@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:package_info/package_info.dart';
@@ -9,6 +10,7 @@ import 'package:scanner/screens/home_screen/widgets/grid_item.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
+import 'package:scanner/util/user_latest_session.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
 final List<Map<String, dynamic>> items = [
@@ -23,6 +25,7 @@ final List<Map<String, dynamic>> items = [
     'route': PicklistsScreen.routeName,
   }
 ];
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
   static const routeName = '/';
@@ -31,15 +34,16 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with RouteAware {
-
+class _HomeScreenState extends State<HomeScreen>
+    with RouteAware {
   _getSettingInfo() async {
     await Future.wait([
       context.read<SettingProvider>().getSettingInfo(),
       context.read<SettingProvider>().getWarehouses(),
       context.read<SettingProvider>().getUserInfo()
     ]);
-    context.read<ValueNotifier<Settings>>().value = context.read<SettingProvider>().settingsLocal;
+    context.read<ValueNotifier<Settings>>().value =
+        context.read<SettingProvider>().settingsLocal;
   }
 
   @override
@@ -47,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _getSettingInfo();
+      await UserLatestSession.shared.startTimer();
     });
   }
 
@@ -93,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                   mainAxisSpacing: 20.0,
                   crossAxisSpacing: 20.0),
               delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                (context, index) {
                   final item = items[index];
                   return GridItem(
                     item['title'](context),
