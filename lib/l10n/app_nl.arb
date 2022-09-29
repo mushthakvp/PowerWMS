@@ -36,6 +36,8 @@
       }
     }
   },
+  "internet_disconnected": "Er is geen internetverbinding.",
+  "load_picklist_error": "De picklist kon niet worden geladen. Controleer uw internetverbinding. Als de error zich blijft voordoen neem contact op met support.",
   "back": "Terug",
   "close": "Sluiten",
   "save": "Opslaan",

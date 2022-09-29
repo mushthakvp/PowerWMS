@@ -13,7 +13,9 @@ class PicklistLineApiProvider {
       (response) => (response.data!['data'] as List<dynamic>)
           .map((json) => PicklistLine.fromJson(json))
           .toList(),
-    );
+    ).catchError((error, _) {
+      throw Failure(error.toString());
+    });
   }
 
   Future<PicklistLine> getPicklistLine(int picklistId, int lineId) {

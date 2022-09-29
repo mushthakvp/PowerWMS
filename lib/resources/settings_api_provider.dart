@@ -7,9 +7,11 @@ import 'package:sembast/sembast.dart';
 
 const int settings_key = 11008901;
 const int user_info = 11008902;
+const int warehouse = 11008903;
 
 class SettingsApiProvider {
   final store = intMapStoreFactory.store('settings_remote');
+  final storeWarehouse = intMapStoreFactory.store('store_warehouse');
   SettingsApiProvider(this.db);
 
   final Database db;
@@ -85,20 +87,20 @@ class SettingsApiProvider {
   }
 
   Future<void> _saveWarehouseToLocal(List<Warehouse> data) async {
-    await store
+    await storeWarehouse
         .records(data.map((w) => w.id!))
         .add(db, data.map((w) => w.toJson()).toList());
   }
 
   Future<void> _updateWarehouseToLocal(List<Warehouse> data) async {
-    await store
+    await storeWarehouse
         .records(data.map((w) => w.id!))
-        .update(db, data.map((w) => w.toJson()).toList());
+        .put(db, data.map((w) => w.toJson()).toList());
   }
 
   Future<List<Warehouse>> _getWarehouseFromLocal() async {
     var finder = Finder(filter: null);
-    return store.find(db, finder: finder).then((records) =>
+    return storeWarehouse.find(db, finder: finder).then((records) =>
         records.map((snapshot) => Warehouse.fromJson(snapshot.value)).toList());
   }
 

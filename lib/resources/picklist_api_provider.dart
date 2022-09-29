@@ -15,8 +15,8 @@ class PicklistApiProvider {
       (response) => (response.data!['data'] as List<dynamic>)
           .map((json) => Picklist.fromJson(json))
           .toList(),
-    ).catchError((error, stackTrace) {
-      print('============ $error');
+    ).catchError((error, _) {
+      throw Failure(error.toString());
     });
   }
 

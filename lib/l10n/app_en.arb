@@ -36,6 +36,8 @@
       }
     }
   },
+  "internet_disconnected": "There is no Internet connection.",
+  "load_picklist_error": "The pick list could not be loaded. Check your internet connection. If the error persists, please contact support.",
   "back": "Back",
   "close": "Close",
   "save": "Save",

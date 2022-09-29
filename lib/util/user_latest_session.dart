@@ -10,7 +10,7 @@ class UserLatestSession {
 
   static const _key = 'user_latest_session';
 
-  static Future init() async =>
+  static Future ensureInitialized() async =>
       _preferences = await SharedPreferences.getInstance();
 
   late Timer _timer;

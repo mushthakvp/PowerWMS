@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -27,6 +26,7 @@ import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.
 import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
 import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
+import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/util/user_latest_session.dart';
 import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:sembast/sembast.dart';
@@ -36,7 +36,8 @@ RouteObserver<ModalRoute<void>> navigationObserver = RouteObserver<ModalRoute<vo
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await UserLatestSession.init();
+  await UserLatestSession.ensureInitialized();
+  await InternetState.shared.ensureInitialized();
   initLogs();
   final db = await createDb();
 

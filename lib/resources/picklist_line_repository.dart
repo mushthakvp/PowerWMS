@@ -1,6 +1,8 @@
+import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/resources/picklist_line_api_provider.dart';
 import 'package:scanner/resources/picklist_line_db_provider.dart';
+import 'package:scanner/util/internet_state.dart';
 import 'package:sembast/sembast.dart';
 
 class PicklistLineRepository {
@@ -15,6 +17,9 @@ class PicklistLineRepository {
   Stream<List<PicklistLine>> getPicklistLinesStream(int picklistId) async* {
     final stream = _dbProvider.getPicklistLinesStream(picklistId);
     if (await _dbProvider.count(picklistId) == 0) {
+      if (!InternetState.shared.connectivityAvailable()) {
+        throw NoConnection('Intentional exception');
+      }
       final list = await _apiProvider.getPicklistLines(picklistId);
       _dbProvider.savePicklistLines(list);
     }

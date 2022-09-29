@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:scanner/dio.dart';
 import 'package:scanner/main.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
@@ -119,10 +120,15 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
           stream: repository.getPicklistsStream(_search),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Container(
-                margin: EdgeInsets.all(16),
-                child: Text('Data is not available due to the loss of Internet connection.'),
-              );
+              if (snapshot.error is NoConnection) {
+                return errorWidget(mgs: AppLocalizations.of(context)!.internet_disconnected);
+              } else if (snapshot.error is Failure) {
+                return errorWidget(mgs: (snapshot.error as Failure).message);
+              } else {
+                return Container(
+                  child: Text('Something is wrong.'),
+                );
+              }
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
@@ -176,6 +182,13 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
           },
         ),
       ),
+    );
+  }
+
+  Widget errorWidget({required String mgs}) {
+    return Container(
+      margin: EdgeInsets.all(16),
+      child: Text(mgs),
     );
   }
 }
