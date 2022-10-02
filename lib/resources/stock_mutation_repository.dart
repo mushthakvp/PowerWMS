@@ -1,12 +1,15 @@
 import 'package:scanner/models/stock_mutation.dart';
+import 'package:scanner/resources/stock_mutation_api_provider.dart';
 import 'package:scanner/resources/stock_mutation_db_provider.dart';
 import 'package:sembast/sembast.dart';
 
 class StockMutationRepository {
   StockMutationRepository(Database db) {
+    _apiProvider = StockMutationApiProvider();
     _dbProvider = StockMutationDbProvider(db);
   }
 
+  late StockMutationApiProvider _apiProvider;
   late StockMutationDbProvider _dbProvider;
 
   Stream<Map<int, StockMutation>> getStockMutationsStream(int picklistId) {
@@ -25,6 +28,7 @@ class StockMutationRepository {
 
   Future<dynamic> addStockMutation(int id, StockMutation mutation) async {
     try {
+      var resp = await _apiProvider.addStockMutation(mutation);
       await _dbProvider.deleteStockMutation(id);
     } catch (e) {
       print(e);

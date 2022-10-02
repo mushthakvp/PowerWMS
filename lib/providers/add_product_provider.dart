@@ -9,4 +9,13 @@ class AddProductProvider extends ChangeNotifier {
     _canAdd = value;
     notifyListeners();
   }
+
+  String? _value;
+
+  String? get value => _value;
+
+  set value(String? value) {
+    _value = value;
+    notifyListeners();
+  }
 }

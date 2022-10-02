@@ -51,7 +51,8 @@ class ScanForm extends StatelessWidget {
                           onPressed: provider.needToScan() || !enable
                               ? null
                               : () {
-                            formKey.currentState?.save();
+                            // formKey.currentState?.save();
+                            _parseHandler(context, provider, context.read<AddProductProvider>().value ?? '', null);
                             context.read<AddProductProvider>().canAdd = false;
                           },
                         ),
@@ -68,11 +69,13 @@ class ScanForm extends StatelessWidget {
                     }, (String barcode) {
                       if (barcode.isEmpty) {
                         context.read<AddProductProvider>().canAdd = false;
+                        context.read<AddProductProvider>().value = null;
                         return;
                       }
                       bool enableAddButton = provider.line.product.uid == barcode
                           || provider.line.product.ean == barcode;
                       context.read<AddProductProvider>().canAdd = enableAddButton;
+                      context.read<AddProductProvider>().value = barcode;
                     }),
                   ),
                 ],

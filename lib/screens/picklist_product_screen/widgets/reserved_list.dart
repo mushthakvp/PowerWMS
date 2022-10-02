@@ -68,8 +68,12 @@ class _ReservedListState extends State<ReservedList> with RouteAware {
               Center(child: CircularProgressIndicator()),
             ];
           }
-          if (provider.stocks == [] && !provider.isLoading) {
-            list = [Text('Data is empty.')];
+          if (provider.stocks?.length == 0 && !provider.isLoading) {
+            return SliverList(delegate: SliverChildListDelegate([
+              Container(
+                  padding: EdgeInsets.all(16),
+              child: Text('Data is empty.'))]
+            ));
           }
           if (provider.stocks != null && provider.stocks!.isNotEmpty && !provider.isLoading) {
             var items = provider.stocks!;
