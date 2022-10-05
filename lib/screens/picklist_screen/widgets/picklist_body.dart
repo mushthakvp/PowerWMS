@@ -7,6 +7,7 @@ import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/settings_provider.dart';
+import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 import 'package:scanner/widgets/product_image.dart';
@@ -130,6 +131,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
           final settings = value.value;
           lines.asMap().forEach((index, line) {
             lines[index].priority = line.getPriority(
+                context,
                 prefs,
                 this.isCurrentWarehouse(line));
           });
@@ -287,7 +289,7 @@ extension PicklistLineColor on PicklistLine {
   // 1 - grey
   // 2 - yellow
   // 3 - blue
-  int getPriority(SharedPreferences? prefs, bool isCurrentWarehouse) {
+  int getPriority(BuildContext context, SharedPreferences? prefs, bool isCurrentWarehouse) {
     if (!isCurrentWarehouse) {
       return 1;
     }
@@ -311,11 +313,13 @@ extension PicklistLineColor on PicklistLine {
       if (idleList.isNotEmpty) {
         if (cancelProductAmount + this.pickedAmount + (idleList.first.amount)
             == this.pickAmount) {
+          context.read<PicklistRepository>().updatePicklistStatus(this.picklistId);
           return 2;
         }
       } else {
         if (cancelProductAmount + this.pickedAmount
             == this.pickAmount) {
+          context.read<PicklistRepository>().updatePicklistStatus(this.picklistId);
           return 2;
         }
       }

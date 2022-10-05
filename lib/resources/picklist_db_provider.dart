@@ -49,6 +49,12 @@ class PicklistDbProvider {
     }));
   }
 
+  Future<void> updatePicklistStatus(int id) async {
+    _store.record(id).update(db, {
+      'status': PicklistStatus.picked.name,
+    });
+  }
+
   Future<dynamic> savePicklists(List<Picklist> picklists) {
     return _store
         .records(picklists.map<int>((picklist) => picklist.id))
