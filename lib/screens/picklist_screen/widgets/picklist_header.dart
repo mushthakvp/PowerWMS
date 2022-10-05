@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scanner/models/picklist.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PicklistHeader extends StatefulWidget {
   final Picklist _picklist;
@@ -34,10 +35,26 @@ class _PicklistHeaderState extends State<PicklistHeader> {
   }
 
   _address() {
+    var orderReference = widget._picklist.orderReference;
+    var internalMemo = widget._picklist.internalMemo;
     return [
-      ListTile(
-        title: Text(widget._picklist.debtor.address ?? ''),
-      ),
+      if (widget._picklist.debtor.address != null) ...[
+        ListTile(
+          title: Text(widget._picklist.debtor.address ?? ''),
+        ),
+      ],
+      if (orderReference != null) ...[
+        ListTile(
+          title: Text(AppLocalizations.of(context)!.reference),
+          subtitle: Text(orderReference),
+        ),
+      ],
+      if (internalMemo != null) ...[
+        ListTile(
+          title: Text(AppLocalizations.of(context)!.note),
+          subtitle: Text(internalMemo),
+        ),
+      ],
       Divider(),
     ];
   }

@@ -53,6 +53,7 @@ class Picklist {
   final double? palletAmount;
   final String? invoiceId;
   final String? deliveryConditionId;
+  final String? orderReference;
   final String? internalMemo;
   final String? picker;
   final int lines;
@@ -74,6 +75,7 @@ class Picklist {
     required this.palletAmount,
     required this.invoiceId,
     required this.deliveryConditionId,
+    required this.orderReference,
     required this.internalMemo,
     required this.picker,
     required this.lines,

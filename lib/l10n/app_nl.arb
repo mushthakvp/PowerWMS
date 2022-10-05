@@ -92,5 +92,7 @@
   "description": "Product omschrijving",
   "oneScanPicksAll": "Eén scan pakt alles",
   "directMutation": "Directe mutatie",
-  "processing": "Verwerken"
+  "processing": "Verwerken",
+  "reference": "Reference",
+  "note": "Notitie"
 }

@@ -92,5 +92,7 @@
   "description": "Description",
   "oneScanPicksAll": "One scan picks all",
   "directMutation": "Direct mutation",
-  "processing": "Processing"
+  "processing": "Processing",
+  "reference": "Reference",
+  "note": "Note"
 }
