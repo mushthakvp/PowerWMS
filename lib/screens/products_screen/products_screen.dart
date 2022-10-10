@@ -233,7 +233,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     'GTIN / EAN:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text(product.ean),
+                  Text(product.ean ?? ''),
                 ],
               ),
               Spacer(),

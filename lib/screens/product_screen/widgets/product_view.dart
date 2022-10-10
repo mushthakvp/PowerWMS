@@ -28,7 +28,7 @@ class ProductView extends StatelessWidget {
                     'GTIN / EAN:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text(product.ean),
+                  Text(product.ean ?? ''),
                 ],
               ),
               Spacer(),

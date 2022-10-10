@@ -8,7 +8,7 @@ class Product {
   final String uid;
   final String? name;
   final String? description;
-  final String ean;
+  final String? ean;
   final String? productGroupName;
   final String unit;
   final int status;

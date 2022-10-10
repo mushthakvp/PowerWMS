@@ -106,7 +106,7 @@ class ProductView extends StatelessWidget {
                           'GTIN / EAN:',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        Text(line.product.ean),
+                        Text(line.product.ean ?? ''),
                         if (line.batchSuggestion != null && line.batchSuggestion!.isNotEmpty) ...[
                           SizedBox(height: 8),
                           const Text(

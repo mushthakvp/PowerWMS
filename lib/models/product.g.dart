@@ -11,7 +11,7 @@ Product _$ProductFromJson(Map<String, dynamic> json) {
     uid: json['uid'] as String,
     name: json['name'] as String?,
     description: json['description'] as String?,
-    ean: json['ean'] as String,
+    ean: json['ean'] as String?,
     productGroupName: json['productGroupName'] as String?,
     unit: json['unit'] as String,
     status: json['status'] as int,

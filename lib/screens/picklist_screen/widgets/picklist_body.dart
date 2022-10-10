@@ -162,14 +162,13 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
             var children = lines.where((e) => isFinishAtBottom ? e.priority <= 1 : e.priority > 1)
                 .where(filter(_search))
                 .map((line) {
-              var key = Key(line.product.id.toString());
+              // var key = Key(line.product.id.toString());
               var bgColor = picklistColors[line.priority];
               var fullyPicked = bgColor == blue;
               if (prefs == null) {
                 return Container();
               } else {
                 return Column(
-                  key: key,
                   children: [
                     ListTile(
                       tileColor: bgColor,
@@ -179,7 +178,6 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                       leading: ProductImage(
                         line.product.id,
                         width: 60,
-                        key: key,
                       ),
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,8 +255,8 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  getWidget(settings.finishedProductsAtBottom),
-                  getWidget(!settings.finishedProductsAtBottom)
+                  getWidget(true),
+                  getWidget(false)
                 ],
               )
           );

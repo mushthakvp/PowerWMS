@@ -13,7 +13,8 @@ class PicklistLineApiProvider {
       (response) => (response.data!['data'] as List<dynamic>)
           .map((json) => PicklistLine.fromJson(json))
           .toList(),
-    ).catchError((error, _) {
+    ).catchError((error, stack) {
+      print(stack);
       throw Failure(error.toString());
     });
   }
