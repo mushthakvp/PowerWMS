@@ -24,7 +24,7 @@ class PicklistProductScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WMSAppBar(
-        _line.location ?? '',
+        _line.lineLocationCode ?? '',
       ),
       body: StreamBuilder<List<CancelledStockMutationItem>>(
         stream: context

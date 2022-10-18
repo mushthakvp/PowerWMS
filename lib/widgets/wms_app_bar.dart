@@ -1,8 +1,9 @@
 import 'dart:async';
-
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/dio.dart';
 import 'package:scanner/resources/stock_mutation_item_repository.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/util/user_latest_session.dart';
@@ -64,11 +65,12 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
               icon: Icon(Icons.logout),
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.getKeys().forEach((key) {
+                prefs.getKeys().forEach((key) async {
                   if (key == 'token') {
-                    prefs.remove(key);
+                    await prefs.remove(key);
                   }
                 });
+                dio = Dio();
                 UserLatestSession.shared.cancelTimer();
                 Navigator.pushReplacementNamed(context, '/');
               },

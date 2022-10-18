@@ -58,13 +58,14 @@ class LoginScreen extends StatelessWidget {
                         .toUpperCase(),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  initialValue: 'swagger@powerwms.nl',
+                  initialValue: prefs.getString('username') ?? 'swagger@powerwms.nl',
                   validator: MultiValidator([
                     RequiredValidator(errorText: 'Email is required'),
                     EmailValidator(errorText: 'Invalid email'),
                   ]),
                   onSaved: (value) {
                     _authData['username'] = value ?? '';
+                    prefs.setString('username', value!);
                   },
                 ),
                 TextFormField(
@@ -72,7 +73,7 @@ class LoginScreen extends StatelessWidget {
                     labelText: AppLocalizations.of(context)!.loginPasswordLabel,
                   ),
                   obscureText: true,
-                  initialValue: 'Sw@gger',
+                  initialValue: prefs.getString('password') ?? 'Sw@gger',
                   validator: MultiValidator([
                     RequiredValidator(errorText: 'Password is required'),
                     MinLengthValidator(
@@ -82,6 +83,7 @@ class LoginScreen extends StatelessWidget {
                   ]),
                   onSaved: (value) {
                     _authData['password'] = value ?? '';
+                    prefs.setString('password', value!);
                   },
                 ),
                 SizedBox(
@@ -109,7 +111,7 @@ class LoginScreen extends StatelessWidget {
                         dio.options.headers = {
                           'authorization': 'Bearer ${response.data}',
                         };
-                        prefs.setString('token', response.data);
+                        await prefs.setString('token', response.data);
                         Navigator.pushReplacementNamed(context, '/');
                       } catch (e, stack) {
                         print('$e\n$stack');
