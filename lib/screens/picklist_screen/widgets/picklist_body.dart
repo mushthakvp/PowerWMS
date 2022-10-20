@@ -151,28 +151,17 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                 prefs,
                 this.isCurrentWarehouse(line));
           });
-          Map data = Map();
-          data['context'] = context;
           if (lines.where((element) => element.priority == 0 || element.priority == 1)
               .toList().isEmpty) {
             widget.delegate.onUpdateStatus(PicklistStatus.picked);
             if (lines.isNotEmpty) {
-              data['picklistId'] = lines.first.picklistId;
-              data['status'] = PicklistStatus.picked;
-              // compute(updatePicklistStatus, data);
-              SchedulerBinding.instance.scheduleTask(() => {
-                updatePicklistStatus(data)
-              }, Priority.animation);
+              context.read<PicklistRepository>().updatePicklistStatus(lines.first.picklistId, PicklistStatus.picked);
             }
           } else {
             widget.delegate.onUpdateStatus(PicklistStatus.added);
             context.read<StockMutationNeedToProcessProvider>().clearStocks();
             if (lines.isNotEmpty) {
-              data['picklistId'] = lines.first.picklistId;
-              data['status'] = PicklistStatus.added;
-              SchedulerBinding.instance.scheduleTask(() => {
-                updatePicklistStatus(data)
-              }, Priority.animation);
+              context.read<PicklistRepository>().updatePicklistStatus(lines.first.picklistId, PicklistStatus.added);
             }
           }
           switch (settings.picklistSort) {
@@ -354,9 +343,11 @@ extension PicklistLineColor on PicklistLine {
             .toList()
             .fold(0, (p, c) => p + c))
             == this.pickAmount) {
-          context.read<StockMutationNeedToProcessProvider>().addStock(
+          SchedulerBinding.instance.scheduleTask(() => {
+            context.read<StockMutationNeedToProcessProvider>().addStock(
               StockMutation(warehouseId, picklistId, id, true, idleList)
-          );
+            )
+          }, Priority.idle);
           return 2;
         }
       } else {
