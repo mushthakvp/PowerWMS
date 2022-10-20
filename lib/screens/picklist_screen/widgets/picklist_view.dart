@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scanner/dio.dart';
-import 'package:scanner/log.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
@@ -11,16 +10,22 @@ import 'package:scanner/screens/picklist_screen/widgets/picklist_header.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PicklistView extends StatefulWidget {
-  const PicklistView(this.picklist, {Key? key}) : super(key: key);
+  const PicklistView(this.picklist, this.delegate, {Key? key}) : super(key: key);
 
   final Picklist picklist;
+  final PicklistStatusDelegate delegate;
 
   @override
   _PicklistViewState createState() => _PicklistViewState();
 }
 
-class _PicklistViewState extends State<PicklistView> {
+class _PicklistViewState extends State<PicklistView> with PicklistStatusDelegate {
   final _refreshController = RefreshController(initialRefresh: false);
+
+  @override
+  onUpdateStatus(PicklistStatus status) {
+    widget.delegate.onUpdateStatus(status);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +63,7 @@ class _PicklistViewState extends State<PicklistView> {
             child: CustomScrollView(
               slivers: [
                 PicklistHeader(picklist),
-                PicklistBody(snapshot.data!),
+                PicklistBody(snapshot.data!, this),
               ],
             ),
           );

@@ -11,12 +11,14 @@ class SearchField extends StatefulWidget {
       this.onChange,
       this.controller,
       this.focusNode,
+      this.isShowKeyboard,
       {Key? key}) : super(key: key);
 
   final String value;
   final void Function(String value) onChange;
   final TextEditingController controller;
   final FocusNode focusNode;
+  final bool isShowKeyboard;
 
   @override
   _SearchFieldState createState() => _SearchFieldState();
@@ -64,6 +66,10 @@ class _SearchFieldState extends State<SearchField> {
         onChanged: _onChangeHandler,
         onTap: () {
           SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+          widget.focusNode.requestFocus();
+        },
+        onSubmitted: (val) {
+          widget.focusNode.requestFocus();
         },
         autofocus: true,
         decoration: InputDecoration(
@@ -73,13 +79,14 @@ class _SearchFieldState extends State<SearchField> {
           enabledBorder: InputBorder.none,
           errorBorder: InputBorder.none,
           disabledBorder: InputBorder.none,
-          suffixIcon: widget.controller.text.isEmpty ? _keyboardButton() : IconButton(
+          suffixIcon:(widget.controller.text.isEmpty) ? ((widget.isShowKeyboard) ? _keyboardButton() : null) : IconButton(
               hoverColor: Colors.white,
               splashColor: Colors.white,
               highlightColor: Colors.white,
               icon: const Icon(Icons.clear),
               onPressed: () {
                 widget.controller.clear();
+                SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
                 _onChangeHandler('');
               },
           ), // Show the clear button if the text field has something
@@ -114,6 +121,7 @@ class _SearchFieldState extends State<SearchField> {
         }
         setState(() {
           willShowKeyboard = !willShowKeyboard;
+          widget.focusNode.requestFocus();
         });
       },
     );

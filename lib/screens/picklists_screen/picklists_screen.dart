@@ -28,6 +28,7 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
   final TextEditingController textEditingController = TextEditingController();
   final FocusNode focusNode = FocusNode();
   late PicklistLineRepository lineRepository;
+  var isShowKeyboard = true;
 
   _moveToPickList(Picklist picklist) {
     Future.microtask(() {
@@ -58,7 +59,7 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
   @override
   void didPopNext() async {
     setState(() {
-
+      this.focusNode.requestFocus();
     });
     super.didPopNext();
   }
@@ -88,6 +89,11 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
             child: Column(
               children: [
                 TabBar(
+                  onTap: (int index) {
+                    setState(() {
+                      this.isShowKeyboard = (index == 0);
+                    });
+                  },
                   tabs: [
                     Tab(
                       text: AppLocalizations.of(context)!
@@ -105,13 +111,13 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
                   setState(() {
                     _search = value;
                     if (value == '' || value.isEmpty) {
-                      // In case user click on enter keyboard
-                      FocusScope.of(context).requestFocus(focusNode);
-                      // In case user hide keyboard physically
-                      FocusScope.of(context).nextFocus();
+                      this.focusNode.requestFocus();
                     }
                   });
-                },textEditingController, this.focusNode),
+                }, this.textEditingController,
+                    this.focusNode,
+                    this.isShowKeyboard
+                ),
               ],
             ),
           ),

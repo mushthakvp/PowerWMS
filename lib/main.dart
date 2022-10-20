@@ -11,9 +11,11 @@ import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/providers/complete_picklist_provider.dart';
+import 'package:scanner/providers/complete_stockmutation_provider.dart';
 import 'package:scanner/providers/process_product_provider.dart';
 import 'package:scanner/providers/reversed_provider.dart';
 import 'package:scanner/providers/settings_provider.dart';
+import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/resources/product_repository.dart';
@@ -33,6 +35,7 @@ import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 RouteObserver<ModalRoute<void>> navigationObserver = RouteObserver<ModalRoute<void>>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,8 +97,15 @@ class WMSApp extends StatelessWidget {
               ChangeNotifierProvider<ReservedListProvider>(
                   create: (_) => ReservedListProvider(_db)
               ),
+              ChangeNotifierProvider<CompleteStockMutationProvider>(
+                  create: (_) => CompleteStockMutationProvider()
+              ),
+              ChangeNotifierProvider<StockMutationNeedToProcessProvider>(
+                  create: (_) => StockMutationNeedToProcessProvider()
+              ),
             ],
             child: MaterialApp(
+              navigatorKey: navigatorKey,
               debugShowCheckedModeBanner: false,
               title: 'Extracom WMS',
               navigatorObservers: [navigationObserver],

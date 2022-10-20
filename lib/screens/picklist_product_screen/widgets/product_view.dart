@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/log.dart';
+import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
@@ -13,6 +14,7 @@ import 'package:scanner/providers/process_product_provider.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/product_adjustment.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
+import 'package:scanner/util/widget/popup.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -259,8 +261,19 @@ class ProductView extends StatelessWidget {
         .read<StockMutationRepository>()
         .saveMutation(provider.getStockMutation())
         .then((value) {
-      provider.clear();
-      Navigator.of(context).pop();
+      if (value.success) {
+        provider.clear();
+        Navigator.of(context).pop();
+      } else {
+        Future.delayed(const Duration(), () async {
+          await showErrorAlert(message: value.message);
+        });
+      }
+    }, onError: (error) {
+      var response = error as BaseResponse;
+      Future.delayed(const Duration(), () async {
+        await showErrorAlert(message: response.message);
+      });
     });
   }
 

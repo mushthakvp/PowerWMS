@@ -19,7 +19,7 @@ class InternetState {
     try {
       result = await _connectivity.checkConnectivity();
       _updateConnectionStatus(result);
-    } on PlatformException catch (e) {
+    } on PlatformException catch (_) {
       print('Couldn\'t check connectivity status');
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/log.dart';
+import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/providers/mutation_provider.dart';
@@ -11,6 +12,7 @@ import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/line_info.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/product_view.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/reserved_list.dart';
+import 'package:scanner/util/widget/popup.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
 class PicklistProductScreen extends StatelessWidget {
@@ -84,8 +86,19 @@ class PicklistProductScreen extends StatelessWidget {
         .read<StockMutationRepository>()
         .saveMutation(provider.getStockMutation())
         .then((value) {
-      provider.clear();
-      Navigator.of(context).pop();
+      if (value.success) {
+        provider.clear();
+        Navigator.of(context).pop();
+      } else {
+        Future.delayed(const Duration(), () async {
+          await showErrorAlert(message: value.message);
+        });
+      }
+    }, onError: (error) {
+          var response = error as BaseResponse;
+          Future.delayed(const Duration(), () async {
+            await showErrorAlert(message: response.message);
+          });
     });
   }
 }

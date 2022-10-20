@@ -1,3 +1,4 @@
+import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/resources/stock_mutation_api_provider.dart';
 import 'package:scanner/resources/stock_mutation_db_provider.dart';
@@ -16,9 +17,30 @@ class StockMutationRepository {
     return _dbProvider.getStockMutationsStream(picklistId);
   }
 
-  Future<dynamic> saveMutation(StockMutation mutation) async {
-    final id = await _dbProvider.addStockMutation(mutation);
-    addStockMutation(id, mutation);
+  Future<BaseResponse> saveMutation(StockMutation mutation) async {
+    try {
+      var resp = await _apiProvider.addStockMutation(mutation);
+      if (resp.data != null) {
+        final data = BaseResponse.fromJson(resp.data!);
+        print(data.toJson());
+        if (data.success) {
+          final id = await _dbProvider.addStockMutation(mutation);
+          await _dbProvider.deleteStockMutation(id);
+          return data;
+        } else {
+          throw data;
+        }
+      } else {
+        throw BaseResponse(success: false, message: 'Data is empty!');
+      }
+    } catch (error) {
+      print(error);
+      if (error is BaseResponse) {
+        throw error;
+      } else {
+        throw BaseResponse(success: false, message: 'Unknown Error!');
+      }
+    }
   }
 
   Future<dynamic> processQueue() async {
@@ -26,12 +48,21 @@ class StockMutationRepository {
     mutations.forEach(addStockMutation);
   }
 
-  Future<dynamic> addStockMutation(int id, StockMutation mutation) async {
+  Future<BaseResponse> addStockMutation(int id, StockMutation mutation) async {
     try {
       var resp = await _apiProvider.addStockMutation(mutation);
-      await _dbProvider.deleteStockMutation(id);
+      if (resp.data != null) {
+        final data = BaseResponse.fromJson(resp.data!);
+        if (data.success) {
+          await _dbProvider.deleteStockMutation(id);
+        }
+        return data;
+      } else {
+        return BaseResponse(success: false, message: 'Data is empty!');
+      }
     } catch (e) {
       print(e);
+      return BaseResponse(success: false, message: e.toString());
     }
   }
 }

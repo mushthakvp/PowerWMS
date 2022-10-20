@@ -1,12 +1,16 @@
 import 'dart:convert';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/main.dart';
+import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
+import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/settings_provider.dart';
+import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
 import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
 import 'package:scanner/widgets/barcode_input.dart';
@@ -33,10 +37,22 @@ const List<Color?> picklistColors = [
   Color(0xFF034784)
 ];
 
+mixin PicklistStatusDelegate {
+  onUpdateStatus(PicklistStatus status);
+}
+
+Future<void> updatePicklistStatus(Map data) async {
+  final context = data['context'] as BuildContext;
+  final picklistId = data['picklistId'] as int;
+  final status = data['status'] as PicklistStatus;
+  await context.read<PicklistRepository>().updatePicklistStatus(picklistId, status);
+}
+
 class PicklistBody extends StatefulWidget {
-  const PicklistBody(this.lines, {Key? key}) : super(key: key);
+  const PicklistBody(this.lines, this.delegate, {Key? key}) : super(key: key);
 
   final List<PicklistLine> lines;
+  final PicklistStatusDelegate delegate;
 
   @override
   _PicklistBodyState createState() => _PicklistBodyState();
@@ -135,6 +151,30 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                 prefs,
                 this.isCurrentWarehouse(line));
           });
+          Map data = Map();
+          data['context'] = context;
+          if (lines.where((element) => element.priority == 0 || element.priority == 1)
+              .toList().isEmpty) {
+            widget.delegate.onUpdateStatus(PicklistStatus.picked);
+            if (lines.isNotEmpty) {
+              data['picklistId'] = lines.first.picklistId;
+              data['status'] = PicklistStatus.picked;
+              // compute(updatePicklistStatus, data);
+              SchedulerBinding.instance.scheduleTask(() => {
+                updatePicklistStatus(data)
+              }, Priority.animation);
+            }
+          } else {
+            widget.delegate.onUpdateStatus(PicklistStatus.added);
+            context.read<StockMutationNeedToProcessProvider>().clearStocks();
+            if (lines.isNotEmpty) {
+              data['picklistId'] = lines.first.picklistId;
+              data['status'] = PicklistStatus.added;
+              SchedulerBinding.instance.scheduleTask(() => {
+                updatePicklistStatus(data)
+              }, Priority.animation);
+            }
+          }
           switch (settings.picklistSort) {
             case PicklistSortType.warehouseLocation:
               lines.sort((a, b) {
@@ -309,15 +349,19 @@ extension PicklistLineColor on PicklistLine {
     int? cancelProductAmount = getCancelProductAmount(prefs, this);
     if (cancelProductAmount != null) {
       if (idleList.isNotEmpty) {
-        if (cancelProductAmount + this.pickedAmount + (idleList.first.amount)
+        if (cancelProductAmount + this.pickedAmount + (idleList
+            .map((e) => e.amount)
+            .toList()
+            .fold(0, (p, c) => p + c))
             == this.pickAmount) {
-          context.read<PicklistRepository>().updatePicklistStatus(this.picklistId);
+          context.read<StockMutationNeedToProcessProvider>().addStock(
+              StockMutation(warehouseId, picklistId, id, true, idleList)
+          );
           return 2;
         }
       } else {
         if (cancelProductAmount + this.pickedAmount
             == this.pickAmount) {
-          context.read<PicklistRepository>().updatePicklistStatus(this.picklistId);
           return 2;
         }
       }

@@ -49,9 +49,9 @@ class PicklistDbProvider {
     }));
   }
 
-  Future<void> updatePicklistStatus(int id) async {
+  Future<void> updatePicklistStatus(int id, PicklistStatus status) async {
     _store.record(id).update(db, {
-      'status': PicklistStatus.picked.name,
+      'status': status.name,
     });
   }
 

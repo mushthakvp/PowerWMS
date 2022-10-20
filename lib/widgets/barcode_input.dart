@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
-import 'package:scanner/widgets/e_formfield.dart';
 import 'package:scanner/widgets/e_textfield.dart';
 
 final parser = GS1BarcodeParser.defaultParser();

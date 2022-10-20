@@ -240,7 +240,7 @@ class ScanForm extends StatelessWidget {
           && mutation.cancelRestProductAmount != 0
           && mutation.showToPickAmount == 0
       ) {
-        Navigator.of(context).pop();
+        onParse(true);
       }
     } catch (e, stack) {
       AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
