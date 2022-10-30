@@ -9,3 +9,9 @@ Future<Database> createDb() async {
   var dbPath = join(dir.path, 'database.db');
   return await databaseFactoryIo.openDatabase(dbPath);
 }
+
+Future<void> deleteDb() async {
+  var dir = await getApplicationDocumentsDirectory();
+  var dbPath = join(dir.path, 'database.db');
+  await databaseFactoryIo.deleteDatabase(dbPath);
+}

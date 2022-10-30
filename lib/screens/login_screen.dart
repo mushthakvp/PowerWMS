@@ -42,7 +42,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                   keyboardType: TextInputType.url,
                   initialValue:
-                      prefs.getString('server') ?? 'http://powerwms.nl',
+                      prefs.getString('server') ?? 'https://powerwms.nl',
                   validator: (value) {
                     return null;
                   },
@@ -58,7 +58,7 @@ class LoginScreen extends StatelessWidget {
                         .toUpperCase(),
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  initialValue: prefs.getString('username') ?? 'swagger@powerwms.nl',
+                  initialValue: prefs.getString('username'),
                   validator: MultiValidator([
                     RequiredValidator(errorText: 'Email is required'),
                     EmailValidator(errorText: 'Invalid email'),
@@ -73,7 +73,7 @@ class LoginScreen extends StatelessWidget {
                     labelText: AppLocalizations.of(context)!.loginPasswordLabel,
                   ),
                   obscureText: true,
-                  initialValue: prefs.getString('password') ?? 'Sw@gger',
+                  initialValue: prefs.getString('password'),
                   validator: MultiValidator([
                     RequiredValidator(errorText: 'Password is required'),
                     MinLengthValidator(

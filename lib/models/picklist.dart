@@ -15,7 +15,11 @@ enum PicklistStatus {
   @JsonValue(5)
   completed,
   @JsonValue(6)
-  archived
+  archived,
+  @JsonValue(7)
+  priority,
+  @JsonValue(8)
+  check
 }
 
 extension PicklistStatusExtension on PicklistStatus {
@@ -35,6 +39,10 @@ extension PicklistStatusExtension on PicklistStatus {
         return 5;
       case PicklistStatus.archived:
         return 6;
+      case PicklistStatus.priority:
+        return 7;
+      case PicklistStatus.check:
+        return 8;
     }
   }
 }
