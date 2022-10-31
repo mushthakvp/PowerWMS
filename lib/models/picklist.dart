@@ -95,7 +95,9 @@ class Picklist {
 
   isNotPicked() {
     return status == PicklistStatus.added ||
-        status == PicklistStatus.inProgress;
+        status == PicklistStatus.inProgress ||
+        status == PicklistStatus.check ||
+        status == PicklistStatus.priority;
   }
 
   isPicked() {

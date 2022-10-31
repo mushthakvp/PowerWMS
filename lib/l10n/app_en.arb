@@ -94,5 +94,6 @@
   "directMutation": "Direct mutation",
   "processing": "Processing",
   "reference": "Reference",
-  "note": "Note"
+  "note": "Note",
+  "status": "Status"
 }

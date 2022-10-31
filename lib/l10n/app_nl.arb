@@ -94,5 +94,6 @@
   "directMutation": "Directe mutatie",
   "processing": "Verwerken",
   "reference": "Reference",
-  "note": "Notitie"
+  "note": "Notitie",
+  "status": "Staat"
 }

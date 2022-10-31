@@ -34,7 +34,7 @@ class PicklistView extends StatelessWidget {
                       leading: Container(
                         width: 40,
                         height: 40,
-                        color: Colors.black,
+                        color: statusColor(picklist),
                         alignment: Alignment.center,
                         child: Text(
                           '${picklist.lines}',
@@ -74,5 +74,19 @@ class PicklistView extends StatelessWidget {
             .toList(),
       ),
     );
+  }
+  Color statusColor(Picklist picklist) {
+    switch(picklist.status) {
+      case PicklistStatus.inProgress:
+        return Color(0xFF034784);
+      case PicklistStatus.added:
+        return Colors.black;
+      case PicklistStatus.check:
+        return Color(0Xff777777);
+      case PicklistStatus.priority:
+        return Color(0xFFed6f56);
+      default:
+        return Colors.black;
+    }
   }
 }
