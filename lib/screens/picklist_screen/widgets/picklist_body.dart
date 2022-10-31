@@ -41,13 +41,6 @@ mixin PicklistStatusDelegate {
   onUpdateStatus(PicklistStatus status);
 }
 
-Future<void> updatePicklistStatus(Map data) async {
-  final context = data['context'] as BuildContext;
-  final picklistId = data['picklistId'] as int;
-  final status = data['status'] as PicklistStatus;
-  await context.read<PicklistRepository>().updatePicklistStatus(picklistId, status);
-}
-
 class PicklistBody extends StatefulWidget {
   const PicklistBody(this.lines, this.delegate, {Key? key}) : super(key: key);
 
@@ -155,13 +148,21 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
               .toList().isEmpty) {
             widget.delegate.onUpdateStatus(PicklistStatus.picked);
             if (lines.isNotEmpty) {
-              context.read<PicklistRepository>().updatePicklistStatus(lines.first.picklistId, PicklistStatus.picked);
+              context.read<PicklistRepository>().updatePicklistStatus(
+                  lines.first.picklistId,
+                  PicklistStatus.picked,
+                  false,
+              );
             }
           } else {
             widget.delegate.onUpdateStatus(PicklistStatus.added);
             context.read<StockMutationNeedToProcessProvider>().clearStocks();
             if (lines.isNotEmpty) {
-              context.read<PicklistRepository>().updatePicklistStatus(lines.first.picklistId, PicklistStatus.added);
+              context.read<PicklistRepository>().updatePicklistStatus(
+                  lines.first.picklistId,
+                  PicklistStatus.added,
+                  true
+              );
             }
           }
           switch (settings.picklistSort) {

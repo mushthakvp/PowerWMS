@@ -69,6 +69,7 @@ class Picklist {
   final bool hasCancelled;
   final int id;
   final bool isNew;
+  final PicklistStatus? defaultStatus;
 
   Picklist({
     required this.timezone,
@@ -91,6 +92,7 @@ class Picklist {
     required this.hasCancelled,
     required this.id,
     required this.isNew,
+    required this.defaultStatus
   });
 
   isNotPicked() {

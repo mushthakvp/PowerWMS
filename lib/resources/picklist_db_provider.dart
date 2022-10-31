@@ -49,10 +49,20 @@ class PicklistDbProvider {
     }));
   }
 
-  Future<void> updatePicklistStatus(int id, PicklistStatus status) async {
-    _store.record(id).update(db, {
-      'status': status.name,
-    });
+  Future<void> updatePicklistStatus(int id, PicklistStatus status, bool isReset) async {
+    final res = await _store.record(id).get(db);
+    final picklist = Picklist.fromJson(res ?? {});
+    if (isReset && picklist.defaultStatus != null) {
+      _store.record(id).update(db, {
+        'status': picklist.defaultStatus!.name,
+      });
+    }
+    if (!isReset) {
+      _store.record(id).update(db, {
+        'status': status.name,
+        'defaultStatus': picklist.status.name
+      });
+    }
   }
 
   Future<dynamic> savePicklists(List<Picklist> picklists) {

@@ -28,8 +28,8 @@ class PicklistRepository {
     yield* stream;
   }
 
-  Future<void> updatePicklistStatus(int id, PicklistStatus status) async {
-    await _dbProvider.updatePicklistStatus(id, status);
+  Future<void> updatePicklistStatus(int id, PicklistStatus status, bool isReset) async {
+    await _dbProvider.updatePicklistStatus(id, status, isReset);
   }
 
   Future<dynamic> clear() {

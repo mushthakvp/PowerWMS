@@ -28,6 +28,8 @@ Picklist _$PicklistFromJson(Map<String, dynamic> json) {
     hasCancelled: json['hasCancelled'] as bool,
     id: json['id'] as int,
     isNew: json['isNew'] as bool,
+    defaultStatus:
+        _$enumDecodeNullable(_$PicklistStatusEnumMap, json['defaultStatus']),
   );
 }
 
@@ -52,6 +54,7 @@ Map<String, dynamic> _$PicklistToJson(Picklist instance) => <String, dynamic>{
       'hasCancelled': instance.hasCancelled,
       'id': instance.id,
       'isNew': instance.isNew,
+      'defaultStatus': _$PicklistStatusEnumMap[instance.defaultStatus],
     };
 
 K _$enumDecode<K, V>(
@@ -90,3 +93,14 @@ const _$PicklistStatusEnumMap = {
   PicklistStatus.priority: 7,
   PicklistStatus.check: 8,
 };
+
+K? _$enumDecodeNullable<K, V>(
+  Map<K, V> enumValues,
+  dynamic source, {
+  K? unknownValue,
+}) {
+  if (source == null) {
+    return null;
+  }
+  return _$enumDecode<K, V>(enumValues, source, unknownValue: unknownValue);
+}
