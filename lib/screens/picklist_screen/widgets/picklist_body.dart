@@ -22,8 +22,17 @@ filter(String search) => (PicklistLine line) =>
     search == '' || line.product.ean == search || line.product.uid == search;
 
 List<PicklistLine> scanFilter(String search, List<PicklistLine> line) {
-  return line
-      .where((l) => l.product.ean == search || l.product.uid == search).toList();
+  List<PicklistLine> result = [];
+  if (search.length == 13) {
+    final request = '0$search';
+    result = line
+        .where((l) => l.product.ean == request || l.product.uid == request).toList();
+  }
+  if (result.isEmpty) {
+    result = line
+        .where((l) => l.product.ean == search || l.product.uid == search).toList();
+  }
+  return result;
 }
 
 const blue = Color(0xFF034784);

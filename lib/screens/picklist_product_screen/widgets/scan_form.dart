@@ -52,7 +52,17 @@ class ScanForm extends StatelessWidget {
                               ? null
                               : () {
                             // formKey.currentState?.save();
-                            _parseHandler(context, provider, context.read<AddProductProvider>().value ?? '', null);
+                            final String ean = _parseHandler(context, provider, context.read<AddProductProvider>().value ?? '', null);
+                            if (ean.length == 13) {
+                              String request = '0$ean';
+                              try {
+                                _parseHandler(context, provider, request, null, isThrowError: true);
+                              } catch (_) {
+                                _parseHandler(context, provider, ean, null);
+                              }
+                            } else {
+                              _parseHandler(context, provider, ean, null);
+                            }
                             context.read<AddProductProvider>().canAdd = false;
                           },
                         ),
@@ -63,7 +73,16 @@ class ScanForm extends StatelessWidget {
                     flex: 3,
                     child: BarcodeInput((value, barcode) {
                       if (!provider.needToScan() || value.length > 0) {
-                        _parseHandler(context, provider, value, barcode);
+                        if (value.length == 13) {
+                          String request = '0$value';
+                          try {
+                            _parseHandler(context, provider, request, barcode, isThrowError: true);
+                          } catch (_) {
+                            _parseHandler(context, provider, value, barcode);
+                          }
+                        } else {
+                          _parseHandler(context, provider, value, barcode);
+                        }
                         context.read<AddProductProvider>().canAdd = false;
                       }
                     }, (String barcode) {
@@ -92,6 +111,7 @@ class ScanForm extends StatelessWidget {
     MutationProvider mutation,
     String ean,
     GS1Barcode? barcode,
+    {bool? isThrowError = false}
   ) {
     final settings = context.read<ValueNotifier<Settings>>().value;
     try {
@@ -243,14 +263,18 @@ class ScanForm extends StatelessWidget {
         onParse(true);
       }
     } catch (e, stack) {
-      AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
-        final snackBar = SnackBar(
-          content: Text(e.toString()),
-          duration: Duration(seconds: 2),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      });
-      print('$e\n$stack');
+      if (isThrowError == false) {
+        AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
+          final snackBar = SnackBar(
+            content: Text(e.toString()),
+            duration: Duration(seconds: 2),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        });
+      }
+      if (isThrowError == true) {
+        throw '$e\n$stack';
+      }
     }
   }
 

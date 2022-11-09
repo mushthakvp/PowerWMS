@@ -67,7 +67,7 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 prefs.getKeys().forEach((key) async {
-                  if (key != 'username' && key != 'password') {
+                  if (key != 'username' && key != 'password' && key != 'server') {
                     await prefs.remove(key);
                   }
                 });
