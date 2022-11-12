@@ -31,8 +31,7 @@ class ProductView extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AddProductProvider>(
-            create: (_) => AddProductProvider()
-        ),
+            create: (_) => AddProductProvider()),
         StreamProvider<Map<int, StockMutation>?>(
           create: (_) =>
               mutationRepository.getStockMutationsStream(line.picklistId),
@@ -47,9 +46,10 @@ class ProductView extends StatelessWidget {
             final prefs = await SharedPreferences.getInstance();
             final json = prefs.getString('${line.id}');
             if (json != null) {
-              return (jsonDecode(json) as List<dynamic>)
+              final res = (jsonDecode(json) as List<dynamic>)
                   .map((json) => StockMutationItem.fromJson(json))
                   .toList();
+              return res;
             } else {
               return [];
             }
@@ -79,10 +79,10 @@ class ProductView extends StatelessWidget {
         builder: (context, provider, _) {
           Future.delayed(const Duration(milliseconds: 500), () {
             if (provider != null) {
-              context.read<ProcessProductProvider>()
-                  .canProcess = provider.idleItems.length > 0;
-              context.read<ProcessProductProvider>()
-                  .mutationProvider = provider;
+              context.read<ProcessProductProvider>().canProcess =
+                  provider.idleItems.length > 0;
+              context.read<ProcessProductProvider>().mutationProvider =
+                  provider;
             }
           });
           if (provider == null) {
@@ -109,7 +109,8 @@ class ProductView extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(line.product.ean ?? ''),
-                        if (line.batchSuggestion != null && line.batchSuggestion!.isNotEmpty) ...[
+                        if (line.batchSuggestion != null &&
+                            line.batchSuggestion!.isNotEmpty) ...[
                           SizedBox(height: 8),
                           const Text(
                             'Batch',
@@ -128,8 +129,13 @@ class ProductView extends StatelessWidget {
               _pickTile(provider, context),
               SizedBox(height: 8),
               Divider(height: 1),
-              /// Cancel rest product amount
+
+              /// Cancel rest of product amount
               _cancelProductAmount(provider, context),
+
+              /// Backorder rest of product amount
+              _backorderProductAmount(provider, context),
+
               /// Barcode
               ScanForm(
                 (process) {
@@ -182,6 +188,7 @@ class ProductView extends StatelessWidget {
             ],
           ),
           Spacer(),
+
           /// Amount to pick
           InkWell(
             onTap: () {
@@ -191,14 +198,19 @@ class ProductView extends StatelessWidget {
                     mutationProvider: provider,
                     onConfirmAmount: (int amount, bool isCancel) {
                       provider.changeAmount(amount, isCancel);
+                      provider.changeBackorderAmount(amount, !isCancel);
                       // handle local storage
-                      provider.handleProductCancelAmount(
-                          isCancel ? CacheProductStatus.set : CacheProductStatus.remove
-                      );
+                      provider.handleProductCancelAmount(isCancel
+                          ? CacheProductStatus.set
+                          : CacheProductStatus.remove);
+                      provider.handleProductBackorderAmount(!isCancel
+                          ? CacheProductStatus.set
+                          : CacheProductStatus.remove);
                     });
               } else {
                 final snackBar = SnackBar(
-                  content: Text(AppLocalizations.of(context)!.productCannotScan),
+                  content:
+                      Text(AppLocalizations.of(context)!.productCannotScan),
                   duration: Duration(seconds: 2),
                 );
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -219,8 +231,9 @@ class ProductView extends StatelessWidget {
                     '${provider.showToPickAmount}',
                     style: TextStyle(
                       fontSize: 50,
-                      color:
-                          provider.toPickAmount < 0 ? Colors.red : Colors.black54,
+                      color: provider.toPickAmount < 0
+                          ? Colors.red
+                          : Colors.black54,
                     ),
                   ),
                 ),
@@ -238,22 +251,39 @@ class ProductView extends StatelessWidget {
   }
 
   _cancelProductAmount(MutationProvider provider, BuildContext context) {
-    return provider.showCancelRestProductAmount ? Column(
-      children: <Widget>[
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 10.0),
-          alignment: Alignment.center,
-          child: Text('${provider.cancelRestProductAmount} ${AppLocalizations.of(context)!.productWillBeCancel.toUpperCase()}',
-              style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 24.0
-              )
-          ),
-        ),
-        SizedBox(height: 4),
-        Divider(height: 1),
-      ],
-    ) : SizedBox();
+    return provider.showCancelRestProductAmount
+        ? Column(
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10.0),
+                alignment: Alignment.center,
+                child: Text(
+                    '${provider.cancelRestProductAmount} ${AppLocalizations.of(context)!.productWillBeCancel.toUpperCase()}',
+                    style: TextStyle(color: Colors.red, fontSize: 24.0)),
+              ),
+              SizedBox(height: 4),
+              Divider(height: 1),
+            ],
+          )
+        : SizedBox();
+  }
+
+  _backorderProductAmount(MutationProvider provider, BuildContext context) {
+    return provider.showBackorderProductAmount
+        ? Column(
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10.0),
+                alignment: Alignment.center,
+                child: Text(
+                    '${provider.backorderRestProductAmount} ${AppLocalizations.of(context)!.productWillBeBackorder.toUpperCase()}',
+                    style: TextStyle(color: Colors.blue, fontSize: 24.0)),
+              ),
+              SizedBox(height: 4),
+              Divider(height: 1),
+            ],
+          )
+        : SizedBox();
   }
 
   _onProcessHandler(MutationProvider provider, BuildContext context) {
@@ -279,7 +309,8 @@ class ProductView extends StatelessWidget {
 
   _itemsBuilder(MutationProvider mutation, BuildContext context) {
     return mutation.idleItems.map((item) {
-      var expirationDate = item.expirationDate != null ? '| ${item.expirationDate!}' : '';
+      var expirationDate =
+          item.expirationDate != null ? '| ${item.expirationDate!}' : '';
       return Dismissible(
         key: item.stickerCode == null ? UniqueKey() : Key(item.stickerCode!),
         onDismissed: (direction) {

@@ -60,7 +60,7 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
     print("========== $amount");
   }
 
-  bool _isCancelRestProduct = true;
+  bool _isCancelRestProduct = false;
 
   setCancelRestProduct() {
     setState(() {

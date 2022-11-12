@@ -44,6 +44,7 @@ class MutationProvider extends ChangeNotifier {
     this.packaging,
   ) {
     handleProductCancelAmount(CacheProductStatus.get);
+    handleProductBackorderAmount(CacheProductStatus.get);
   }
 
   final PicklistLine line;
@@ -62,6 +63,16 @@ class MutationProvider extends ChangeNotifier {
 
   bool get showCancelRestProductAmount {
     return isCancelRestProductAmount && cancelRestProductAmount != 0;
+  }
+
+  // the status of backorder rest of product amount checkbox
+  bool isBackorderRestProductAmount = true;
+
+  // the cancel product amount
+  int backorderRestProductAmount = 0;
+
+  bool get showBackorderProductAmount {
+    return isBackorderRestProductAmount && backorderRestProductAmount != 0;
   }
 
   getStockMutation() => StockMutation(
@@ -91,6 +102,8 @@ class MutationProvider extends ChangeNotifier {
   int get showToPickAmount {
     if (this.isCancelRestProductAmount) {
       return toPickAmount - cancelRestProductAmount;
+    } else if (this.isBackorderRestProductAmount) {
+      return toPickAmount - backorderRestProductAmount;
     } else {
       return amount;
     }
@@ -150,6 +163,8 @@ class MutationProvider extends ChangeNotifier {
     idleItems.remove(value);
     if (this.isCancelRestProductAmount) {
       amount = toPickAmount - cancelRestProductAmount;
+    } else if (this.isBackorderRestProductAmount) {
+      amount = toPickAmount - backorderRestProductAmount;
     } else {
       amount = toPickAmount;
     }
@@ -177,16 +192,34 @@ class MutationProvider extends ChangeNotifier {
   }
 
   changeAmount(int value, bool isCancel) {
+    if (!isCancel) {
+      this.isCancelRestProductAmount = false;
+      this.cancelRestProductAmount = 0;
+      notifyListeners();
+      return;
+    }
     this.amount = value;
     this.cancelRestProductAmount = max<int>(0, toPickAmount - amount);
-    this.isCancelRestProductAmount = isCancel;
+    this.isCancelRestProductAmount = true;
     // In case picked amount is a negative number
     // Then, cancel amount doesn't effected
     if (askedAmount < 0) {
       this.cancelRestProductAmount = toPickAmount - amount;
     }
-    if (!isCancel) {
-      this.cancelRestProductAmount = 0;
+    notifyListeners();
+  }
+
+  changeBackorderAmount(int value, bool isBackorder) {
+    if (!isBackorder) {
+      this.backorderRestProductAmount = 0;
+      this.isBackorderRestProductAmount = false;
+      notifyListeners();
+    }
+    this.amount = value;
+    this.backorderRestProductAmount = max<int>(0, toPickAmount - amount);
+    this.isBackorderRestProductAmount = true;
+    if (askedAmount < 0) {
+      this.backorderRestProductAmount = toPickAmount - amount;
     }
     notifyListeners();
   }
@@ -211,6 +244,36 @@ class MutationProvider extends ChangeNotifier {
         break;
       case CacheProductStatus.remove:
         prefs.remove(key);
+        this.isCancelRestProductAmount = false;
+        this.cancelRestProductAmount = 0;
+        notifyListeners();
+        break;
+    }
+  }
+
+  handleProductBackorderAmount(CacheProductStatus status) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '${line.id}_${line.product.id}_backorder';
+    switch (status) {
+      case CacheProductStatus.set:
+        prefs.setInt(key, this.backorderRestProductAmount);
+        break;
+      case CacheProductStatus.get:
+        int? count = prefs.getInt(key);
+        if (count != null) {
+          this.backorderRestProductAmount = count;
+          this.amount -= count;
+          this.isBackorderRestProductAmount = count != 0;
+        } else {
+          this.isBackorderRestProductAmount = false;
+        }
+        notifyListeners();
+        break;
+      case CacheProductStatus.remove:
+        prefs.remove(key);
+        this.isBackorderRestProductAmount = false;
+        this.backorderRestProductAmount = 0;
+        notifyListeners();
         break;
     }
   }

@@ -310,17 +310,21 @@ extension PicklistLineColor on PicklistLine {
   List<StockMutationItem> _getIdleAmount(SharedPreferences? prefs, PicklistLine line) {
     final json = prefs?.getString('${line.id}');
     if (json != null) {
-      return (jsonDecode(json) as List<dynamic>)
+      final res = (jsonDecode(json) as List<dynamic>)
           .map((json) => StockMutationItem.fromJson(json))
           .toList();
+      return res;
     } else {
       return [];
     }
   }
 
-  int? getCancelProductAmount(SharedPreferences? prefs, PicklistLine line) {
-    final key = '${line.id}_${line.product.id}';
-    return prefs?.getInt(key);
+  int? getBackorderCancelProductAmount(SharedPreferences? prefs, PicklistLine line) {
+    final cKey = '${line.id}_${line.product.id}';
+    int? cAmount = prefs?.getInt(cKey);
+    final bKey = '${line.id}_${line.product.id}_backorder';
+    int? bAmount = prefs?.getInt(bKey);
+    return cAmount ?? bAmount;
   }
 
   // 0 - none background
@@ -345,24 +349,26 @@ extension PicklistLineColor on PicklistLine {
         return 3;
       }
     }
+    if (idleList.isNotEmpty) {
+      SchedulerBinding.instance.scheduleTask(() => {
+        context.read<StockMutationNeedToProcessProvider>().addStock(
+            StockMutation(warehouseId, picklistId, id, true, idleList)
+        )
+      }, Priority.idle);
+    }
     // case 3: pickAmount = the amount of process product + picked amount + cancelled amount
-    int? cancelProductAmount = getCancelProductAmount(prefs, this);
-    if (cancelProductAmount != null) {
+    int? cancelBackorderProductAmount = getBackorderCancelProductAmount(prefs, this);
+    if (cancelBackorderProductAmount != null) {
       if (idleList.isNotEmpty) {
-        if (cancelProductAmount + this.pickedAmount + (idleList
+        if (cancelBackorderProductAmount + this.pickedAmount + (idleList
             .map((e) => e.amount)
             .toList()
             .fold(0, (p, c) => p + c))
             == this.pickAmount) {
-          SchedulerBinding.instance.scheduleTask(() => {
-            context.read<StockMutationNeedToProcessProvider>().addStock(
-              StockMutation(warehouseId, picklistId, id, true, idleList)
-            )
-          }, Priority.idle);
           return 2;
         }
       } else {
-        if (cancelProductAmount + this.pickedAmount
+        if (cancelBackorderProductAmount + this.pickedAmount
             == this.pickAmount) {
           return 2;
         }
