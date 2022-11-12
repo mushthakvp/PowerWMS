@@ -97,7 +97,8 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
   }
 
   bool isCurrentWarehouse(PicklistLine line) {
-    return context.read<SettingProvider>().currentWareHouse?.code == line.lineWarehouseCode;
+    final warehouseCode = context.read<SettingProvider>().currentWareHouse?.code;
+    return warehouseCode == line.lineWarehouseCode || warehouseCode == line.warehouse;
   }
 
   _moveToProduct(PicklistLine line) {
