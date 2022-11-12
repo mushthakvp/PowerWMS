@@ -21,6 +21,8 @@ class PicklistFooter extends StatefulWidget {
 }
 
 class _PicklistFooterState extends State<PicklistFooter> {
+  bool isProcessing = false;
+
   @override
   void initState() {
     super.initState();
@@ -33,40 +35,64 @@ class _PicklistFooterState extends State<PicklistFooter> {
         return ListTile(
           visualDensity: VisualDensity.compact,
           title: ElevatedButton(
-              child: Text(AppLocalizations.of(context)!.complete.toUpperCase()),
+              child: isProcessing
+                  ? SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: Colors.white,
+                      ))
+                  : Text(AppLocalizations.of(context)!.complete.toUpperCase()),
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
               ),
-              onPressed: () async {
-                Future<void> doComplete(
-                    List<StockMutation> stocksNeedToProcess) async {
-                  var response =
-                      await provider.completePicklist(widget.picklist.id);
-                  if (response?.success == true) {
-                    widget.onCompleted(true, response?.message ?? '',
-                        widget.picklist, stocksNeedToProcess);
-                  } else {
-                    widget.onCompleted(false, response?.message ?? '',
-                        widget.picklist, stocksNeedToProcess);
-                  }
-                }
+              onPressed: isProcessing
+                  ? null
+                  : () async {
+                      setState(() {
+                        isProcessing = true;
+                      });
 
-                var stocksNeedToProcess =
-                    context.read<StockMutationNeedToProcessProvider>().stocks;
-                if (stocksNeedToProcess.isNotEmpty) {
-                  await Future.forEach(stocksNeedToProcess,
-                      context.read<StockMutationRepository>().saveMutation).catchError((error) {
-                        var response = error as BaseResponse;
-                        Future.delayed(const Duration(), () async {
-                          await showErrorAlert(message: response.message);
+                      Future<void> doComplete(
+                          List<StockMutation> stocksNeedToProcess) async {
+                        var response =
+                            await provider.completePicklist(widget.picklist.id);
+                        if (response?.success == true) {
+                          widget.onCompleted(true, response?.message ?? '',
+                              widget.picklist, stocksNeedToProcess);
+                        } else {
+                          widget.onCompleted(false, response?.message ?? '',
+                              widget.picklist, stocksNeedToProcess);
+                        }
+                        Future.delayed(const Duration(seconds: 2),
+                            () {
+                          if (!mounted) return;
+                          setState(() {
+                            isProcessing = false;
+                          });
                         });
-                  }).then((value) => {
-                    doComplete(stocksNeedToProcess)
-                  });
-                } else {
-                  await doComplete(stocksNeedToProcess);
-                }
-              }),
+                      }
+
+                      var stocksNeedToProcess = context
+                          .read<StockMutationNeedToProcessProvider>()
+                          .stocks;
+                      if (stocksNeedToProcess.isNotEmpty) {
+                        await Future.forEach(
+                                stocksNeedToProcess,
+                                context
+                                    .read<StockMutationRepository>()
+                                    .saveMutation)
+                            .catchError((error) {
+                          var response = error as BaseResponse;
+                          Future.delayed(const Duration(), () async {
+                            await showErrorAlert(message: response.message);
+                          });
+                        }).then((value) => {doComplete(stocksNeedToProcess)});
+                      } else {
+                        await doComplete(stocksNeedToProcess);
+                      }
+                    }),
         );
       },
     );

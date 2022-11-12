@@ -52,6 +52,9 @@ class PicklistDbProvider {
   Future<void> updatePicklistStatus(int id, PicklistStatus status, bool isReset) async {
     final res = await _store.record(id).get(db);
     final picklist = Picklist.fromJson(res ?? {});
+    if (picklist.status == PicklistStatus.completed) {
+      return;
+    }
     if (isReset && picklist.defaultStatus != null) {
       _store.record(id).update(db, {
         'status': picklist.defaultStatus!.name,
