@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:scanner/models/picklist.dart';
+import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/providers/complete_stockmutation_provider.dart';
+import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_body.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_footer.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_view.dart';
@@ -24,12 +26,14 @@ class PicklistScreen extends StatefulWidget {
 class _PicklistScreenState extends State<PicklistScreen> with PicklistStatusDelegate {
 
   late CompleteStockMutationProvider completeStockMutationProvider;
+  SharedPreferences? prefs;
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       completeStockMutationProvider = Provider.of<CompleteStockMutationProvider>(context, listen: false);
       completeStockMutationProvider.status = widget._picklist.status;
+      prefs = await SharedPreferences.getInstance();
     });
     super.initState();
   }
@@ -56,6 +60,25 @@ class _PicklistScreenState extends State<PicklistScreen> with PicklistStatusDele
               ? PicklistFooter(widget._picklist, (isProcessSuccess, message, picklist, stocksNeedToProcess) async {
                 if (isProcessSuccess) {
                   Future.delayed(const Duration(), () async {
+                    bool isBackorderRemain(StockMutation line) {
+                      final bKey = '${line.lineId}_${line.items.first.productId}_backorder';
+                      int? bAmount = prefs?.getInt(bKey);
+                      return bAmount != null;
+                    }
+                    bool isCancelledRemain(StockMutation line) {
+                      final cKey = '${line.lineId}_${line.items.first.productId}';
+                      int? cAmount = prefs?.getInt(cKey);
+                      return cAmount != null;
+                    }
+                    Future<void> processCancelBackorder(StockMutation item) async {
+                      if (isBackorderRemain(item)) {
+                        await context.read<StockMutationRepository>().doBackorderRemain(item);
+                      }
+                      if (isCancelledRemain(item)) {
+                        await context.read<StockMutationRepository>().doCancelledRemain(item);
+                      }
+                    }
+                    await Future.forEach(stocksNeedToProcess, processCancelBackorder);
                     await showDialog(
                       context: context,
                       builder: (ctx) => successAlert(

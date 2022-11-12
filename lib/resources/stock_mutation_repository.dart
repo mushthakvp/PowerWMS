@@ -65,4 +65,14 @@ class StockMutationRepository {
       return BaseResponse(success: false, message: e.toString());
     }
   }
+
+  Future<void> doCancelledRemain(StockMutation mutation) async {
+    await _apiProvider.triggerCancelledAmount(
+        picklistId: mutation.picklistId, lineId: mutation.lineId);
+  }
+
+  Future<void> doBackorderRemain(StockMutation mutation) async {
+    await _apiProvider.triggerBackorderAmount(
+        picklistId: mutation.picklistId, lineId: mutation.lineId);
+  }
 }

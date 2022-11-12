@@ -350,11 +350,9 @@ extension PicklistLineColor on PicklistLine {
       }
     }
     if (idleList.isNotEmpty) {
-      SchedulerBinding.instance.scheduleTask(() => {
-        context.read<StockMutationNeedToProcessProvider>().addStock(
-            StockMutation(warehouseId, picklistId, id, true, idleList)
-        )
-      }, Priority.idle);
+      context.read<StockMutationNeedToProcessProvider>().addStock(
+          StockMutation(warehouseId, picklistId, id, true, idleList)
+      );
     }
     // case 3: pickAmount = the amount of process product + picked amount + cancelled amount
     int? cancelBackorderProductAmount = getBackorderCancelProductAmount(prefs, this);
