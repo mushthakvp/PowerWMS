@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WMSAppBar(
-        'Extracom',
+        context.watch<SettingProvider>().userInfo?.firstName ?? '    ',
       ),
       body: CustomScrollView(
         slivers: <Widget>[

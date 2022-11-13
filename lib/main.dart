@@ -107,7 +107,7 @@ class WMSApp extends StatelessWidget {
             child: MaterialApp(
               navigatorKey: navigatorKey,
               debugShowCheckedModeBanner: false,
-              title: 'Extracom WMS',
+              title: 'PowerWMS',
               navigatorObservers: [navigationObserver],
               localizationsDelegates: [
                 AppLocalizations.delegate,

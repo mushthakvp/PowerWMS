@@ -5,6 +5,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/main.dart';
 import 'package:scanner/models/picklist.dart';
+import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
@@ -82,7 +83,7 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
       length: 2,
       child: Scaffold(
         appBar: WMSAppBar(
-          'Extracom',
+          context.watch<SettingProvider>().userInfo?.firstName ?? '    ',
           preferredSize: kToolbarHeight + 100,
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(100),

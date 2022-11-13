@@ -49,7 +49,7 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Image.asset('assets/images/logo_blue.png', height: 24),
+              Image.asset('assets/images/logo_horizontal.png', width: MediaQuery.of(context).size.width * 0.23),
               Text(title, style: Theme.of(context).appBarTheme.titleTextStyle),
             ],
           ),
