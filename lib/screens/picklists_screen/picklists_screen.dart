@@ -117,7 +117,7 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
                   });
                 }, this.textEditingController,
                     this.focusNode,
-                    this.isShowKeyboard
+                    false
                 ),
               ],
             ),
