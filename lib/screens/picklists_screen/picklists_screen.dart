@@ -37,6 +37,7 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
         textEditingController.clear();
         _search = '';
       });
+      if (!mounted) return;
       Navigator.pushNamed(context, PicklistScreen.routeName,
           arguments: picklist);
     });
@@ -115,10 +116,7 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
                       this.focusNode.requestFocus();
                     }
                   });
-                }, this.textEditingController,
-                    this.focusNode,
-                    false
-                ),
+                }, this.textEditingController, this.focusNode, false),
               ],
             ),
           ),
@@ -128,7 +126,8 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               if (snapshot.error is NoConnection) {
-                return errorWidget(mgs: AppLocalizations.of(context)!.internet_disconnected);
+                return errorWidget(
+                    mgs: AppLocalizations.of(context)!.internet_disconnected);
               } else if (snapshot.error is Failure) {
                 return errorWidget(mgs: (snapshot.error as Failure).message);
               } else {
@@ -147,7 +146,9 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
               final picked = snapshot.data!
                   .where((element) => element.isPicked())
                   .toList();
-              if (notPicked.length == 1) {
+              if (notPicked.length == 1 && (_search != '') &&
+                  (notPicked.first.uid.contains(_search) ||
+                      notPicked.first.debtor.name.contains(_search))) {
                 _moveToPickList(notPicked.first);
               }
               return TabBarView(
