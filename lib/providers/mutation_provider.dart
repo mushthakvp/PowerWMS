@@ -148,8 +148,8 @@ class MutationProvider extends ChangeNotifier {
   }
 
   needToScan() {
-    return line.product.batchField != null &&
-        line.product.batchField! > 0;
+    return line.product.serialNumberField != null &&
+        line.product.serialNumberField == true;
   }
 
   addItem(StockMutationItem value) {
