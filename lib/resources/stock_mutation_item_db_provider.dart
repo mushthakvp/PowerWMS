@@ -71,12 +71,9 @@ class StockMutationItemDbProvider {
     return _store.findKeys(db);
   }
 
-  Future<dynamic> deleteCancelledItem(int id) {
-    return db.transaction((transaction) {
-      _cancelledStore.record(id).delete(transaction);
-      _store.record(id).update(transaction, {
-        'status': StockMutationItemStatus.Cancelled,
-      });
+  Future<dynamic> deleteCancelledItem(int id) async {
+    await _store.record(id).update(db, {
+      'status': StockMutationItemStatus.Cancelled.name,
     });
   }
 }

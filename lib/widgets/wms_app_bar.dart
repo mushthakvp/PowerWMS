@@ -40,8 +40,8 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
             timer!.cancel();
           }
           timer = new Timer(duration, () {
-            mutationRepository.processQueue();
-            itemRepository.processQueue();
+            // mutationRepository.processQueue();
+            // itemRepository.processQueue();
           });
         }
         return AppBar(

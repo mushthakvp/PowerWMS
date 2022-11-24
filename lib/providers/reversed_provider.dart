@@ -22,6 +22,7 @@ class ReservedListProvider extends ChangeNotifier {
   ) async {
     _showLoading();
     this.stocks = await apiProvider.getStockMutationItems(picklistId, picklistLineId);
+    await dbProvider.saveCancelledItems(stocks ?? []);
     this.isLoading = false;
     notifyListeners();
   }

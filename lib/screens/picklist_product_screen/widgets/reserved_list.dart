@@ -6,12 +6,14 @@ import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/reversed_provider.dart';
+import 'package:scanner/resources/picklist_line_repository.dart';
 
 class ReservedList extends StatefulWidget {
-  ReservedList(this.line, this.cancelledItems, {Key? key}) : super(key: key);
+  ReservedList(this.line, this.cancelledItems, this.updatedPicklistLine, {Key? key}) : super(key: key);
 
   final PicklistLine line;
   final List<CancelledStockMutationItem> cancelledItems;
+  final Function(PicklistLine) updatedPicklistLine;
 
   @override
   _ReservedListState createState() => _ReservedListState();
@@ -80,7 +82,9 @@ class _ReservedListState extends State<ReservedList> with RouteAware {
             list = items.map((stock) => Column(
               children: [
                 _itemTile(stock, () async {
+                  var updatedLine = await context.read<PicklistLineRepository>().updatePicklistLinePickedAmount(line, stock);
                   await provider.cancelledMutation(stock.id!, line);
+                  widget.updatedPicklistLine(updatedLine);
                 }),
                 Divider(height: 1),
               ],

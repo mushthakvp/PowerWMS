@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
+import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/resources/stock_mutation_db_provider.dart';
 import 'package:scanner/resources/stock_mutation_item_db_provider.dart';
 import 'package:sembast/sembast.dart';
@@ -69,6 +70,20 @@ class PicklistLineDbProvider {
             .toList(),
       );
     }));
+  }
+
+  Future<PicklistLine> updatePicklistLinePickedAmount(PicklistLine line, StockMutationItem item) async {
+    var finder = Finder(filter: Filter.equals('picklistId', line.picklistId));
+    final list = await _store.query(finder: finder).getSnapshots(db).then((snapshotList) => {
+      snapshotList.map((snapshot) => PicklistLine.fromJson(snapshot.value)).toList()
+    });
+
+    var picklistLine = list.first.firstWhere((element) => element.product.id == item.productId);
+    await _store.record(picklistLine.id).update(db,
+      {'pickedAmount': (picklistLine.pickedAmount + item.amount)},
+    );
+    var result = picklistLine.copyWith(pickedAmount: (picklistLine.pickedAmount + item.amount));
+    return result;
   }
 
   Future<dynamic> savePicklistLine(PicklistLine line) {

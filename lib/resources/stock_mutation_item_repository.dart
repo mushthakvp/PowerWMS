@@ -31,6 +31,10 @@ class StockMutationItemRepository {
     yield* stream;
   }
 
+  Future<dynamic> saveCancelledItems(List<StockMutationItem> list) async {
+    await _dbProvider.saveCancelledItems(list);
+  }
+
   Stream<List<CancelledStockMutationItem>> getCancelledStockMutationItemsStream(
       int productId) {
     return _dbProvider.getCancelledStockMutationItemsStream(productId);
@@ -50,7 +54,7 @@ class StockMutationItemRepository {
     ids.forEach((id) async {
       try {
         await _apiProvider.cancelStockMutationItem(id);
-        _dbProvider.deleteCancelledItem(id);
+        await _dbProvider.deleteCancelledItem(id);
       } catch (e) {
         print(e);
       }

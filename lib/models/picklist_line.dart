@@ -77,6 +77,36 @@ class PicklistLine {
     required this.batchSuggestion
   });
 
+
+  PicklistLine copyWith({
+    required num? pickedAmount,
+  }) {
+    return PicklistLine(
+      picklist: picklist,
+      picklistId: picklistId,
+      line: line,
+      uid: uid,
+      warehouse: warehouse,
+      warehouseId: warehouseId,
+      lineDate: lineDate,
+      pickAmount: pickAmount,
+      canceledAmount: canceledAmount,
+      pickedAmount: pickedAmount ?? this.pickedAmount,
+      available: available,
+      descriptionA: descriptionA,
+      descriptionB: descriptionB,
+      internalMemo: internalMemo,
+      status: status,
+      product: product,
+      location: location,
+      lineLocationCode: lineLocationCode,
+      lineWarehouseCode: lineWarehouseCode,
+      id: id,
+      isNew: isNew,
+      batchSuggestion: batchSuggestion,
+    );
+  }
+
   isFullyPicked() {
     return pickAmount == pickedAmount;
   }

@@ -15,23 +15,36 @@ import 'package:scanner/screens/picklist_product_screen/widgets/reserved_list.da
 import 'package:scanner/util/widget/popup.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
-class PicklistProductScreen extends StatelessWidget {
+class PicklistProductScreen extends StatefulWidget {
+  const PicklistProductScreen(this.line, {Key? key}) : super(key: key);
+
   static const routeName = '/picklist-product';
+  final PicklistLine line;
 
-  const PicklistProductScreen(this._line, {Key? key}) : super(key: key);
+  @override
+  State<PicklistProductScreen> createState() => _PicklistProductScreenState();
+}
 
-  final PicklistLine _line;
+class _PicklistProductScreenState extends State<PicklistProductScreen> {
+
+  late PicklistLine newLine;
+
+  @override
+  void initState() {
+    newLine = widget.line;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WMSAppBar(
-        _line.lineLocationCode ?? '',
+        newLine.lineLocationCode ?? '',
       ),
       body: StreamBuilder<List<CancelledStockMutationItem>>(
         stream: context
             .read<StockMutationItemRepository>()
-            .getCancelledStockMutationItemsStream(_line.product.id),
+            .getCancelledStockMutationItemsStream(newLine.product.id),
         builder: (_, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -45,9 +58,13 @@ class PicklistProductScreen extends StatelessWidget {
           if (snapshot.hasData) {
             return CustomScrollView(
               slivers: <Widget>[
-                LineInfo(_line),
-                ProductView(_line, snapshot.data ?? []),
-                ReservedList(_line, snapshot.data ?? []),
+                LineInfo(newLine),
+                ProductView(newLine, snapshot.data ?? []),
+                ReservedList(newLine, snapshot.data ?? [], (PicklistLine line) {
+                  setState(() {
+                    newLine = line;
+                  });
+                }),
               ],
             );
           }
@@ -95,10 +112,10 @@ class PicklistProductScreen extends StatelessWidget {
         });
       }
     }, onError: (error) {
-          var response = error as BaseResponse;
-          Future.delayed(const Duration(), () async {
-            await showErrorAlert(message: response.message);
-          });
+      var response = error as BaseResponse;
+      Future.delayed(const Duration(), () async {
+        await showErrorAlert(message: response.message);
+      });
     });
   }
 }
