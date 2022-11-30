@@ -2,6 +2,7 @@ import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/resources/stock_mutation_api_provider.dart';
 import 'package:scanner/resources/stock_mutation_db_provider.dart';
+import 'package:scanner/util/internet_state.dart';
 import 'package:sembast/sembast.dart';
 
 class StockMutationRepository {
@@ -18,28 +19,34 @@ class StockMutationRepository {
   }
 
   Future<BaseResponse> saveMutation(StockMutation mutation) async {
-    try {
-      var resp = await _apiProvider.addStockMutation(mutation);
-      if (resp.data != null) {
-        final data = BaseResponse.fromJson(resp.data!);
-        print(data.toJson());
-        if (data.success) {
-          final id = await _dbProvider.addStockMutation(mutation);
-          await _dbProvider.deleteStockMutation(id);
-          return data;
+    if (InternetState.shared.connectivityAvailable()) {
+      try {
+        var resp = await _apiProvider.addStockMutation(mutation);
+        if (resp.data != null) {
+          final data = BaseResponse.fromJson(resp.data!);
+          print(data.toJson());
+          if (data.success) {
+            final id = await _dbProvider.addStockMutation(mutation);
+            await _dbProvider.deleteStockMutation(id);
+            return data;
+          } else {
+            throw data;
+          }
         } else {
-          throw data;
+          throw BaseResponse(success: false, message: 'Data is empty!');
         }
-      } else {
-        throw BaseResponse(success: false, message: 'Data is empty!');
+      } catch (error) {
+        print(error);
+        if (error is BaseResponse) {
+          throw error;
+        } else {
+          throw BaseResponse(success: false, message: 'Unknown Error!');
+        }
       }
-    } catch (error) {
-      print(error);
-      if (error is BaseResponse) {
-        throw error;
-      } else {
-        throw BaseResponse(success: false, message: 'Unknown Error!');
-      }
+    } else {
+      final id = await _dbProvider.addStockMutation(mutation);
+      addStockMutation(id, mutation);
+      return BaseResponse(success: true, message: '');
     }
   }
 

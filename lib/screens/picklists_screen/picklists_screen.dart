@@ -11,6 +11,7 @@ import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
 import 'package:scanner/screens/picklists_screen/widgets/picklist_view.dart';
 import 'package:scanner/screens/picklists_screen/widgets/search_field.dart';
+import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
 class PicklistsScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class PicklistsScreen extends StatefulWidget {
 
 class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
   final _refreshController = RefreshController(initialRefresh: false);
+  final _refreshControllerNoInternet = RefreshController(initialRefresh: false);
   final _refreshControllerPicked = RefreshController(initialRefresh: false);
   String _search = '';
   final TextEditingController textEditingController = TextEditingController();
@@ -127,9 +129,9 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
             if (snapshot.hasError) {
               if (snapshot.error is NoConnection) {
                 return errorWidget(
-                    mgs: AppLocalizations.of(context)!.internet_disconnected);
+                    mgs: AppLocalizations.of(context)!.internet_disconnected, repository: repository);
               } else if (snapshot.error is Failure) {
-                return errorWidget(mgs: (snapshot.error as Failure).message);
+                return errorWidget(mgs: (snapshot.error as Failure).message, repository: repository);
               } else {
                 return Container(
                   child: Text('Something is wrong.'),
@@ -193,10 +195,29 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
     );
   }
 
-  Widget errorWidget({required String mgs}) {
-    return Container(
-      margin: EdgeInsets.all(16),
-      child: Text(mgs),
+  Widget errorWidget({required String mgs, required PicklistRepository repository}) {
+    return SmartRefresher(
+      onLoading: () {
+        if (!InternetState.shared.connectivityAvailable()) {
+          _refreshControllerNoInternet.refreshCompleted();
+          setState(() {});
+        }
+      },
+      controller: _refreshControllerNoInternet,
+      onRefresh: () async {
+        await Future.wait([
+          repository.clear(),
+          lineRepository.clear(),
+        ]);
+        if (!InternetState.shared.connectivityAvailable()) {
+          _refreshControllerNoInternet.refreshCompleted();
+        }
+        setState(() {});
+      },
+      child: Container(
+        margin: EdgeInsets.all(16),
+        child: Text(mgs),
+      ),
     );
   }
 }

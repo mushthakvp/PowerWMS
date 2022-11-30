@@ -7,6 +7,7 @@ import 'package:scanner/db.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/resources/stock_mutation_item_repository.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
+import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/util/user_latest_session.dart';
 import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,15 +50,17 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Image.asset('assets/images/logo_horizontal.png', width: MediaQuery.of(context).size.width * 0.23),
+              (!InternetState.shared.connectivityAvailable() || result == ConnectivityResult.none)
+                  ? Image.asset('assets/images/no_internet.png', width: 38)
+                  : Image.asset('assets/images/logo_horizontal.png',
+                      width: MediaQuery.of(context).size.width * 0.23),
               Text(title, style: Theme.of(context).appBarTheme.titleTextStyle),
             ],
           ),
           bottom: bottom,
           leading: IconButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(
-                  SettingsDialog.routeName);
+              Navigator.of(context).pushNamed(SettingsDialog.routeName);
             },
             icon: Icon(Icons.settings),
           ),
@@ -67,7 +70,9 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 prefs.getKeys().forEach((key) async {
-                  if (key != 'username' && key != 'password' && key != 'server') {
+                  if (key != 'username' &&
+                      key != 'password' &&
+                      key != 'server') {
                     await prefs.remove(key);
                   }
                 });

@@ -7,6 +7,7 @@ import 'package:scanner/providers/complete_picklist_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
+import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/util/widget/popup.dart';
 
 class PicklistFooter extends StatefulWidget {
@@ -35,48 +36,49 @@ class _PicklistFooterState extends State<PicklistFooter> {
         return ListTile(
           visualDensity: VisualDensity.compact,
           title: ElevatedButton(
-              child: isProcessing
-                  ? SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        color: Colors.white,
-                      ))
-                  : Text(AppLocalizations.of(context)!.complete.toUpperCase()),
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-              ),
-              onPressed: isProcessing
-                  ? null
-                  : () async {
-                      setState(() {
-                        isProcessing = true;
-                      });
+            child: isProcessing
+                ? SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Colors.white,
+                    ))
+                : Text(AppLocalizations.of(context)!.complete.toUpperCase()),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+            ),
+            onPressed: isProcessing
+                ? null
+                : () async {
+                    setState(() {
+                      isProcessing = true;
+                    });
 
-                      Future<void> doComplete(
-                          List<StockMutation> stocksNeedToProcess) async {
-                        var response =
-                            await provider.completePicklist(widget.picklist.id);
-                        if (response?.success == true) {
-                          widget.onCompleted(true, response?.message ?? '',
-                              widget.picklist, stocksNeedToProcess);
-                        } else {
-                          widget.onCompleted(false, response?.message ?? '',
-                              widget.picklist, stocksNeedToProcess);
-                        }
-                        Future.delayed(const Duration(seconds: 2),
-                            () {
-                          if (!mounted) return;
-                          setState(() {
-                            isProcessing = false;
-                          });
-                        });
+                    Future<void> doComplete(
+                        List<StockMutation> stocksNeedToProcess) async {
+                      var response =
+                          await provider.completePicklist(widget.picklist.id);
+                      if (response?.success == true) {
+                        widget.onCompleted(true, response?.message ?? '',
+                            widget.picklist, stocksNeedToProcess);
+                      } else {
+                        widget.onCompleted(false, response?.message ?? '',
+                            widget.picklist, stocksNeedToProcess);
                       }
+                      Future.delayed(const Duration(seconds: 2), () {
+                        if (!mounted) return;
+                        setState(() {
+                          isProcessing = false;
+                        });
+                      });
+                    }
 
-                      var stocksNeedToProcess = context
-                          .read<StockMutationNeedToProcessProvider>()
-                          .stocks;
+                    var stocksNeedToProcess = context
+                        .read<StockMutationNeedToProcessProvider>()
+                        .stocks;
+
+                    if (InternetState.shared.connectivityAvailable()) {
                       if (stocksNeedToProcess.isNotEmpty) {
                         await Future.forEach(
                                 stocksNeedToProcess,
@@ -92,7 +94,50 @@ class _PicklistFooterState extends State<PicklistFooter> {
                       } else {
                         await doComplete(stocksNeedToProcess);
                       }
-                    }),
+                    } else {
+                      if (stocksNeedToProcess.isNotEmpty) {
+                        Future.delayed(const Duration(), () async {
+                          await showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                content: Text(AppLocalizations.of(context)!.cannotProcessed),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text(AppLocalizations.of(context)!
+                                        .ok
+                                        .toUpperCase()),
+                                    onPressed: () {
+                                      Future.delayed(
+                                          const Duration(milliseconds: 100),
+                                              () {
+                                                setState(() {
+                                                  isProcessing = false;
+                                                });
+                                            Navigator.of(ctx).pop();
+                                          });
+                                    },
+                                  )
+                                ],
+                              ));
+                        });
+                      } else {
+                        widget.onCompleted(
+                            true, '', widget.picklist, stocksNeedToProcess);
+                        Future.delayed(
+                          const Duration(seconds: 2),
+                          () {
+                            if (!mounted) return;
+                            setState(
+                              () {
+                                isProcessing = false;
+                              },
+                            );
+                          },
+                        );
+                      }
+                    }
+                  },
+          ),
         );
       },
     );

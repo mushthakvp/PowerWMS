@@ -9,6 +9,7 @@ import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_body.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_footer.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_view.dart';
+import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -62,45 +63,58 @@ class _PicklistScreenState extends State<PicklistScreen>
               ? PicklistFooter(widget._picklist, (isProcessSuccess, message,
                   picklist, stocksNeedToProcess) async {
                   if (isProcessSuccess) {
-                    Future.delayed(const Duration(), () async {
-                      bool isBackorderRemain(StockMutation line) {
-                        final bKey =
-                            '${line.lineId}_${line.items.first.productId}_backorder';
-                        int? bAmount = prefs?.getInt(bKey);
-                        return bAmount != null;
-                      }
-
-                      bool isCancelledRemain(StockMutation line) {
-                        final cKey =
-                            '${line.lineId}_${line.items.first.productId}';
-                        int? cAmount = prefs?.getInt(cKey);
-                        return cAmount != null;
-                      }
-
-                      Future<void> processCancelBackorder(
-                          StockMutation item) async {
-                        if (isBackorderRemain(item)) {
-                          await context
-                              .read<StockMutationRepository>()
-                              .doBackorderRemain(item);
+                    if (InternetState.shared.connectivityAvailable()) {
+                      Future.delayed(const Duration(), () async {
+                        bool isBackorderRemain(StockMutation line) {
+                          final bKey =
+                              '${line.lineId}_${line.items.first.productId}_backorder';
+                          int? bAmount = prefs?.getInt(bKey);
+                          return bAmount != null;
                         }
-                        if (isCancelledRemain(item)) {
-                          await context
-                              .read<StockMutationRepository>()
-                              .doCancelledRemain(item);
-                        }
-                      }
 
-                      if (stocksNeedToProcess.isNotEmpty) {
-                        await Future.forEach(
-                            stocksNeedToProcess, processCancelBackorder);
-                        await context
-                            .read<PicklistRepository>()
-                            .updatePicklistStatus(
-                            stocksNeedToProcess.first.picklistId,
-                            PicklistStatus.completed,
-                            false);
-                      }
+                        bool isCancelledRemain(StockMutation line) {
+                          final cKey =
+                              '${line.lineId}_${line.items.first.productId}';
+                          int? cAmount = prefs?.getInt(cKey);
+                          return cAmount != null;
+                        }
+
+                        Future<void> processCancelBackorder(
+                            StockMutation item) async {
+                          if (isBackorderRemain(item)) {
+                            await context
+                                .read<StockMutationRepository>()
+                                .doBackorderRemain(item);
+                          }
+                          if (isCancelledRemain(item)) {
+                            await context
+                                .read<StockMutationRepository>()
+                                .doCancelledRemain(item);
+                          }
+                        }
+
+                        if (stocksNeedToProcess.isNotEmpty) {
+                          await Future.forEach(
+                              stocksNeedToProcess, processCancelBackorder);
+                          await context
+                              .read<PicklistRepository>()
+                              .updatePicklistStatus(
+                              stocksNeedToProcess.first.picklistId,
+                              PicklistStatus.completed,
+                              false);
+                        }
+                        await showDialog(
+                          context: context,
+                          builder: (ctx) => successAlert(
+                              ctx, message, picklist.uid, onPop: () async {
+                            await Future.delayed(
+                                const Duration(milliseconds: 100), () async {
+                              Navigator.of(ctx).pop();
+                            });
+                          }),
+                        );
+                      });
+                    } else {
                       await showDialog(
                         context: context,
                         builder: (ctx) => successAlert(
@@ -111,7 +125,7 @@ class _PicklistScreenState extends State<PicklistScreen>
                           });
                         }),
                       );
-                    });
+                    }
                   } else {
                     Future.delayed(const Duration(), () async {
                       await showDialog(

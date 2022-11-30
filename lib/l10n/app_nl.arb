@@ -96,5 +96,6 @@
   "processing": "Verwerken",
   "reference": "Reference",
   "note": "Notitie",
-  "status": "Staat"
+  "status": "Staat",
+  "cannotProcessed": "Afronden niet toegestaan. Nog onverwerkte mutaties."
 }
