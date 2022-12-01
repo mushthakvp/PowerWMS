@@ -44,10 +44,17 @@ class _ProductImageState extends State<ProductImage> {
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Image.memory(
-                snapshot.data!,
-                width: widget.width ?? double.infinity,
-                errorBuilder: (context, error, _) => fallback,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: widget.width ?? double.infinity,
+                  minWidth: widget.width ?? double.infinity,
+                  maxHeight: 150
+                ),
+                child: Image.memory(
+                  snapshot.data!,
+                  width: widget.width ?? double.infinity,
+                  errorBuilder: (context, error, _) => fallback,
+                ),
               ),
             ),
           );
