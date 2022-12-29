@@ -6,7 +6,7 @@ class InternetState {
   InternetState._();
   static InternetState shared = InternetState._();
 
-  late ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  late ConnectivityResult _connectionStatus = ConnectivityResult.wifi;
   final Connectivity _connectivity = Connectivity();
 
   Future<void> ensureInitialized() async {
@@ -22,6 +22,14 @@ class InternetState {
     } on PlatformException catch (_) {
       print('Couldn\'t check connectivity status');
     }
+  }
+
+  Future<bool> isConnectivityAvailable() async {
+    final result = await _connectivity.checkConnectivity();
+    await _updateConnectionStatus(result);
+    return (result == ConnectivityResult.mobile ||
+        result == ConnectivityResult.wifi ||
+        result == ConnectivityResult.ethernet);
   }
 
   bool connectivityAvailable() {

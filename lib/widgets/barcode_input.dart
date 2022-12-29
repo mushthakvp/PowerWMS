@@ -11,10 +11,11 @@ typedef OnBarCodeChanged = Function(String);
 
 class BarcodeInput extends StatefulWidget {
   final void Function(String value, GS1Barcode? barcode) onParse;
+  final bool willShowKeyboardButton;
   final OnBarCodeChanged? onBarCodeChanged;
 
   const BarcodeInput(this.onParse, this.onBarCodeChanged,
-      {Key? key}) : super(key: key);
+      {required this.willShowKeyboardButton, Key? key}) : super(key: key);
 
   @override
   _BarcodeInputState createState() => _BarcodeInputState();
@@ -91,7 +92,9 @@ class _BarcodeInputState extends State<BarcodeInput> {
             }
           },
         ),
-        _keyboardButton()
+        if (widget.willShowKeyboardButton) ... [
+          _keyboardButton()
+        ]
       ],
     );
   }

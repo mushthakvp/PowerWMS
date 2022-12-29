@@ -100,15 +100,25 @@ class ProductView extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           '${AppLocalizations.of(context)!.productProductNumber}:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87.withOpacity(.6)),
                         ),
-                        Text(line.product.uid),
-                        SizedBox(height: 8),
-                        const Text(
+                        SizedBox(height: 2),
+                        Text(
+                          line.product.uid,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 19),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
                           'GTIN / EAN:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87.withOpacity(.6)),
                         ),
-                        Text(line.product.ean ?? ''),
+                        SizedBox(height: 2),
+                        Text(
+                          line.product.ean ?? '',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 19),
+                        ),
                         if (line.batchSuggestion != null &&
                             line.batchSuggestion!.isNotEmpty) ...[
                           SizedBox(height: 8),
@@ -121,7 +131,7 @@ class ProductView extends StatelessWidget {
                       ],
                     ),
                     Spacer(),
-                    ProductImage(line.product.id, width: 120),
+                    ProductImage(line.product.id, width: 128),
                   ],
                 ),
               ),

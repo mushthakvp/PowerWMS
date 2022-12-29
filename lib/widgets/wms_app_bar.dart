@@ -12,9 +12,7 @@ import 'package:scanner/util/user_latest_session.dart';
 import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Timer? timer;
-
-class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
+class WMSAppBar extends StatefulWidget implements PreferredSizeWidget {
   WMSAppBar(
     this.title, {
     Key? key,
@@ -25,39 +23,49 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   final String title;
   final PreferredSizeWidget? bottom;
-  late final Size _preferredSize;
+  final Size _preferredSize;
 
   @override
   Size get preferredSize => _preferredSize;
+
+  State<WMSAppBar> createState() => _WMSAppBarState();
+}
+
+class _WMSAppBarState extends State<WMSAppBar> {
+  Timer? timer;
 
   @override
   Widget build(BuildContext context) {
     return Consumer3<StockMutationRepository, StockMutationItemRepository,
         ConnectivityResult?>(
       builder: (context, mutationRepository, itemRepository, result, _) {
-        if (result != ConnectivityResult.none) {
-          const duration = Duration(milliseconds: 700);
-          if (timer != null) {
-            timer!.cancel();
-          }
-          timer = new Timer(duration, () {
-            // mutationRepository.processQueue();
-            // itemRepository.processQueue();
-          });
+        bool isAvailableInternet = InternetState.shared.connectivityAvailable();
+        const duration = Duration(milliseconds: 700);
+        if (timer != null) {
+          timer!.cancel();
         }
+        timer = new Timer(duration, () {
+          Future.delayed(const Duration(), () async {
+            isAvailableInternet =
+                await InternetState.shared.isConnectivityAvailable();
+            if (!mounted) return;
+            setState(() {});
+          });
+        });
         return AppBar(
-          key: key,
+          key: widget.key,
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              (!InternetState.shared.connectivityAvailable() || result == ConnectivityResult.none)
-                  ? Image.asset('assets/images/no_internet.png', width: 38)
-                  : Image.asset('assets/images/logo_horizontal.png',
-                      width: MediaQuery.of(context).size.width * 0.23),
-              Text(title, style: Theme.of(context).appBarTheme.titleTextStyle),
+              (isAvailableInternet)
+                  ? Image.asset('assets/images/logo_horizontal.png',
+                      width: MediaQuery.of(context).size.width * 0.23)
+                  : Image.asset('assets/images/no_internet.png', width: 38),
+              Text(widget.title,
+                  style: Theme.of(context).appBarTheme.titleTextStyle),
             ],
           ),
-          bottom: bottom,
+          bottom: widget.bottom,
           leading: IconButton(
             onPressed: () {
               Navigator.of(context).pushNamed(SettingsDialog.routeName);

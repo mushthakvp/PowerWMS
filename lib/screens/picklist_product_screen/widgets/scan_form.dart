@@ -37,40 +37,37 @@ class ScanForm extends StatelessWidget {
                   Selector<AddProductProvider, bool>(
                     selector: (_, p) => p.canAdd,
                     builder: (context, enable, _) {
-                      return Flexible(
-                        flex: 2,
-                        child: ElevatedButton(
-                          child: Text(
-                            AppLocalizations.of(context)!.productAdd.toUpperCase(),
+                      return ElevatedButton(
+                        child: Text(
+                          AppLocalizations.of(context)!.productAdd.toUpperCase(),
+                        ),
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              enable ? Colors.blue : Colors.grey
                           ),
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                enable ? Colors.blue : Colors.grey
-                            ),
-                          ),
-                          onPressed: provider.needToScan() || !enable
-                              ? null
-                              : () {
-                            // formKey.currentState?.save();
-                            final String ean = _parseHandler(context, provider, context.read<AddProductProvider>().value ?? '', null);
-                            if (ean.length == 13) {
-                              String request = '0$ean';
-                              try {
-                                _parseHandler(context, provider, request, null, isThrowError: true);
-                              } catch (_) {
-                                _parseHandler(context, provider, ean, null);
-                              }
-                            } else {
+                        ),
+                        onPressed: provider.needToScan() || !enable
+                            ? null
+                            : () {
+                          // formKey.currentState?.save();
+                          final String ean = _parseHandler(context, provider, context.read<AddProductProvider>().value ?? '', null);
+                          if (ean.length == 13) {
+                            String request = '0$ean';
+                            try {
+                              _parseHandler(context, provider, request, null, isThrowError: true);
+                            } catch (_) {
                               _parseHandler(context, provider, ean, null);
                             }
-                            context.read<AddProductProvider>().canAdd = false;
-                          },
-                        ),
+                          } else {
+                            _parseHandler(context, provider, ean, null);
+                          }
+                          context.read<AddProductProvider>().canAdd = false;
+                        },
                       );
                     },
                   ),
-                  Flexible(
-                    flex: 3,
+                  SizedBox(width: 12),
+                  Expanded(
                     child: BarcodeInput((value, barcode) {
                       if (!provider.needToScan() || value.length > 0) {
                         if (value.length == 13) {
@@ -95,7 +92,7 @@ class ScanForm extends StatelessWidget {
                           || provider.line.product.ean == barcode;
                       context.read<AddProductProvider>().canAdd = enableAddButton;
                       context.read<AddProductProvider>().value = barcode;
-                    }),
+                    }, willShowKeyboardButton: false),
                   ),
                 ],
               ),
@@ -262,6 +259,12 @@ class ScanForm extends StatelessWidget {
       ) {
         onParse(true);
       }
+      if (settings.directlyProcess
+          && mutation.isBackorderRestProductAmount
+          && mutation.backorderRestProductAmount != 0
+          && mutation.showToPickAmount == 0) {
+        onParse(true);
+      }
     } catch (e, stack) {
       if (isThrowError == false) {
         AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
@@ -284,11 +287,15 @@ class ScanForm extends StatelessWidget {
     Settings settings,
   ) {
     var amount = 0;
+    var oneScanPickAll = settings.oneScanPickAll;
+    if (provider.backorderRestProductAmount != 0) {
+      oneScanPickAll = false;
+    }
     if (provider.line.product.ean == ean || provider.line.product.uid == ean) {
       if (provider.isCancelRestProductAmount) {
         amount = provider.amount;
       } else {
-        amount = provider.needToScan() || !settings.oneScanPickAll
+        amount = provider.needToScan() || !oneScanPickAll
             ? -1
             : provider.toPickAmount;
       }
@@ -306,13 +313,17 @@ class ScanForm extends StatelessWidget {
       Settings settings,
   ) {
     int amount = 0;
+    var oneScanPickAll = settings.oneScanPickAll;
+    if (provider.backorderRestProductAmount != 0) {
+      oneScanPickAll = false;
+    }
     if (!provider.isCancelRestProductAmount) {
-      amount = provider.needToScan() || !settings.oneScanPickAll
+      amount = provider.needToScan() || !oneScanPickAll
           ? 1
           : provider.toPickAmount;
       // packaging case
       if (provider.packaging != null && provider.packaging!.uid == ean) {
-        if (!settings.oneScanPickAll) {
+        if (!oneScanPickAll) {
           amount = provider.packaging!.defaultAmount.round();
         }
       }

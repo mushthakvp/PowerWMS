@@ -96,8 +96,9 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
   }
 
   bool isCurrentWarehouse(PicklistLine line) {
-    final warehouseCode = context.read<SettingProvider>().currentWareHouse?.code;
-    return warehouseCode == line.lineWarehouseCode || warehouseCode == line.warehouse;
+    final warehouseId = context.read<SettingProvider>().currentWareHouse?.id;
+    final warehouse= context.read<SettingProvider>().currentWareHouse?.name;
+    return warehouseId == line.warehouseId || warehouse == line.warehouse;
   }
 
   _moveToProduct(PicklistLine line) {
@@ -107,7 +108,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
           arguments: line);
     } else {
       final snackBar = SnackBar(
-        content: Text(AppLocalizations.of(context)!.otherWarehouse(line.lineWarehouseCode ?? '')),
+        content: Text(AppLocalizations.of(context)!.otherWarehouse(line.warehouse ?? '')),
         duration: Duration(seconds: 2),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -138,7 +139,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                       }
                     }
                   });
-                }, (String barcode) {}),
+                }, (String barcode) {}, willShowKeyboardButton: false),
               ),
               Divider(),
             ],
