@@ -250,7 +250,21 @@ class ScanForm extends StatelessWidget {
           ),
         ).then((result) => onParse(result));
       } else {
+        if (settings.directlyProcess
+            && mutation.isCancelRestProductAmount
+            && mutation.cancelRestProductAmount != 0
+        ) {
+          onParse(true);
+          return;
+        }
+        if (settings.directlyProcess
+            && mutation.isBackorderRestProductAmount
+            && mutation.backorderRestProductAmount != 0) {
+          onParse(true);
+          return;
+        }
         onParse(settings.directlyProcess && mutation.toPickAmount == 0);
+        return;
       }
       if (settings.directlyProcess
           && mutation.isCancelRestProductAmount
@@ -289,7 +303,16 @@ class ScanForm extends StatelessWidget {
     var amount = 0;
     var oneScanPickAll = settings.oneScanPickAll;
     if (provider.backorderRestProductAmount != 0) {
-      oneScanPickAll = false;
+      amount = provider.needToScan() || !oneScanPickAll
+          ? 1
+          : (provider.toPickAmount - provider.backorderRestProductAmount);
+      // packaging case
+      if (provider.packaging != null && provider.packaging!.uid == ean) {
+        if (!oneScanPickAll) {
+          amount = provider.packaging!.defaultAmount.round();
+        }
+      }
+      return amount;
     }
     if (provider.line.product.ean == ean || provider.line.product.uid == ean) {
       if (provider.isCancelRestProductAmount) {
@@ -315,7 +338,16 @@ class ScanForm extends StatelessWidget {
     int amount = 0;
     var oneScanPickAll = settings.oneScanPickAll;
     if (provider.backorderRestProductAmount != 0) {
-      oneScanPickAll = false;
+      amount = provider.needToScan() || !oneScanPickAll
+          ? 1
+          : (provider.toPickAmount - provider.backorderRestProductAmount);
+      // packaging case
+      if (provider.packaging != null && provider.packaging!.uid == ean) {
+        if (!oneScanPickAll) {
+          amount = provider.packaging!.defaultAmount.round();
+        }
+      }
+      return amount;
     }
     if (!provider.isCancelRestProductAmount) {
       amount = provider.needToScan() || !oneScanPickAll
