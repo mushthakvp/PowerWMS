@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/log.dart';
 import 'package:scanner/models/base_response.dart';
@@ -6,27 +7,30 @@ import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/providers/process_product_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
 import 'package:scanner/resources/stock_mutation_item_repository.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/line_info.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/product_view.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/reserved_list.dart';
+import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/util/widget/popup.dart';
+import 'package:scanner/widgets/dialogs/custom_snack_bar.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
 class PicklistProductScreen extends StatefulWidget {
-  const PicklistProductScreen(this.line, {Key? key}) : super(key: key);
+  const PicklistProductScreen(this.line, {Key? key, this.totalStock})
+      : super(key: key);
 
   static const routeName = '/picklist-product';
   final PicklistLine line;
+  final double? totalStock;
 
   @override
   State<PicklistProductScreen> createState() => _PicklistProductScreenState();
 }
 
 class _PicklistProductScreenState extends State<PicklistProductScreen> {
-
   late PicklistLine newLine;
 
   @override
@@ -40,6 +44,7 @@ class _PicklistProductScreenState extends State<PicklistProductScreen> {
     return Scaffold(
       appBar: WMSAppBar(
         newLine.lineLocationCode ?? '',
+        leading: BackButton(),
       ),
       body: StreamBuilder<List<CancelledStockMutationItem>>(
         stream: context
@@ -59,7 +64,8 @@ class _PicklistProductScreenState extends State<PicklistProductScreen> {
             return CustomScrollView(
               slivers: <Widget>[
                 LineInfo(newLine),
-                ProductView(newLine, snapshot.data ?? []),
+                ProductView(newLine, snapshot.data ?? [],
+                    totalStock: widget.totalStock),
                 ReservedList(newLine, snapshot.data ?? [], (PicklistLine line) {
                   setState(() {
                     newLine = line;
@@ -75,31 +81,46 @@ class _PicklistProductScreenState extends State<PicklistProductScreen> {
       ),
       bottomNavigationBar: Consumer<ProcessProductProvider>(
         builder: (context, provider, _) {
+          bool isProcessable = provider.getCanProcess &&
+              InternetState.shared.connectivityAvailable();
           return ListTile(
             visualDensity: VisualDensity.compact,
             title: ElevatedButton(
-                child: Text(AppLocalizations.of(context)!
-                    .productProcess
-                    .toUpperCase()),
+                child: Text(
+                    AppLocalizations.of(context)!.productProcess.toUpperCase()),
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(
-                      provider.canProcess ? Colors.blue : Colors.grey
-                  ),
+                      isProcessable ? Colors.blue : Colors.grey),
                 ),
-                onPressed: provider.canProcess ? () {
-                  if (provider.mutationProvider != null) {
-                    _onProcessHandler(provider.mutationProvider!, context);
-                  }
-                } : null
-            ),
+                onPressed: isProcessable
+                    ? () async {
+                        if (provider.mutationProvider != null &&
+                            InternetState.shared.connectivityAvailable()) {
+                          context.read<ProcessProductProvider>().canProcess =
+                              (false);
+                          await _onProcessHandler(
+                            provider.mutationProvider!,
+                            context,
+                          );
+                          context
+                              .read<StockMutationNeedToProcessProvider>()
+                              .changePendingMutation(isPending: false);
+                        } else {
+                          CustomSnackBar.showSnackBar(
+                            context,
+                            title: "No Internet",
+                          );
+                        }
+                      }
+                    : null),
           );
         },
       ),
     );
   }
 
-  _onProcessHandler(MutationProvider provider, BuildContext context) {
-    context
+  _onProcessHandler(MutationProvider provider, BuildContext context) async {
+    await context
         .read<StockMutationRepository>()
         .saveMutation(provider.getStockMutation())
         .then((value) {

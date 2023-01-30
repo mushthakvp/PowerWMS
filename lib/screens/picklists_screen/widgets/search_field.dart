@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -7,12 +8,13 @@ import 'package:scanner/widgets/e_textfield.dart';
 
 class SearchField extends StatefulWidget {
   const SearchField(
-      this.value,
-      this.onChange,
-      this.controller,
-      this.focusNode,
-      this.isShowKeyboard,
-      {Key? key}) : super(key: key);
+      {required this.value,
+      required this.onChange,
+      required this.controller,
+      required this.focusNode,
+      required this.isShowKeyboard,
+      Key? key})
+      : super(key: key);
 
   final String value;
   final void Function(String value) onChange;
@@ -34,9 +36,8 @@ class _SearchFieldState extends State<SearchField> {
     super.initState();
     var keyboardVisibilityController = KeyboardVisibilityController();
     // Subscribe
-    keyboardSubscription = keyboardVisibilityController
-        .onChange
-        .listen((bool visible) {
+    keyboardSubscription =
+        keyboardVisibilityController.onChange.listen((bool visible) {
       setState(() {
         willShowKeyboard = visible;
       });
@@ -72,6 +73,7 @@ class _SearchFieldState extends State<SearchField> {
           widget.focusNode.requestFocus();
         },
         autofocus: true,
+        textCapitalization: TextCapitalization.words,
         decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.picklistsSearch,
           border: InputBorder.none,
@@ -79,19 +81,22 @@ class _SearchFieldState extends State<SearchField> {
           enabledBorder: InputBorder.none,
           errorBorder: InputBorder.none,
           disabledBorder: InputBorder.none,
-          suffixIcon:(widget.controller.text.isEmpty) ? ((widget.isShowKeyboard) ? _keyboardButton() : null) : IconButton(
-              hoverColor: Colors.white,
-              splashColor: Colors.white,
-              highlightColor: Colors.white,
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                widget.controller.clear();
-                SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
-                _onChangeHandler('');
-              },
-          ), // Show the clear button if the text field has something
+          suffixIcon: (widget.controller.text.isEmpty)
+              ? ((widget.isShowKeyboard) ? _keyboardButton() : null)
+              : IconButton(
+                  hoverColor: Colors.white,
+                  splashColor: Colors.white,
+                  highlightColor: Colors.white,
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    widget.controller.clear();
+                    SystemChannels.textInput
+                        .invokeMethod<void>('TextInput.hide');
+                    _onChangeHandler('');
+                  },
+                ), // Show the clear button if the text field has something
         ),
-        ),
+      ),
       padding: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(color: Colors.white),
     );
@@ -110,9 +115,9 @@ class _SearchFieldState extends State<SearchField> {
       hoverColor: Colors.white,
       splashColor: Colors.white,
       highlightColor: Colors.white,
-      icon: Icon(
-          !willShowKeyboard ? Icons.keyboard_alt_outlined : Icons.keyboard_alt_rounded
-      ),
+      icon: Icon(!willShowKeyboard
+          ? Icons.keyboard_alt_outlined
+          : Icons.keyboard_alt_rounded),
       onPressed: () async {
         if (willShowKeyboard) {
           SystemChannels.textInput.invokeMethod<void>('TextInput.hide');

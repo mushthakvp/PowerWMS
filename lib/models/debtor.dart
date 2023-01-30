@@ -53,5 +53,29 @@ class Debtor {
   });
 
   factory Debtor.fromJson(Map<String, dynamic> json) => _$DebtorFromJson(json);
-  Map<String, dynamic> toJson() => _$DebtorToJson(this);
+
+  Map<String, dynamic> toJson() => {
+        'uid': uid,
+        'name': name.toUpperCase(),
+        'email': email,
+        'street': street,
+        'number': number,
+        'streetNote': streetNote,
+        'city': city,
+        'postalCode': postalCode,
+        'country': country,
+        'vatNumber': vatNumber,
+        'chamberOfCommerceNumber': chamberOfCommerceNumber,
+        'status': status,
+        'agentId': agentId,
+        'organisation': organisation,
+        'organisationId': organisationId,
+        'addressId': addressId,
+        'paymentConditionId': paymentConditionId,
+        'statusFormatted': statusFormatted,
+        'address': address,
+        'googleQuery': googleQuery,
+        'id': id,
+        'isNew': isNew,
+      };
 }

@@ -19,9 +19,9 @@ class _ProductImageState extends State<ProductImage> {
   Future<Uint8List?>? _future;
 
   @override
-  void didChangeDependencies() {
+  void initState() {
     _future = productImageRepository.getImageFile(widget.productId);
-    super.didChangeDependencies();
+    super.initState();
   }
 
   @override
@@ -33,6 +33,12 @@ class _ProductImageState extends State<ProductImage> {
           width: widget.width,
           height: widget.width,
           color: Colors.grey[400],
+          child: Text(
+            "Image Not Found",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white, fontSize: 8),
+          ),
+          alignment: Alignment.center,
         );
         if (snapshot.hasError) {
           print(snapshot.error);
@@ -42,19 +48,16 @@ class _ProductImageState extends State<ProductImage> {
             onTap: () {
               OptionPage().showOption(context, snapshot.data!);
             },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
                   maxWidth: widget.width ?? double.infinity,
                   minWidth: widget.width ?? double.infinity,
-                  maxHeight: 150
-                ),
-                child: Image.memory(
-                  snapshot.data!,
-                  width: widget.width ?? double.infinity,
-                  errorBuilder: (context, error, _) => fallback,
-                ),
+                  maxHeight: 150),
+              child: Image.memory(
+                snapshot.data!,
+                width: widget.width ?? double.infinity,
+                fit: BoxFit.fill,
+                errorBuilder: (context, error, _) => fallback,
               ),
             ),
           );
@@ -83,35 +86,28 @@ class OptionPage {
               width: double.infinity,
               child: Stack(
                 children: <Widget>[
+                  Center(
+                    child: Image.memory(
+                      data,
+                      fit: BoxFit.fitWidth,
+                      width: MediaQuery.of(context).size.width * 0.5,
+                    ),
+                  ),
                   Positioned(
                     top: 16,
                     right: 16,
-                    child: InkWell(
-                      onTap: hideOption,
-                      child: Container(
-                        height: 30,
-                        width: 30,
-                        child: Icon(Icons.close, color: Colors.black),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Center(
-                    child: Container(
-                      height: MediaQuery.of(context).size.width,
-                      margin: EdgeInsets.all(8),
-                      child: Image.memory(
-                        data,
-                        fit: BoxFit.fitWidth,
-                      ),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(Icons.close, color: Colors.black),
                     ),
                   ),
                 ],
               ),
             ),
           );
-        }
-    );
+        });
   }
 
   /// BuildContext

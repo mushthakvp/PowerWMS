@@ -8,13 +8,17 @@ class LineInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle textStyle = const TextStyle(
+        color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w400);
     return SliverList(
       delegate: SliverChildListDelegate([
-        ListTile(
-          visualDensity: VisualDensity.compact,
-          title: Text(_product.description ?? '-'),
-        ),
-        Divider(height: 1),
+        Padding(
+          padding: EdgeInsets.only(left: 14,top: 12,bottom: 4),
+          child: Text(
+            _product.description ?? '-',
+            style: textStyle,
+          ),
+        )
       ]),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -6,7 +7,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/db.dart';
 import 'package:scanner/dio.dart';
-import 'package:scanner/log.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
@@ -34,14 +34,16 @@ import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-RouteObserver<ModalRoute<void>> navigationObserver = RouteObserver<ModalRoute<void>>();
+RouteObserver<ModalRoute<void>> navigationObserver =
+    RouteObserver<ModalRoute<void>>();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  interceptErpDio();
   await UserLatestSession.ensureInitialized();
   await InternetState.shared.ensureInitialized();
-  initLogs();
+  // initLogs();
   final db = await createDb();
 
   runApp(WMSApp(db));
@@ -58,9 +60,12 @@ class WMSApp extends StatelessWidget {
       future:
           Future.wait([Settings.fromMemory(), SharedPreferences.getInstance()]),
       builder: (context, snapshot) {
+        print(snapshot.error);
+        print(snapshot.hasError);
         if (snapshot.hasData) {
           final settings = snapshot.data![0] as Settings;
           final prefs = snapshot.data![1] as SharedPreferences;
+
           return MultiProvider(
             providers: [
               ChangeNotifierProvider<ValueNotifier<Settings>>(
@@ -89,20 +94,15 @@ class WMSApp extends StatelessWidget {
                 initialData: null,
               ),
               ChangeNotifierProvider<ProcessProductProvider>(
-                  create: (_) => ProcessProductProvider()
-              ),
+                  create: (_) => ProcessProductProvider()),
               ChangeNotifierProvider<CompletePicklistProvider>(
-                  create: (_) => CompletePicklistProvider()
-              ),
+                  create: (_) => CompletePicklistProvider()),
               ChangeNotifierProvider<ReservedListProvider>(
-                  create: (_) => ReservedListProvider(_db)
-              ),
+                  create: (_) => ReservedListProvider(_db)),
               ChangeNotifierProvider<CompleteStockMutationProvider>(
-                  create: (_) => CompleteStockMutationProvider()
-              ),
+                  create: (_) => CompleteStockMutationProvider()),
               ChangeNotifierProvider<StockMutationNeedToProcessProvider>(
-                  create: (_) => StockMutationNeedToProcessProvider()
-              ),
+                  create: (_) => StockMutationNeedToProcessProvider()),
             ],
             child: MaterialApp(
               navigatorKey: navigatorKey,
@@ -139,8 +139,7 @@ class WMSApp extends StatelessWidget {
                 builder: (context) {
                   if (prefs.getString('token') != null &&
                       prefs.getString('server') != null &&
-                      UserLatestSession.isOutOfSession() == false
-                  ) {
+                      UserLatestSession.isOutOfSession() == false) {
                     dio.options.baseUrl = '${prefs.getString('server')!}/api';
                     dio.options.headers = {
                       'authorization': 'Bearer ${prefs.getString('token')}',
@@ -155,9 +154,15 @@ class WMSApp extends StatelessWidget {
                 SettingsDialog.routeName: (context) => SettingsDialog(),
                 ProductsScreen.routeName: (context) => ProductsScreen(),
                 PicklistProductScreen.routeName: (context) {
-                  final line = ModalRoute.of(context)!.settings.arguments
-                      as PicklistLine;
-                  return PicklistProductScreen(line);
+                  Map<String, dynamic> args = ModalRoute.of(context)!
+                      .settings
+                      .arguments as Map<String, dynamic>;
+                  final line = args['line'] as PicklistLine;
+                  double? totalStock = args['totalStock'] as double?;
+                  return PicklistProductScreen(
+                    line,
+                    totalStock: totalStock,
+                  );
                 },
                 PicklistsScreen.routeName: (context) => PicklistsScreen(),
                 PicklistScreen.routeName: (context) {

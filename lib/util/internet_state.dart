@@ -40,6 +40,6 @@ class InternetState {
 
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
     _connectionStatus = result;
-    print('Internet status: $result');
+    // print('Internet status: $result');
   }
 }

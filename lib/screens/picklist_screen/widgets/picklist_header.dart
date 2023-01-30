@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:scanner/models/picklist.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scanner/models/picklist.dart';
 
 class PicklistHeader extends StatefulWidget {
   final Picklist _picklist;
@@ -17,21 +17,19 @@ class _PicklistHeaderState extends State<PicklistHeader> {
   @override
   Widget build(BuildContext context) {
     final picklist = widget._picklist;
-    return SliverList(
-        delegate: SliverChildListDelegate(
-      [
-        ListTile(
-          onTap: _onTapHandler,
-          title: Text(picklist.debtor.name),
-          trailing: IconButton(
-            icon: Icon(_open ? Icons.expand_less : Icons.expand_more),
-            onPressed: _onTapHandler,
-          ),
+    return Column(
+        children: ([
+      ListTile(
+        onTap: _onTapHandler,
+        title: Text(picklist.debtor.name),
+        trailing: IconButton(
+          icon: Icon(_open ? Icons.expand_less : Icons.expand_more),
+          onPressed: _onTapHandler,
         ),
-        Divider(),
-        if (_open) ..._address(),
-      ],
-    ));
+      ),
+      Divider(),
+      if (_open) ..._address(),
+    ]));
   }
 
   _address() {

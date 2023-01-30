@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/resources/picklist_api_provider.dart';
@@ -15,9 +16,10 @@ class PicklistRepository {
   late PicklistApiProvider _apiProvider;
   late PicklistDbProvider _dbProvider;
 
-  Stream<List<Picklist>> getPicklistsStream(String search) async* {
+  Stream<List<Picklist>> getPicklistsStream(String search,
+      {bool? isRemote = false}) async* {
     final stream = _dbProvider.getPicklistsStream(search);
-    if (await _dbProvider.count() == 0) {
+    if (await _dbProvider.count() == 0 || isRemote!) {
       if (!InternetState.shared.connectivityAvailable()) {
         throw NoConnection('Intentional exception');
       }
@@ -28,7 +30,8 @@ class PicklistRepository {
     yield* stream;
   }
 
-  Future<void> updatePicklistStatus(int id, PicklistStatus status, bool isReset) async {
+  Future<void> updatePicklistStatus(
+      int id, PicklistStatus status, bool isReset) async {
     await _dbProvider.updatePicklistStatus(id, status, isReset);
   }
 

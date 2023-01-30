@@ -32,24 +32,32 @@ class PicklistDbProvider {
   final Database db;
 
   Stream<List<Picklist>> getPicklistsStream(String? search) {
+    print("getPicklistsStream");
     var finder = Finder(
-        filter: search == '' || search == null
-            ? null
-            : Filter.or([
+      filter: search == '' || search == null
+          ? null
+          : Filter.or(
+              [
                 Filter.matches('uid', search),
                 Filter.matches('debtor.name', search),
-              ]));
+              ],
+            ),
+    );
     return _store.query(finder: finder).onSnapshots(db).transform(
-        StreamTransformer.fromHandlers(handleData: (snapshotList, sink) {
-      sink.add(
-        snapshotList
-            .map((snapshot) => Picklist.fromJson(snapshot.value))
-            .toList(),
-      );
-    }));
+      StreamTransformer.fromHandlers(
+        handleData: (snapshotList, sink) {
+          sink.add(
+            snapshotList
+                .map((snapshot) => Picklist.fromJson(snapshot.value))
+                .toList(),
+          );
+        },
+      ),
+    );
   }
 
-  Future<void> updatePicklistStatus(int id, PicklistStatus status, bool isReset) async {
+  Future<void> updatePicklistStatus(
+      int id, PicklistStatus status, bool isReset) async {
     final res = await _store.record(id).get(db);
     final picklist = Picklist.fromJson(res ?? {});
     if (picklist.status == PicklistStatus.completed) {
@@ -61,10 +69,8 @@ class PicklistDbProvider {
       });
     }
     if (!isReset) {
-      _store.record(id).update(db, {
-        'status': status.name,
-        'defaultStatus': picklist.status.name
-      });
+      _store.record(id).update(
+          db, {'status': status.name, 'defaultStatus': picklist.status.name});
     }
   }
 

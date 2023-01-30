@@ -7,9 +7,12 @@ import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/reversed_provider.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
+import 'package:scanner/util/internet_state.dart';
 
 class ReservedList extends StatefulWidget {
-  ReservedList(this.line, this.cancelledItems, this.updatedPicklistLine, {Key? key}) : super(key: key);
+  ReservedList(this.line, this.cancelledItems, this.updatedPicklistLine,
+      {Key? key})
+      : super(key: key);
 
   final PicklistLine line;
   final List<CancelledStockMutationItem> cancelledItems;
@@ -20,7 +23,6 @@ class ReservedList extends StatefulWidget {
 }
 
 class _ReservedListState extends State<ReservedList> with RouteAware {
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -44,53 +46,59 @@ class _ReservedListState extends State<ReservedList> with RouteAware {
   @override
   Widget build(BuildContext context) {
     var line = widget.line;
-    return Consumer<ReservedListProvider>(
-        builder: (context, provider, _) {
-          List<Widget> list = [];
-          if (provider.stocks == null &&
-              line.pickedAmount > 0) {
-            list = [
-              Center(
-                child: ElevatedButton(
-                  child: Text(
-                    '${line.pickedAmount} ${line.product.unit} verwerkt',
-                  ),
-                  onPressed: () async {
-                    await provider.getMutationList(
-                        line.picklistId,
-                        line.id
-                    );
-                  },
+    return Consumer<ReservedListProvider>(builder: (context, provider, _) {
+      List<Widget> list = [];
+      if (provider.stocks == null && line.pickedAmount > 0) {
+        list = [
+          if (InternetState.shared.connectivityAvailable())
+            Center(
+              child: ElevatedButton(
+                child: Text(
+                  '${line.pickedAmount} ${line.product.unit} verwerkt',
                 ),
+                onPressed: () async {
+                  if (InternetState.shared.connectivityAvailable()) {
+                    await provider.getMutationList(line.picklistId, line.id);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Internet unavailable")));
+                  }
+                },
               ),
-            ];
-          }
-          if (provider.stocks == null && provider.isLoading) {
-            list = [
-              Center(child: CircularProgressIndicator()),
-            ];
-          }
-          if (provider.stocks?.length == 0 && !provider.isLoading) {
-            return SliverList(delegate: SliverChildListDelegate([
-              Container(
-                  padding: EdgeInsets.all(16),
-              child: Text('Data is empty.'))]
-            ));
-          }
-          if (provider.stocks != null && provider.stocks!.isNotEmpty && !provider.isLoading) {
-            var items = provider.stocks!;
-            list = items.map((stock) => Column(
-              children: [
-                _itemTile(stock, () async {
-                  var updatedLine = await context.read<PicklistLineRepository>().updatePicklistLinePickedAmount(line, stock);
-                  await provider.cancelledMutation(stock.id!, line);
-                  widget.updatedPicklistLine(updatedLine);
-                }),
-                Divider(height: 1),
-              ],
-            )).toList();
-          }
-          return SliverList(delegate: SliverChildListDelegate(list));
+            ),
+        ];
+      }
+      if (provider.stocks == null && provider.isLoading) {
+        list = [
+          Center(child: CircularProgressIndicator()),
+        ];
+      }
+      if (provider.stocks?.length == 0 && !provider.isLoading) {
+        return SliverList(
+            delegate: SliverChildListDelegate([
+          Container(padding: EdgeInsets.all(16), child: Text('Data is empty.'))
+        ]));
+      }
+      if (provider.stocks != null &&
+          provider.stocks!.isNotEmpty &&
+          !provider.isLoading) {
+        var items = provider.stocks!;
+        list = items
+            .map((stock) => Column(
+                  children: [
+                    _itemTile(stock, () async {
+                      var updatedLine = await context
+                          .read<PicklistLineRepository>()
+                          .updatePicklistLinePickedAmount(line, stock);
+                      await provider.cancelledMutation(stock.id!, line);
+                      widget.updatedPicklistLine(updatedLine);
+                    }),
+                    Divider(height: 1),
+                  ],
+                ))
+            .toList();
+      }
+      return SliverList(delegate: SliverChildListDelegate(list));
     });
   }
 
@@ -99,7 +107,8 @@ class _ReservedListState extends State<ReservedList> with RouteAware {
       title: Text(
         '${item.amount} x ${item.batch} | ${item.stickerCode}       ${item.createdDate != null ? DateFormat('yy-MM-dd HH:mm').format(item.createdDate!) : ''}',
       ),
-      trailing: item.isReserved() ? IconButton(
+      trailing: item.isReserved()
+          ? IconButton(
               icon: Icon(Icons.cancel_outlined, color: Colors.amber),
               onPressed: onCancel,
             )

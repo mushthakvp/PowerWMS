@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -16,12 +17,16 @@ class WMSAppBar extends StatefulWidget implements PreferredSizeWidget {
   WMSAppBar(
     this.title, {
     Key? key,
+    this.leading,
+    this.action,
     this.bottom,
     double? preferredSize,
   })  : _preferredSize = Size.fromHeight(preferredSize ?? kToolbarHeight),
         super(key: key);
 
   final String title;
+  final Widget? leading;
+  final Widget? action;
   final PreferredSizeWidget? bottom;
   final Size _preferredSize;
 
@@ -66,30 +71,33 @@ class _WMSAppBarState extends State<WMSAppBar> {
             ],
           ),
           bottom: widget.bottom,
-          leading: IconButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed(SettingsDialog.routeName);
-            },
-            icon: Icon(Icons.settings),
-          ),
+          leading: widget.leading ??
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(SettingsDialog.routeName);
+                },
+                icon: Icon(Icons.settings),
+              ),
           actions: [
-            IconButton(
-              icon: Icon(Icons.logout),
-              onPressed: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.getKeys().forEach((key) async {
-                  if (key != 'username' &&
-                      key != 'password' &&
-                      key != 'server') {
-                    await prefs.remove(key);
-                  }
-                });
-                dio = Dio();
-                await deleteDb();
-                UserLatestSession.shared.cancelTimer();
-                Navigator.pushReplacementNamed(context, '/');
-              },
-            )
+            widget.action ??
+                IconButton(
+                  icon: Icon(Icons.logout),
+                  onPressed: () async {
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    prefs.getKeys().forEach((key) async {
+                      if (key != 'username' &&
+                          key != 'password' &&
+                          key != 'server') {
+                        await prefs.remove(key);
+                      }
+                    });
+                    dio = Dio();
+                    await deleteDb();
+                    UserLatestSession.shared.cancelTimer();
+                    Navigator.pushReplacementNamed(context, '/');
+                  },
+                )
           ],
         );
       },

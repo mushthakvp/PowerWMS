@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:scanner/models/settings.dart';
 
 part 'settings_remote.g.dart';
 
@@ -18,6 +19,7 @@ class SettingsRemote {
     this.finishedProductsAtBottom,
     this.oneScanPickAll,
     this.directProcessing,
+    this.wholeSaleSettings,
   });
 
   int? warehouseId;
@@ -33,6 +35,7 @@ class SettingsRemote {
   bool? finishedProductsAtBottom;
   bool? oneScanPickAll;
   bool? directProcessing;
+  WholeSaleSettings? wholeSaleSettings;
 
   SettingsRemote copyWith({
     int? picklistSorting,

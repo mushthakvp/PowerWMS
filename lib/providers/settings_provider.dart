@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scanner/dio.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/settings_remote.dart';
 import 'package:scanner/models/user_info.dart';
 import 'package:scanner/models/warehouse.dart';
 import 'package:scanner/resources/settings_api_provider.dart';
 import 'package:sembast/sembast.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-enum PicklistSortType {
-  warehouseLocation, productNumber, description
-}
+enum PicklistSortType { warehouseLocation, productNumber, description }
 
 extension PicklistSortTypeExt on PicklistSortType {
   String title(BuildContext context) {
@@ -30,6 +29,7 @@ class SettingProvider extends ChangeNotifier {
   UserInfo? userInfo;
   List<Warehouse>? warehouses;
   SettingsRemote? settingsRemote;
+  WholeSaleSettings? wholeSaleSettings;
   final Database db;
 
   bool get finishedProductsAtBottom {
@@ -65,18 +65,37 @@ class SettingProvider extends ChangeNotifier {
   }
 
   Settings get settingsLocal {
+    print("*****");
+    print(wholeSaleSettings?.toJson());
     return Settings(
-      picklistSort: this.picklistSortType(),
-      finishedProductsAtBottom: this.finishedProductsAtBottom,
-      oneScanPickAll: this.oneScanPickAll,
-      directlyProcess: this.directProcessing,
-    );
+        picklistSort: this.picklistSortType(),
+        finishedProductsAtBottom: this.finishedProductsAtBottom,
+        oneScanPickAll: this.oneScanPickAll,
+        directlyProcess: this.directProcessing,
+        wholeSaleSettings: wholeSaleSettings);
   }
 
   Future<void> getSettingInfo() async {
     var _apiProvider = SettingsApiProvider(db);
     settingsRemote = await _apiProvider.getSettingsRemote();
+    await getWholeSetting();
     saveSettingLocal();
+  }
+
+  getWholeSetting() async {
+    var settings = await Settings.fromMemory();
+    print("settings.toJson()");
+    print(settings.toJson());
+
+    wholeSaleSettings = settings.wholeSaleSettings;
+    if (settings.wholeSaleSettings != null) {
+      updateErpDio(
+        server: wholeSaleSettings!.server!,
+        admin: wholeSaleSettings!.admin!,
+        userName: wholeSaleSettings!.userName!,
+        password: wholeSaleSettings!.password!,
+      );
+    }
   }
 
   Future<void> saveSettingInfo() async {
@@ -84,11 +103,10 @@ class SettingProvider extends ChangeNotifier {
     saveSettingLocal();
     // Save to remote
     final data = settingsRemote!.copyWith(
-      picklistSorting: this.picklistSortType().index + 1,
-      finishedProductsAtBottom: this.finishedProductsAtBottom,
-      oneScanPickAll: this.oneScanPickAll,
-      directProcessing: this.directProcessing
-    );
+        picklistSorting: this.picklistSortType().index + 1,
+        finishedProductsAtBottom: this.finishedProductsAtBottom,
+        oneScanPickAll: this.oneScanPickAll,
+        directProcessing: this.directProcessing);
     var _apiProvider = SettingsApiProvider(db);
     _apiProvider.saveSettingsRemote(data);
     notifyListeners();
@@ -107,7 +125,8 @@ class SettingProvider extends ChangeNotifier {
   }
 
   Warehouse? get currentWareHouse {
-    return this.warehouses
+    return this
+        .warehouses
         ?.firstWhere((w) => w.id == this.settingsRemote?.warehouseId);
   }
 

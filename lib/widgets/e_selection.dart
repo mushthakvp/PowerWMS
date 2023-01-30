@@ -4,8 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-
-import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

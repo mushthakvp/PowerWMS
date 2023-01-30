@@ -50,6 +50,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     return Scaffold(
       appBar: WMSAppBar(
         AppLocalizations.of(context)!.products,
+        leading: BackButton(),
       ),
       body: CustomScrollView(
         slivers: <Widget>[
@@ -66,7 +67,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
                       hintText:
-                      AppLocalizations.of(context)!.productScreenSearch,
+                          AppLocalizations.of(context)!.productScreenSearch,
                     ),
                   ),
                 ),
@@ -102,7 +103,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           padding: const EdgeInsets.all(20),
                           sliver: SliverToBoxAdapter(
                             child:
-                            Text(AppLocalizations.of(context)!.barcodeHelp),
+                                Text(AppLocalizations.of(context)!.barcodeHelp),
                           ),
                         );
                       }
@@ -111,7 +112,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           padding: const EdgeInsets.all(10),
                           sliver: SliverToBoxAdapter(
                               child:
-                              Center(child: CircularProgressIndicator())),
+                                  Center(child: CircularProgressIndicator())),
                         );
                       }
 
@@ -121,8 +122,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             padding: const EdgeInsets.all(20),
                             sliver: SliverToBoxAdapter(
                                 child: Text(
-                                  AppLocalizations.of(context)!.productNotFound,
-                                )),
+                              AppLocalizations.of(context)!.productNotFound,
+                            )),
                           );
                         }
 
@@ -130,7 +131,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
                         return SliverList(
                           delegate: SliverChildBuilderDelegate(
-                                (context, index) {
+                            (context, index) {
                               final product = products[index];
 
                               if (products.length == 0) {
@@ -145,41 +146,60 @@ class _ProductsScreenState extends State<ProductsScreen> {
                               }
                               return Column(
                                 children: [
-                                  ListTile(
-                                    onTap: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              ProductScreen(product),
-                                        ),
-                                      );
+                                  Dismissible(
+                                    key: Key(product.id.toString()),
+                                    onDismissed: (value) {
+                                      final repository =
+                                          context.read<ProductRepository>();
+                                      repository.deleteProduct(product);
                                     },
-                                    leading: ProductImage(
-                                      product.id,
-                                      width: 60,
-                                      key: widget.key,
+                                    background: Container(
+                                      padding: EdgeInsets.only(right: 16),
+                                      alignment: Alignment.centerRight,
+                                      color: Colors.red,
+                                      child: Icon(
+                                        Icons.delete_forever_outlined,
+                                        color: Colors.white,
+                                        size: 25,
+                                      ),
                                     ),
-                                    title: Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          product.uid,
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                  product.description ?? '',
-                                                  overflow:
-                                                  TextOverflow.ellipsis),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                    child: ListTile(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ProductScreen(product),
+                                          ),
+                                        );
+                                      },
+                                      leading: ProductImage(
+                                        product.id,
+                                        width: 60,
+                                        key: widget.key,
+                                      ),
+                                      subtitle: Text(product.unit),
+                                      title: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            product.uid,
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                    product.description ?? '',
+                                                    overflow:
+                                                        TextOverflow.ellipsis),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      trailing: Icon(Icons.chevron_right),
                                     ),
-                                    trailing: Icon(Icons.chevron_right),
                                   ),
                                   Divider(
                                     height: 1,
@@ -247,19 +267,19 @@ class _ProductsScreenState extends State<ProductsScreen> {
           title: Text('Packaging'),
         ),
         ...product.packagings.map((packaging) => Column(
-          children: [
-            ListTile(
-              dense: true,
-              title: Text(
-                  '${mylocale.languageCode == "en" ? packaging.packagingUnitTranslations.first.value : packaging.packagingUnitTranslations.last.value} (${packaging.defaultAmount})'),
-            ),
-            // ...packaging.packagingUnitTranslations
-            //     .map((translation) => ListTile(
-            //           dense: true,
-            //           title: Text('${translation.value}'),
-            //         )),
-          ],
-        )),
+              children: [
+                ListTile(
+                  dense: true,
+                  title: Text(
+                      '${mylocale.languageCode == "en" ? packaging.packagingUnitTranslations.first.value : packaging.packagingUnitTranslations.last.value} (${packaging.defaultAmount})'),
+                ),
+                // ...packaging.packagingUnitTranslations
+                //     .map((translation) => ListTile(
+                //           dense: true,
+                //           title: Text('${translation.value}'),
+                //         )),
+              ],
+            )),
         Divider(height: 1),
         if (product.extra1 != null)
           ListTile(
@@ -291,16 +311,22 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   _parse(String value) {
+    print("_parse");
     setState(() {
       try {
         var barcode = parser.parse(value.trim());
+        print(barcode);
         if (barcode.hasAI('01')) {
           _result = barcode.getAIData('01');
+          print("_result");
+          print(_result);
         } else {
           _result = '';
         }
       } catch (e) {
         _result = value.trim();
+        print("error");
+        print(_result);
       }
     });
     focusNode.requestFocus();

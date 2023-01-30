@@ -60,8 +60,8 @@ class _PicklistViewState extends State<PicklistView> with PicklistStatusDelegate
               _refreshController.refreshCompleted();
               setState(() {});
             },
-            child: CustomScrollView(
-              slivers: [
+            child: ListView(
+              children: [
                 PicklistHeader(picklist),
                 PicklistBody(snapshot.data!, this),
               ],

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -7,6 +8,7 @@ import 'package:scanner/barcode_parser/barcode_parser.dart';
 import 'package:scanner/widgets/e_textfield.dart';
 
 final parser = GS1BarcodeParser.defaultParser();
+
 typedef OnBarCodeChanged = Function(String);
 
 class BarcodeInput extends StatefulWidget {
@@ -14,8 +16,12 @@ class BarcodeInput extends StatefulWidget {
   final bool willShowKeyboardButton;
   final OnBarCodeChanged? onBarCodeChanged;
 
-  const BarcodeInput(this.onParse, this.onBarCodeChanged,
-      {required this.willShowKeyboardButton, Key? key}) : super(key: key);
+  const BarcodeInput(
+      {required this.onParse,
+      this.onBarCodeChanged,
+      required this.willShowKeyboardButton,
+      Key? key})
+      : super(key: key);
 
   @override
   _BarcodeInputState createState() => _BarcodeInputState();
@@ -32,9 +38,8 @@ class _BarcodeInputState extends State<BarcodeInput> {
     super.initState();
     var keyboardVisibilityController = KeyboardVisibilityController();
     // Subscribe
-    keyboardSubscription = keyboardVisibilityController
-        .onChange
-        .listen((bool visible) {
+    keyboardSubscription =
+        keyboardVisibilityController.onChange.listen((bool visible) {
       setState(() {
         willShowKeyboard = visible;
       });
@@ -92,9 +97,7 @@ class _BarcodeInputState extends State<BarcodeInput> {
             }
           },
         ),
-        if (widget.willShowKeyboardButton) ... [
-          _keyboardButton()
-        ]
+        if (widget.willShowKeyboardButton) ...[_keyboardButton()]
       ],
     );
   }
@@ -123,9 +126,9 @@ class _BarcodeInputState extends State<BarcodeInput> {
       hoverColor: Colors.white,
       splashColor: Colors.white,
       highlightColor: Colors.white,
-      icon: Icon(
-          !willShowKeyboard ? Icons.keyboard_alt_outlined : Icons.keyboard_alt_rounded
-      ),
+      icon: Icon(!willShowKeyboard
+          ? Icons.keyboard_alt_outlined
+          : Icons.keyboard_alt_rounded),
       onPressed: () async {
         if (willShowKeyboard) {
           SystemChannels.textInput.invokeMethod<void>('TextInput.hide');

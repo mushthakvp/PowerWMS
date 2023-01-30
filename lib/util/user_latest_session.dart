@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserLatestSession {
   UserLatestSession._();
+
   static UserLatestSession shared = UserLatestSession._();
 
   static SharedPreferences? _preferences;
@@ -29,10 +30,9 @@ class UserLatestSession {
     if (timestamp != null) {
       DateTime tsdate = DateTime.fromMillisecondsSinceEpoch(timestamp);
       DateTime now = DateTime.now();
-      if (tsdate.year == now.year
-          && tsdate.month == now.month
-          && tsdate.day == now.day
-      ) {
+      if (tsdate.year == now.year &&
+          tsdate.month == now.month &&
+          tsdate.day == now.day) {
         int h = now.hour - tsdate.hour;
         if (h == 4) {
           return (now.minute >= tsdate.minute);

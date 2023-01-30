@@ -4,7 +4,7 @@ import 'package:scanner/providers/mutation_provider.dart';
 class ProcessProductProvider extends ChangeNotifier {
   bool _canProcess = false;
 
-  bool get canProcess => _canProcess;
+  bool get getCanProcess => _canProcess;
 
   set canProcess(bool value) {
     _canProcess = value;

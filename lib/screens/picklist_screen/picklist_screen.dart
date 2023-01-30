@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:scanner/models/picklist.dart';
@@ -10,8 +11,8 @@ import 'package:scanner/screens/picklist_screen/widgets/picklist_body.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_footer.dart';
 import 'package:scanner/screens/picklist_screen/widgets/picklist_view.dart';
 import 'package:scanner/util/internet_state.dart';
+import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PicklistScreen extends StatefulWidget {
@@ -55,6 +56,13 @@ class _PicklistScreenState extends State<PicklistScreen>
     return Scaffold(
       appBar: WMSAppBar(
         widget._picklist.uid,
+        leading: BackButton(),
+        action: IconButton(
+          onPressed: () {
+            Navigator.of(context).pushNamed(SettingsDialog.routeName);
+          },
+          icon: Icon(Icons.settings),
+        ),
       ),
       body: PicklistView(widget._picklist, this),
       bottomNavigationBar: Consumer<CompleteStockMutationProvider>(
@@ -99,9 +107,9 @@ class _PicklistScreenState extends State<PicklistScreen>
                           await context
                               .read<PicklistRepository>()
                               .updatePicklistStatus(
-                              stocksNeedToProcess.first.picklistId,
-                              PicklistStatus.completed,
-                              false);
+                                  stocksNeedToProcess.first.picklistId,
+                                  PicklistStatus.completed,
+                                  false);
                         }
                         await showDialog(
                           context: context,
@@ -127,7 +135,7 @@ class _PicklistScreenState extends State<PicklistScreen>
                       );
                     }
                   } else {
-                    Future.delayed(const Duration(), () async {
+                    Future.delayed(const Duration(milliseconds: 300), () async {
                       await showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(

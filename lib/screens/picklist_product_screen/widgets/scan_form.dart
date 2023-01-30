@@ -1,6 +1,7 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
@@ -10,12 +11,13 @@ import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/error_barcode.dart';
+import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 
 final audio = Audio('assets/error.mp3');
 
 class ScanForm extends StatelessWidget {
-  const ScanForm(this.onParse, {Key? key}) : super(key: key);
+  const ScanForm({required this.onParse, Key? key}) : super(key: key);
 
   final void Function(bool proceed) onParse;
 
@@ -23,38 +25,41 @@ class ScanForm extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<MutationProvider?>()!;
     final formKey = GlobalKey<FormState>();
-    return ListTile(
-      visualDensity: VisualDensity.compact,
-      title: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            child: Form(
-              key: formKey,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Selector<AddProductProvider, bool>(
-                    selector: (_, p) => p.canAdd,
-                    builder: (context, enable, _) {
-                      return ElevatedButton(
-                        child: Text(
-                          AppLocalizations.of(context)!.productAdd.toUpperCase(),
-                        ),
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              enable ? Colors.blue : Colors.grey
-                          ),
-                        ),
-                        onPressed: provider.needToScan() || !enable
-                            ? null
-                            : () {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      width: double.infinity,
+      child: Form(
+        key: formKey,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Selector<AddProductProvider, bool>(
+              selector: (_, p) => p.canAdd,
+              builder: (context, enable, _) {
+                return ElevatedButton(
+                  child: Text(
+                    AppLocalizations.of(context)!.productAdd.toUpperCase(),
+                  ),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        enable ? Colors.blue : Colors.grey),
+                  ),
+                  onPressed: provider.needToScan() || !enable
+                      ? null
+                      : () async {
                           // formKey.currentState?.save();
-                          final String ean = _parseHandler(context, provider, context.read<AddProductProvider>().value ?? '', null);
+                          final String ean = await _parseHandler(
+                              context,
+                              provider,
+                              context.read<AddProductProvider>().value ??
+                                  '',
+                              null);
                           if (ean.length == 13) {
                             String request = '0$ean';
                             try {
-                              _parseHandler(context, provider, request, null, isThrowError: true);
+                              _parseHandler(
+                                  context, provider, request, null,
+                                  isThrowError: true);
                             } catch (_) {
                               _parseHandler(context, provider, ean, null);
                             }
@@ -63,53 +68,52 @@ class ScanForm extends StatelessWidget {
                           }
                           context.read<AddProductProvider>().canAdd = false;
                         },
-                      );
-                    },
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: BarcodeInput((value, barcode) {
-                      if (!provider.needToScan() || value.length > 0) {
-                        if (value.length == 13) {
-                          String request = '0$value';
-                          try {
-                            _parseHandler(context, provider, request, barcode, isThrowError: true);
-                          } catch (_) {
-                            _parseHandler(context, provider, value, barcode);
-                          }
-                        } else {
+                );
+              },
+            ),
+            Gap(12),
+            Expanded(
+              child: BarcodeInput(
+                  onParse: (value, barcode) {
+                    if (!provider.needToScan() || value.length > 0) {
+                      if (value.length == 13) {
+                        String request = '0$value';
+                        try {
+                          _parseHandler(context, provider, request, barcode,
+                              isThrowError: true);
+                        } catch (_) {
                           _parseHandler(context, provider, value, barcode);
                         }
-                        context.read<AddProductProvider>().canAdd = false;
+                      } else {
+                        _parseHandler(context, provider, value, barcode);
                       }
-                    }, (String barcode) {
-                      if (barcode.isEmpty) {
-                        context.read<AddProductProvider>().canAdd = false;
-                        context.read<AddProductProvider>().value = null;
-                        return;
-                      }
-                      bool enableAddButton = provider.line.product.uid == barcode
-                          || provider.line.product.ean == barcode;
-                      context.read<AddProductProvider>().canAdd = enableAddButton;
-                      context.read<AddProductProvider>().value = barcode;
-                    }, willShowKeyboardButton: false),
-                  ),
-                ],
-              ),
+                      context.read<AddProductProvider>().canAdd = false;
+                    }
+                  },
+                  onBarCodeChanged: (String barcode) {
+                    if (barcode.isEmpty) {
+                      context.read<AddProductProvider>().canAdd = false;
+                      context.read<AddProductProvider>().value = null;
+                      return;
+                    }
+                    bool enableAddButton =
+                        provider.line.product.uid == barcode ||
+                            provider.line.product.ean == barcode;
+                    context.read<AddProductProvider>().canAdd =
+                        enableAddButton;
+                    context.read<AddProductProvider>().value = barcode;
+                  },
+                  willShowKeyboardButton: false),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  _parseHandler(
-    BuildContext context,
-    MutationProvider mutation,
-    String ean,
-    GS1Barcode? barcode,
-    {bool? isThrowError = false}
-  ) {
+  _parseHandler(BuildContext context, MutationProvider mutation, String ean,
+      GS1Barcode? barcode,
+      {bool? isThrowError = false}) async {
     final settings = context.read<ValueNotifier<Settings>>().value;
     try {
       if (ean != '' &&
@@ -123,7 +127,8 @@ class ScanForm extends StatelessWidget {
       }
       if (!mutation.shallAllowScan) {
         context.read<AddProductProvider>().canAdd = false;
-        throw new DomainException(AppLocalizations.of(context)!.productCannotScan);
+        throw new DomainException(
+            AppLocalizations.of(context)!.productCannotScan);
       }
       int amount;
       if (mutation.amount > 0) {
@@ -195,37 +200,38 @@ class ScanForm extends StatelessWidget {
         mutation.replaceItem(
           item,
           StockMutationItem(
-            id: item.id,
+              id: item.id,
+              productId: mutation.line.product.id,
+              batch: batch ?? '',
+              amount: amount + item.amount,
+              productionDate: productionDate,
+              expirationDate: expirationDate,
+              stickerCode: serial,
+              picklistLineId: mutation.line.id,
+              picklistId: mutation.line.picklistId,
+              warehouse: mutation.line.warehouse,
+              warehouseCode: mutation.line.lineWarehouseCode),
+        );
+      } catch (e) {
+        print("ERROR");
+        print(e.toString());
+        mutation.addItem(StockMutationItem(
             productId: mutation.line.product.id,
             batch: batch ?? '',
-            amount: amount + item.amount,
+            amount: amount,
             productionDate: productionDate,
             expirationDate: expirationDate,
             stickerCode: serial,
             picklistLineId: mutation.line.id,
             picklistId: mutation.line.picklistId,
             warehouse: mutation.line.warehouse,
-            warehouseCode: mutation.line.lineWarehouseCode
-          ),
-        );
-      } catch (e) {
-        mutation.addItem(StockMutationItem(
-          productId: mutation.line.product.id,
-          batch: batch ?? '',
-          amount: amount,
-          productionDate: productionDate,
-          expirationDate: expirationDate,
-          stickerCode: serial,
-          picklistLineId: mutation.line.id,
-            picklistId: mutation.line.picklistId,
-            warehouse: mutation.line.warehouse,
-            warehouseCode: mutation.line.lineWarehouseCode
-        ));
+            warehouseCode: mutation.line.lineWarehouseCode));
       }
       if (mutation.maxAmountToPick <= mutation.totalAmount &&
           mutation.allowBelowZero == null &&
-          !settings.directlyProcess) {
-        showDialog(
+          !settings.directlyProcess &&
+          InternetState.shared.connectivityAvailable()) {
+        await showDialog(
           context: context,
           builder: (BuildContext context) => AlertDialog(
             title: Text(
@@ -250,38 +256,45 @@ class ScanForm extends StatelessWidget {
           ),
         ).then((result) => onParse(result));
       } else {
-        if (settings.directlyProcess
-            && mutation.isCancelRestProductAmount
-            && mutation.cancelRestProductAmount != 0
-        ) {
-          onParse(true);
+        if (settings.directlyProcess &&
+            mutation.isCancelRestProductAmount &&
+            mutation.cancelRestProductAmount != 0) {
+          print("@@@1");
+          onParse(InternetState.shared.connectivityAvailable() && true);
           return;
         }
-        if (settings.directlyProcess
-            && mutation.isBackorderRestProductAmount
-            && mutation.backorderRestProductAmount != 0) {
-          onParse(true);
+        if (settings.directlyProcess &&
+            mutation.isBackorderRestProductAmount &&
+            mutation.backorderRestProductAmount != 0) {
+          print("@@@2");
+          onParse(InternetState.shared.connectivityAvailable() && true);
           return;
         }
-        onParse(settings.directlyProcess && mutation.toPickAmount == 0);
+        print("@@@3");
+        onParse(InternetState.shared.connectivityAvailable() &&
+            settings.directlyProcess &&
+            mutation.toPickAmount == 0);
         return;
       }
-      if (settings.directlyProcess
-          && mutation.isCancelRestProductAmount
-          && mutation.cancelRestProductAmount != 0
-          && mutation.showToPickAmount == 0
-      ) {
-        onParse(true);
+      if (settings.directlyProcess &&
+          mutation.isCancelRestProductAmount &&
+          mutation.cancelRestProductAmount != 0 &&
+          mutation.showToPickAmount == 0) {
+        print("@@@4");
+        onParse(InternetState.shared.connectivityAvailable() && true);
       }
-      if (settings.directlyProcess
-          && mutation.isBackorderRestProductAmount
-          && mutation.backorderRestProductAmount != 0
-          && mutation.showToPickAmount == 0) {
-        onParse(true);
+      if (settings.directlyProcess &&
+          mutation.isBackorderRestProductAmount &&
+          mutation.backorderRestProductAmount != 0 &&
+          mutation.showToPickAmount == 0) {
+        print("@@@5");
+        onParse(InternetState.shared.connectivityAvailable() && true);
       }
     } catch (e, stack) {
       if (isThrowError == false) {
-        AssetsAudioPlayer.newPlayer().open(audio, autoStart: true).then((value) {
+        await AssetsAudioPlayer.newPlayer()
+            .open(audio, autoStart: true)
+            .then((value) {
           final snackBar = SnackBar(
             content: Text(e.toString()),
             duration: Duration(seconds: 2),
@@ -331,9 +344,9 @@ class ScanForm extends StatelessWidget {
   }
 
   int _calculatePositiveAmount(
-      MutationProvider provider,
-      String ean,
-      Settings settings,
+    MutationProvider provider,
+    String ean,
+    Settings settings,
   ) {
     int amount = 0;
     var oneScanPickAll = settings.oneScanPickAll;
@@ -350,9 +363,8 @@ class ScanForm extends StatelessWidget {
       return amount;
     }
     if (!provider.isCancelRestProductAmount) {
-      amount = provider.needToScan() || !oneScanPickAll
-          ? 1
-          : provider.toPickAmount;
+      amount =
+          provider.needToScan() || !oneScanPickAll ? 1 : provider.toPickAmount;
       // packaging case
       if (provider.packaging != null && provider.packaging!.uid == ean) {
         if (!oneScanPickAll) {

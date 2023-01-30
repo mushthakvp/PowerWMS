@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +12,7 @@ import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/providers/process_product_provider.dart';
+import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/product_adjustment.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
@@ -19,10 +21,11 @@ import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductView extends StatelessWidget {
-  const ProductView(this.line, this.cancelledItems, {Key? key})
+  const ProductView(this.line, this.cancelledItems, {Key? key, this.totalStock})
       : super(key: key);
 
   final PicklistLine line;
+  final double? totalStock;
   final List<CancelledStockMutationItem> cancelledItems;
 
   @override
@@ -79,10 +82,10 @@ class ProductView extends StatelessWidget {
         builder: (context, provider, _) {
           Future.delayed(const Duration(milliseconds: 500), () {
             if (provider != null) {
-              context.read<ProcessProductProvider>().canProcess =
-                  provider.idleItems.length > 0;
               context.read<ProcessProductProvider>().mutationProvider =
                   provider;
+              context.read<ProcessProductProvider>().canProcess =
+                  provider.idleItems.length > 0;
             }
           });
           if (provider == null) {
@@ -92,15 +95,18 @@ class ProductView extends StatelessWidget {
           }
           return SliverList(
             delegate: SliverChildListDelegate([
-              ListTile(
-                title: Row(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
                   children: <Widget>[
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
                           '${AppLocalizations.of(context)!.productProductNumber}:',
-                          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87.withOpacity(.6)),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87.withOpacity(.6)),
                         ),
                         SizedBox(height: 2),
                         Text(
@@ -111,7 +117,9 @@ class ProductView extends StatelessWidget {
                         SizedBox(height: 10),
                         Text(
                           'GTIN / EAN:',
-                          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87.withOpacity(.6)),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87.withOpacity(.6)),
                         ),
                         SizedBox(height: 2),
                         Text(
@@ -135,7 +143,18 @@ class ProductView extends StatelessWidget {
                   ],
                 ),
               ),
-              Divider(height: 1),
+              Divider(),
+              if (totalStock != null && totalStock != provider.askedAmount) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    "Totaal ${totalStock?.toInt()} x ${provider.line.product.unit} ",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Divider(),
+              ],
+
               _pickTile(provider, context),
               SizedBox(height: 8),
               Divider(height: 1),
@@ -148,7 +167,7 @@ class ProductView extends StatelessWidget {
 
               /// Barcode
               ScanForm(
-                (process) {
+                onParse: (process) {
                   if (process) {
                     _onProcessHandler(provider, context);
                   }
@@ -165,9 +184,9 @@ class ProductView extends StatelessWidget {
   }
 
   _pickTile(MutationProvider provider, BuildContext context) {
-    return ListTile(
-      visualDensity: VisualDensity.compact,
-      title: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
@@ -204,19 +223,20 @@ class ProductView extends StatelessWidget {
             onTap: () {
               if (provider.shallAllowScan) {
                 showProductAdjustmentPopup(
-                    context: context,
-                    mutationProvider: provider,
-                    onConfirmAmount: (int amount, bool isCancel) {
-                      provider.changeAmount(amount, isCancel);
-                      provider.changeBackorderAmount(amount, !isCancel);
-                      // handle local storage
-                      provider.handleProductCancelAmount(isCancel
-                          ? CacheProductStatus.set
-                          : CacheProductStatus.remove);
-                      provider.handleProductBackorderAmount(!isCancel
-                          ? CacheProductStatus.set
-                          : CacheProductStatus.remove);
-                    });
+                  context: context,
+                  mutationProvider: provider,
+                  onConfirmAmount: (int amount, bool isCancel) {
+                    provider.changeAmount(amount, isCancel);
+                    provider.changeBackorderAmount(amount, !isCancel);
+                    // handle local storage
+                    provider.handleProductCancelAmount(isCancel
+                        ? CacheProductStatus.set
+                        : CacheProductStatus.remove);
+                    provider.handleProductBackorderAmount(!isCancel
+                        ? CacheProductStatus.set
+                        : CacheProductStatus.remove);
+                  },
+                );
               } else {
                 final snackBar = SnackBar(
                   content:
@@ -304,6 +324,9 @@ class ProductView extends StatelessWidget {
       if (value.success) {
         provider.clear();
         Navigator.of(context).pop();
+        context
+            .read<StockMutationNeedToProcessProvider>()
+            .changePendingMutation(isPending: false);
       } else {
         Future.delayed(const Duration(), () async {
           await showErrorAlert(message: value.message);
@@ -338,7 +361,7 @@ class ProductView extends StatelessWidget {
           children: [
             ListTile(
               title: Text(
-                '${mutation.askedAmount < 0 && item.amount > 0 ? '-' : ''}${item.amount} x ${item.batch} | ${item.stickerCode} $expirationDate',
+                '${mutation.askedAmount < 0 && item.amount > 0 ? '-' : ''}${item.amount} x ${item.batch} ${item.stickerCode == null ? "" : "| ${item.stickerCode}"} $expirationDate',
               ),
             ),
             Divider(height: 1),

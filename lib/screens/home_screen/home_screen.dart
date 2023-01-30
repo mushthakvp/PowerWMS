@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:package_info/package_info.dart';
@@ -34,16 +35,16 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with RouteAware {
+class _HomeScreenState extends State<HomeScreen> with RouteAware {
   _getSettingInfo() async {
     await Future.wait([
       context.read<SettingProvider>().getSettingInfo(),
       context.read<SettingProvider>().getWarehouses(),
       context.read<SettingProvider>().getUserInfo()
     ]);
-    context.read<ValueNotifier<Settings>>().value =
-        context.read<SettingProvider>().settingsLocal;
+    if (mounted)
+      context.read<ValueNotifier<Settings>>().value =
+          context.read<SettingProvider>().settingsLocal;
   }
 
   @override
