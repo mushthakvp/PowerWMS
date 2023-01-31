@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/db.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/log.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
@@ -43,7 +44,7 @@ Future<void> main() async {
   interceptErpDio();
   await UserLatestSession.ensureInitialized();
   await InternetState.shared.ensureInitialized();
-  // initLogs();
+  initLogs();
   final db = await createDb();
 
   runApp(WMSApp(db));

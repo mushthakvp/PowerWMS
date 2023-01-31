@@ -13,35 +13,26 @@ import 'package:flutter/services.dart';
 import 'package:scanner/widgets/e_editable.dart';
 import 'package:scanner/widgets/e_selection.dart';
 
-export 'package:flutter/services.dart'
-    show
-        TextInputType,
-        TextInputAction,
-        TextCapitalization,
-        SmartQuotesType,
-        SmartDashesType;
+
+export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget? Function(
-  /// The build context for the TextField.
-  BuildContext context, {
+    /// The build context for the TextField.
+    BuildContext context, {
+    /// The length of the string currently in the input.
+    required int currentLength,
+    /// The maximum string length that can be entered into the TextField.
+    required int? maxLength,
+    /// Whether or not the TextField is currently focused.  Mainly provided for
+    /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
+    required bool isFocused,
+    });
 
-  /// The length of the string currently in the input.
-  required int currentLength,
-
-  /// The maximum string length that can be entered into the TextField.
-  required int? maxLength,
-
-  /// Whether or not the TextField is currently focused.  Mainly provided for
-  /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
-  required bool isFocused,
-});
-
-class _TextFieldSelectionGestureDetectorBuilders
-    extends TextSelectionGestureDetectorBuilders {
+class _TextFieldSelectionGestureDetectorBuilders extends TextSelectionGestureDetectorBuilders {
   _TextFieldSelectionGestureDetectorBuilders({
     required _ETextFieldState state,
-  })  : _state = state,
+  }) : _state = state,
         super(delegate: state);
 
   final _ETextFieldState _state;
@@ -329,16 +320,14 @@ class ETextField extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-  })  : assert(textAlign != null),
+  }) : assert(textAlign != null),
         assert(readOnly != null),
         assert(autofocus != null),
         assert(obscuringCharacter != null && obscuringCharacter.length == 1),
         assert(obscureText != null),
         assert(autocorrect != null),
-        smartDashesType = smartDashesType ??
-            (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-        smartQuotesType = smartQuotesType ??
-            (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
         assert(enableSuggestions != null),
         assert(scrollPadding != null),
         assert(dragStartBehavior != null),
@@ -347,56 +336,51 @@ class ETextField extends StatefulWidget {
         assert(maxLines == null || maxLines > 0),
         assert(minLines == null || minLines > 0),
         assert(
-          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-          "minLines can't be greater than maxLines",
+        (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+        "minLines can't be greater than maxLines",
         ),
         assert(expands != null),
         assert(
-          !expands || (maxLines == null && minLines == null),
-          'minLines and maxLines must be null when expands is true.',
+        !expands || (maxLines == null && minLines == null),
+        'minLines and maxLines must be null when expands is true.',
         ),
-        assert(!obscureText || maxLines == 1,
-            'Obscured fields cannot be multiline.'),
-        assert(maxLength == null ||
-            maxLength == ETextField.noMaxLength ||
-            maxLength > 0),
-        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
+        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
+        assert(maxLength == null || maxLength == ETextField.noMaxLength || maxLength > 0),
+  // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
         assert(
-          !identical(textInputAction, TextInputAction.newline) ||
-              maxLines == 1 ||
-              !identical(keyboardType, TextInputType.text),
-          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
+        !identical(textInputAction, TextInputAction.newline) ||
+            maxLines == 1 ||
+            !identical(keyboardType, TextInputType.text),
+        'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
         ),
         assert(clipBehavior != null),
         assert(enableIMEPersonalizedLearning != null),
-        keyboardType = keyboardType ??
-            (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        enableInteractiveSelection =
-            enableInteractiveSelection ?? (!readOnly || !obscureText),
+        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
         toolbarOptions = toolbarOptions ??
             (obscureText
                 ? (readOnly
-                    // No point in even offering "Select All" in a read-only obscured
-                    // field.
-                    ? const ToolbarOptions()
-                    // Writable, but obscured.
-                    : const ToolbarOptions(
-                        selectAll: true,
-                        paste: true,
-                      ))
+            // No point in even offering "Select All" in a read-only obscured
+            // field.
+                ? const ToolbarOptions()
+            // Writable, but obscured.
+                : const ToolbarOptions(
+              selectAll: true,
+              paste: true,
+            ))
                 : (readOnly
-                    // Read-only, not obscured.
-                    ? const ToolbarOptions(
-                        selectAll: true,
-                        copy: true,
-                      )
-                    // Writable, not obscured.
-                    : const ToolbarOptions(
-                        copy: true,
-                        cut: true,
-                        selectAll: true,
-                        paste: true,
-                      ))),
+            // Read-only, not obscured.
+                ? const ToolbarOptions(
+              selectAll: true,
+              copy: true,
+            )
+            // Writable, not obscured.
+                : const ToolbarOptions(
+              copy: true,
+              cut: true,
+              selectAll: true,
+              paste: true,
+            ))),
         super(key: key);
 
   /// Controls the text being edited.
@@ -780,176 +764,104 @@ class ETextField extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<TextEditingController>(
-        'controller', controller,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode,
-        defaultValue: null));
-    properties
-        .add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null));
-    properties.add(DiagnosticsProperty<InputDecoration>(
-        'decoration', decoration,
-        defaultValue: const InputDecoration()));
-    properties.add(DiagnosticsProperty<TextInputType>(
-        'keyboardType', keyboardType,
-        defaultValue: TextInputType.text));
-    properties.add(
-        DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    properties.add(DiagnosticsProperty<String>(
-        'obscuringCharacter', obscuringCharacter,
-        defaultValue: '•'));
-    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText,
-        defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect,
-        defaultValue: true));
-    properties.add(EnumProperty<SmartDashesType>(
-        'smartDashesType', smartDashesType,
-        defaultValue:
-            obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
-    properties.add(EnumProperty<SmartQuotesType>(
-        'smartQuotesType', smartQuotesType,
-        defaultValue:
-            obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
-    properties.add(DiagnosticsProperty<bool>(
-        'enableSuggestions', enableSuggestions,
-        defaultValue: true));
+    properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null));
+    properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration, defaultValue: const InputDecoration()));
+    properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
+    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
+    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
+    properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
-    properties.add(
-        DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(EnumProperty<MaxLengthEnforcement>(
-        'maxLengthEnforcement', maxLengthEnforcement,
-        defaultValue: null));
-    properties.add(EnumProperty<TextInputAction>(
-        'textInputAction', textInputAction,
-        defaultValue: null));
-    properties.add(EnumProperty<TextCapitalization>(
-        'textCapitalization', textCapitalization,
-        defaultValue: TextCapitalization.none));
-    properties.add(EnumProperty<TextAlign>('textAlign', textAlign,
-        defaultValue: TextAlign.start));
-    properties.add(DiagnosticsProperty<TextAlignVertical>(
-        'textAlignVertical', textAlignVertical,
-        defaultValue: null));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
-    properties
-        .add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
-    properties
-        .add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
-    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius,
-        defaultValue: null));
-    properties
-        .add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Brightness>(
-        'keyboardAppearance', keyboardAppearance,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>(
-        'scrollPadding', scrollPadding,
-        defaultValue: const EdgeInsets.all(20.0)));
-    properties.add(FlagProperty('selectionEnabled',
-        value: selectionEnabled,
-        defaultValue: true,
-        ifFalse: 'selection disabled'));
-    properties.add(DiagnosticsProperty<TextSelectionControls>(
-        'selectionControls', selectionControls,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<ScrollController>(
-        'scrollController', scrollController,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<ScrollPhysics>(
-        'scrollPhysics', scrollPhysics,
-        defaultValue: null));
-    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior,
-        defaultValue: Clip.hardEdge));
-    properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled,
-        defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>(
-        'enableIMEPersonalizedLearning', enableIMEPersonalizedLearning,
-        defaultValue: true));
+    properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null));
+    properties.add(EnumProperty<TextInputAction>('textInputAction', textInputAction, defaultValue: null));
+    properties.add(EnumProperty<TextCapitalization>('textCapitalization', textCapitalization, defaultValue: TextCapitalization.none));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
+    properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
+    properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
+    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
+    properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('scrollPadding', scrollPadding, defaultValue: const EdgeInsets.all(20.0)));
+    properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
+    properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
+    properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
+    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
+    properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
   }
 }
 
-class _ETextFieldState extends State<ETextField>
-    with RestorationMixin
-    implements TextSelectionGestureDetectorBuildersDelegate, AutofillClient {
+class _ETextFieldState extends State<ETextField> with RestorationMixin implements TextSelectionGestureDetectorBuildersDelegate, AutofillClient {
   RestorableTextEditingController? _controller;
-
-  TextEditingController get _effectiveController =>
-      widget.controller ?? _controller!.value;
+  TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
   FocusNode? _focusNode;
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  FocusNode get _effectiveFocusNode =>
-      widget.focusNode ?? (_focusNode ??= FocusNode());
-
-  MaxLengthEnforcement get _effectiveMaxLengthEnforcement =>
-      widget.maxLengthEnforcement ??
-      LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement(
-          Theme.of(context).platform);
+  MaxLengthEnforcement get _effectiveMaxLengthEnforcement => widget.maxLengthEnforcement
+      ?? LengthLimitingTextInputFormatter.getDefaultMaxLengthEnforcement(Theme.of(context).platform);
 
   bool _isHovering = false;
 
-  bool get needsCounter =>
-      widget.maxLength != null &&
-      widget.decoration != null &&
-      widget.decoration!.counterText == null;
+  bool get needsCounter => widget.maxLength != null
+      && widget.decoration != null
+      && widget.decoration!.counterText == null;
 
   bool _showSelectionHandles = false;
 
-  late _TextFieldSelectionGestureDetectorBuilders
-      _selectionGestureDetectorBuilder;
+  late _TextFieldSelectionGestureDetectorBuilders _selectionGestureDetectorBuilder;
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
   late bool forcePressEnabled;
 
   @override
-  final GlobalKey<EEditableTextState> editableTextKey =
-      GlobalKey<EEditableTextState>();
+  final GlobalKey<EEditableTextState> editableTextKey = GlobalKey<EEditableTextState>();
 
   @override
   bool get selectionEnabled => widget.selectionEnabled;
-
   // End of API for TextSelectionGestureDetectorBuilderDelegate.
 
-  bool get _isEnabled => widget.enabled ?? widget.decoration?.enabled ?? true;
+  bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
 
   int get _currentLength => _effectiveController.value.text.characters.length;
 
-  bool get _hasIntrinsicError =>
-      widget.maxLength != null &&
-      widget.maxLength! > 0 &&
-      _effectiveController.value.text.characters.length > widget.maxLength!;
+  bool get _hasIntrinsicError => widget.maxLength != null && widget.maxLength! > 0 && _effectiveController.value.text.characters.length > widget.maxLength!;
 
-  bool get _hasError =>
-      widget.decoration?.errorText != null || _hasIntrinsicError;
+  bool get _hasError => widget.decoration?.errorText != null || _hasIntrinsicError;
 
   InputDecoration _getEffectiveDecoration() {
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
-    final InputDecoration effectiveDecoration =
-        (widget.decoration ?? const InputDecoration())
-            .applyDefaults(themeData.inputDecorationTheme)
-            .copyWith(
-              enabled: _isEnabled,
-              hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines,
-            );
+    final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
+        .applyDefaults(themeData.inputDecorationTheme)
+        .copyWith(
+      enabled: _isEnabled,
+      hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines,
+    );
 
     // No need to build anything if counter or counterText were given directly.
-    if (effectiveDecoration.counter != null ||
-        effectiveDecoration.counterText != null) return effectiveDecoration;
+    if (effectiveDecoration.counter != null || effectiveDecoration.counterText != null)
+      return effectiveDecoration;
 
     // If buildCounter was provided, use it to generate a counter widget.
     Widget? counter;
     final int currentLength = _currentLength;
-    if (effectiveDecoration.counter == null &&
-        effectiveDecoration.counterText == null &&
-        widget.buildCounter != null) {
+    if (effectiveDecoration.counter == null
+        && effectiveDecoration.counterText == null
+        && widget.buildCounter != null) {
       final bool isFocused = _effectiveFocusNode.hasFocus;
       final Widget? builtCounter = widget.buildCounter!(
         context,
@@ -978,17 +890,15 @@ class _ETextFieldState extends State<ETextField>
     if (widget.maxLength! > 0) {
       // Show the maxLength in the counter
       counterText += '/${widget.maxLength}';
-      final int remaining =
-          (widget.maxLength! - currentLength).clamp(0, widget.maxLength!);
-      semanticCounterText =
-          localizations.remainingTextFieldCharacterCount(remaining);
+      final int remaining = (widget.maxLength! - currentLength).clamp(0, widget.maxLength!);
+      semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
     }
 
     if (_hasIntrinsicError) {
       return effectiveDecoration.copyWith(
         errorText: effectiveDecoration.errorText ?? '',
-        counterStyle: effectiveDecoration.errorStyle ??
-            themeData.textTheme.caption!.copyWith(color: themeData.errorColor),
+        counterStyle: effectiveDecoration.errorStyle
+            ?? themeData.textTheme.caption!.copyWith(color: themeData.errorColor),
         counterText: counterText,
         semanticCounterText: semanticCounterText,
       );
@@ -1003,8 +913,7 @@ class _ETextFieldState extends State<ETextField>
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder =
-        _TextFieldSelectionGestureDetectorBuilders(state: this);
+    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilders(state: this);
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -1013,8 +922,7 @@ class _ETextFieldState extends State<ETextField>
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ??
-        NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return _isEnabled;
@@ -1047,10 +955,8 @@ class _ETextFieldState extends State<ETextField>
 
     _effectiveFocusNode.canRequestFocus = _canRequestFocus;
 
-    if (_effectiveFocusNode.hasFocus &&
-        widget.readOnly != oldWidget.readOnly &&
-        _isEnabled) {
-      if (_effectiveController.selection.isCollapsed) {
+    if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
+      if(_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
       }
     }
@@ -1101,17 +1007,20 @@ class _ETextFieldState extends State<ETextField>
     if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
       return false;
 
-    if (cause == SelectionChangedCause.keyboard) return false;
+    if (cause == SelectionChangedCause.keyboard)
+      return false;
 
     if (widget.readOnly && _effectiveController.selection.isCollapsed)
       return false;
 
-    if (!_isEnabled) return false;
+    if (!_isEnabled)
+      return false;
 
-    if (cause == SelectionChangedCause.longPress ||
-        cause == SelectionChangedCause.scribble) return true;
+    if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.scribble)
+      return true;
 
-    if (_effectiveController.text.isNotEmpty) return true;
+    if (_effectiveController.text.isNotEmpty)
+      return true;
 
     return false;
   }
@@ -1123,8 +1032,7 @@ class _ETextFieldState extends State<ETextField>
     });
   }
 
-  void _handleSelectionChanged(
-      TextSelection selection, SelectionChangedCause? cause) {
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
@@ -1135,8 +1043,8 @@ class _ETextFieldState extends State<ETextField>
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.longPress ||
-            cause == SelectionChangedCause.drag) {
+        if (cause == SelectionChangedCause.longPress
+            || cause == SelectionChangedCause.drag) {
           _editableText?.bringIntoView(selection.extent);
         }
         return;
@@ -1171,26 +1079,22 @@ class _ETextFieldState extends State<ETextField>
   String get autofillId => _editableText!.autofillId;
 
   @override
-  void autofill(TextEditingValue newEditingValue) =>
-      _editableText!.autofill(newEditingValue);
+  void autofill(TextEditingValue newEditingValue) => _editableText!.autofill(newEditingValue);
 
   @override
   TextInputConfiguration get textInputConfiguration {
-    final List<String>? autofillHints =
-        widget.autofillHints?.toList(growable: false);
+    final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
     final AutofillConfiguration autofillConfiguration = autofillHints != null
         ? AutofillConfiguration(
-            uniqueIdentifier: autofillId,
-            autofillHints: autofillHints,
-            currentEditingValue: _effectiveController.value,
-            hintText: (widget.decoration ?? const InputDecoration()).hintText,
-          )
+      uniqueIdentifier: autofillId,
+      autofillHints: autofillHints,
+      currentEditingValue: _effectiveController.value,
+      hintText: (widget.decoration ?? const InputDecoration()).hintText,
+    )
         : AutofillConfiguration.disabled;
 
-    return _editableText!.textInputConfiguration
-        .copyWith(autofillConfiguration: autofillConfiguration);
+    return _editableText!.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration);
   }
-
   // AutofillClient implementation end.
 
   @override
@@ -1199,19 +1103,15 @@ class _ETextFieldState extends State<ETextField>
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(
-      !(widget.style != null &&
-          widget.style!.inherit == false &&
-          (widget.style!.fontSize == null ||
-              widget.style!.textBaseline == null)),
-      'inherit false style must supply fontSize and textBaseline',
+    !(widget.style != null && widget.style!.inherit == false &&
+        (widget.style!.fontSize == null || widget.style!.textBaseline == null)),
+    'inherit false style must supply fontSize and textBaseline',
     );
 
     final ThemeData theme = Theme.of(context);
-    final TextSelectionThemeData selectionTheme =
-        TextSelectionTheme.of(context);
+    final TextSelectionThemeData selectionTheme = TextSelectionTheme.of(context);
     final TextStyle style = theme.textTheme.subtitle1!.merge(widget.style);
-    final Brightness keyboardAppearance =
-        widget.keyboardAppearance ?? theme.brightness;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
@@ -1240,13 +1140,10 @@ class _ETextFieldState extends State<ETextField>
         textSelectionControls ??= cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??=
-            selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-        selectionColor = selectionTheme.selectionColor ??
-            cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(
-            iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         autocorrectionTextRectColor = selectionColor;
         break;
 
@@ -1256,17 +1153,13 @@ class _ETextFieldState extends State<ETextField>
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??=
-            selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
-        selectionColor = selectionTheme.selectionColor ??
-            cupertinoTheme.primaryColor.withOpacity(0.40);
+        cursorColor ??= selectionTheme.cursorColor ?? cupertinoTheme.primaryColor;
+        selectionColor = selectionTheme.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(
-            iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
-          if (!_effectiveFocusNode.hasFocus &&
-              _effectiveFocusNode.canRequestFocus) {
+          if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
             _effectiveFocusNode.requestFocus();
           }
         };
@@ -1279,8 +1172,7 @@ class _ETextFieldState extends State<ETextField>
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionTheme.selectionColor ??
-            theme.colorScheme.primary.withOpacity(0.40);
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
 
       case TargetPlatform.linux:
@@ -1289,8 +1181,7 @@ class _ETextFieldState extends State<ETextField>
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionTheme.selectionColor ??
-            theme.colorScheme.primary.withOpacity(0.40);
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         break;
 
       case TargetPlatform.windows:
@@ -1299,12 +1190,10 @@ class _ETextFieldState extends State<ETextField>
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= selectionTheme.cursorColor ?? theme.colorScheme.primary;
-        selectionColor = selectionTheme.selectionColor ??
-            theme.colorScheme.primary.withOpacity(0.40);
+        selectionColor = selectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
-          if (!_effectiveFocusNode.hasFocus &&
-              _effectiveFocusNode.canRequestFocus) {
+          if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
             _effectiveFocusNode.requestFocus();
           }
         };
@@ -1341,8 +1230,7 @@ class _ETextFieldState extends State<ETextField>
           expands: widget.expands,
           // Only show the selection highlight when the text field is focused.
           selectionColor: focusNode.hasFocus ? selectionColor : null,
-          selectionControls:
-              widget.selectionEnabled ? textSelectionControls : null,
+          selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
           onSelectionChanged: _handleSelectionChanged,
           onEditingComplete: widget.onEditingComplete,
@@ -1351,8 +1239,7 @@ class _ETextFieldState extends State<ETextField>
           onSelectionHandleTapped: _handleSelectionHandleTapped,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
-          mouseCursor: MouseCursor.defer,
-          // TextField will handle the cursor
+          mouseCursor: MouseCursor.defer, // TextField will handle the cursor
           cursorWidth: widget.cursorWidth,
           cursorHeight: widget.cursorHeight,
           cursorRadius: cursorRadius,
@@ -1381,7 +1268,7 @@ class _ETextFieldState extends State<ETextField>
 
     if (widget.decoration != null) {
       child = AnimatedBuilder(
-        animation: Listenable.merge(<Listenable>[focusNode, controller]),
+        animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget? child) {
           return InputDecorator(
             decoration: _getEffectiveDecoration(),
@@ -1398,8 +1285,7 @@ class _ETextFieldState extends State<ETextField>
         child: child,
       );
     }
-    final MouseCursor effectiveMouseCursor =
-        MaterialStateProperty.resolveAs<MouseCursor>(
+    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.textable,
       <MaterialState>{
         if (!_isEnabled) MaterialState.disabled,
@@ -1432,15 +1318,11 @@ class _ETextFieldState extends State<ETextField>
               return Semantics(
                 maxValueLength: semanticsMaxValueLength,
                 currentValueLength: _currentLength,
-                onTap: widget.readOnly
-                    ? null
-                    : () {
-                        if (!_effectiveController.selection.isValid)
-                          _effectiveController.selection =
-                              TextSelection.collapsed(
-                                  offset: _effectiveController.text.length);
-                        // _requestKeyboard();
-                      },
+                onTap: widget.readOnly ? null : () {
+                  if (!_effectiveController.selection.isValid)
+                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                  // _requestKeyboard();
+                },
                 onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
                 child: child,
               );
