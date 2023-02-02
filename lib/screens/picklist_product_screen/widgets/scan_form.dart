@@ -11,8 +11,8 @@ import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/error_barcode.dart';
-import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/widgets/barcode_input.dart';
+import 'package:scanner/widgets/dialogs/custom_snack_bar.dart';
 
 final audio = Audio('assets/error.mp3');
 
@@ -48,17 +48,15 @@ class ScanForm extends StatelessWidget {
                       ? null
                       : () async {
                           // formKey.currentState?.save();
-                          final String ean = await _parseHandler(
+                          final String ean = _parseHandler(
                               context,
                               provider,
-                              context.read<AddProductProvider>().value ??
-                                  '',
+                              context.read<AddProductProvider>().value ?? '',
                               null);
                           if (ean.length == 13) {
                             String request = '0$ean';
                             try {
-                              _parseHandler(
-                                  context, provider, request, null,
+                              _parseHandler(context, provider, request, null,
                                   isThrowError: true);
                             } catch (_) {
                               _parseHandler(context, provider, ean, null);
@@ -99,8 +97,7 @@ class ScanForm extends StatelessWidget {
                     bool enableAddButton =
                         provider.line.product.uid == barcode ||
                             provider.line.product.ean == barcode;
-                    context.read<AddProductProvider>().canAdd =
-                        enableAddButton;
+                    context.read<AddProductProvider>().canAdd = enableAddButton;
                     context.read<AddProductProvider>().value = barcode;
                   },
                   willShowKeyboardButton: false),
@@ -113,7 +110,7 @@ class ScanForm extends StatelessWidget {
 
   _parseHandler(BuildContext context, MutationProvider mutation, String ean,
       GS1Barcode? barcode,
-      {bool? isThrowError = false}) async {
+      {bool? isThrowError = false}) {
     final settings = context.read<ValueNotifier<Settings>>().value;
     try {
       if (ean != '' &&
@@ -213,8 +210,6 @@ class ScanForm extends StatelessWidget {
               warehouseCode: mutation.line.lineWarehouseCode),
         );
       } catch (e) {
-        print("ERROR");
-        print(e.toString());
         mutation.addItem(StockMutationItem(
             productId: mutation.line.product.id,
             batch: batch ?? '',
@@ -229,9 +224,8 @@ class ScanForm extends StatelessWidget {
       }
       if (mutation.maxAmountToPick <= mutation.totalAmount &&
           mutation.allowBelowZero == null &&
-          !settings.directlyProcess &&
-          InternetState.shared.connectivityAvailable()) {
-        await showDialog(
+          !settings.directlyProcess) {
+        showDialog(
           context: context,
           builder: (BuildContext context) => AlertDialog(
             title: Text(
@@ -259,40 +253,33 @@ class ScanForm extends StatelessWidget {
         if (settings.directlyProcess &&
             mutation.isCancelRestProductAmount &&
             mutation.cancelRestProductAmount != 0) {
-          print("@@@1");
-          onParse(InternetState.shared.connectivityAvailable() && true);
+          onParse(true);
           return;
         }
         if (settings.directlyProcess &&
             mutation.isBackorderRestProductAmount &&
             mutation.backorderRestProductAmount != 0) {
-          print("@@@2");
-          onParse(InternetState.shared.connectivityAvailable() && true);
+          onParse(true);
           return;
         }
-        print("@@@3");
-        onParse(InternetState.shared.connectivityAvailable() &&
-            settings.directlyProcess &&
-            mutation.toPickAmount == 0);
+        onParse(settings.directlyProcess && mutation.toPickAmount == 0);
         return;
       }
       if (settings.directlyProcess &&
           mutation.isCancelRestProductAmount &&
           mutation.cancelRestProductAmount != 0 &&
           mutation.showToPickAmount == 0) {
-        print("@@@4");
-        onParse(InternetState.shared.connectivityAvailable() && true);
+        onParse(true);
       }
       if (settings.directlyProcess &&
           mutation.isBackorderRestProductAmount &&
           mutation.backorderRestProductAmount != 0 &&
           mutation.showToPickAmount == 0) {
-        print("@@@5");
-        onParse(InternetState.shared.connectivityAvailable() && true);
+        onParse(true);
       }
     } catch (e, stack) {
       if (isThrowError == false) {
-        await AssetsAudioPlayer.newPlayer()
+        AssetsAudioPlayer.newPlayer()
             .open(audio, autoStart: true)
             .then((value) {
           final snackBar = SnackBar(
@@ -303,6 +290,7 @@ class ScanForm extends StatelessWidget {
         });
       }
       if (isThrowError == true) {
+        CustomSnackBar.showSnackBar(context, title: "$e\n$stack");
         throw '$e\n$stack';
       }
     }

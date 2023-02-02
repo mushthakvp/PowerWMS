@@ -19,9 +19,9 @@ class _ProductImageState extends State<ProductImage> {
   Future<Uint8List?>? _future;
 
   @override
-  void initState() {
+  void didChangeDependencies() {
     _future = productImageRepository.getImageFile(widget.productId);
-    super.initState();
+    super.didChangeDependencies();
   }
 
   @override

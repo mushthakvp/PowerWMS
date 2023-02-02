@@ -17,6 +17,7 @@ import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/product_adjustment.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
 import 'package:scanner/util/widget/popup.dart';
+import 'package:scanner/widgets/dialogs/custom_snack_bar.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -82,10 +83,10 @@ class ProductView extends StatelessWidget {
         builder: (context, provider, _) {
           Future.delayed(const Duration(milliseconds: 500), () {
             if (provider != null) {
-              context.read<ProcessProductProvider>().mutationProvider =
-                  provider;
               context.read<ProcessProductProvider>().canProcess =
                   provider.idleItems.length > 0;
+              context.read<ProcessProductProvider>().mutationProvider =
+                  provider;
             }
           });
           if (provider == null) {
@@ -168,6 +169,7 @@ class ProductView extends StatelessWidget {
               /// Barcode
               ScanForm(
                 onParse: (process) {
+                  CustomSnackBar.showSnackBar(context, title: "Processed");
                   if (process) {
                     _onProcessHandler(provider, context);
                   }
@@ -223,20 +225,19 @@ class ProductView extends StatelessWidget {
             onTap: () {
               if (provider.shallAllowScan) {
                 showProductAdjustmentPopup(
-                  context: context,
-                  mutationProvider: provider,
-                  onConfirmAmount: (int amount, bool isCancel) {
-                    provider.changeAmount(amount, isCancel);
-                    provider.changeBackorderAmount(amount, !isCancel);
-                    // handle local storage
-                    provider.handleProductCancelAmount(isCancel
-                        ? CacheProductStatus.set
-                        : CacheProductStatus.remove);
-                    provider.handleProductBackorderAmount(!isCancel
-                        ? CacheProductStatus.set
-                        : CacheProductStatus.remove);
-                  },
-                );
+                    context: context,
+                    mutationProvider: provider,
+                    onConfirmAmount: (int amount, bool isCancel) {
+                      provider.changeAmount(amount, isCancel);
+                      provider.changeBackorderAmount(amount, !isCancel);
+                      // handle local storage
+                      provider.handleProductCancelAmount(isCancel
+                          ? CacheProductStatus.set
+                          : CacheProductStatus.remove);
+                      provider.handleProductBackorderAmount(!isCancel
+                          ? CacheProductStatus.set
+                          : CacheProductStatus.remove);
+                    });
               } else {
                 final snackBar = SnackBar(
                   content:

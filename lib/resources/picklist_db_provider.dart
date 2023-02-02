@@ -32,7 +32,6 @@ class PicklistDbProvider {
   final Database db;
 
   Stream<List<Picklist>> getPicklistsStream(String? search) {
-    print("getPicklistsStream");
     var finder = Finder(
       filter: search == '' || search == null
           ? null

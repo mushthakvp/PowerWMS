@@ -36,8 +36,9 @@ class _SearchFieldState extends State<SearchField> {
     super.initState();
     var keyboardVisibilityController = KeyboardVisibilityController();
     // Subscribe
-    keyboardSubscription =
-        keyboardVisibilityController.onChange.listen((bool visible) {
+    keyboardSubscription = keyboardVisibilityController
+        .onChange
+        .listen((bool visible) {
       setState(() {
         willShowKeyboard = visible;
       });

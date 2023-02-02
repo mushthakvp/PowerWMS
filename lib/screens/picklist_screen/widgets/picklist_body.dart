@@ -17,6 +17,7 @@ import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.
 import 'package:scanner/widgets/barcode_input.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 
 filter(String search) => (PicklistLine line) =>
     search == '' || line.product.ean == search || line.product.uid == search;
@@ -26,13 +27,11 @@ List<PicklistLine> scanFilter(String search, List<PicklistLine> line) {
   if (search.length == 13) {
     final request = '0$search';
     result = line
-        .where((l) => l.product.ean == request || l.product.uid == request)
-        .toList();
+        .where((l) => l.product.ean == request || l.product.uid == request).toList();
   }
   if (result.isEmpty) {
     result = line
-        .where((l) => l.product.ean == search || l.product.uid == search)
-        .toList();
+        .where((l) => l.product.ean == search || l.product.uid == search).toList();
   }
   return result;
 }
@@ -71,7 +70,8 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       prefs = await SharedPreferences.getInstance();
-      setState(() {});
+      setState(() {
+      });
     });
   }
 
@@ -84,7 +84,9 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
 
   @override
   void didPopNext() async {
-    setState(() {});
+    setState(() {
+
+    });
     super.didPopNext();
   }
 
@@ -97,7 +99,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
 
   bool isCurrentWarehouse(PicklistLine line) {
     final warehouseId = context.read<SettingProvider>().currentWareHouse?.id;
-    final warehouse = context.read<SettingProvider>().currentWareHouse?.name;
+    final warehouse= context.read<SettingProvider>().currentWareHouse?.name;
     return warehouseId == line.warehouseId || warehouse == line.warehouse;
   }
 
@@ -212,16 +214,6 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                     (e) => isFinishAtBottom ? e.priority <= 1 : e.priority > 1)
                 .where(filter(_search))
                 .map((line) {
-              // print(line.product.description);
-              // print(line.priority);
-              // print(line.product.id);
-              // print(line.id);
-              // print("Pick Amount: " + line.pickAmount.toString());
-              // print("Picked Amount: " + line.pickedAmount.toString());
-              // print(line.isFullyPicked());
-              //
-              // print(isFinishAtBottom);
-              // print("---------------------");
               // var key = Key(line.product.id.toString());
               var bgColor = picklistColors[line.priority];
               var fullyPicked = bgColor == blue;

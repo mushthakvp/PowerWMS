@@ -65,8 +65,6 @@ class SettingProvider extends ChangeNotifier {
   }
 
   Settings get settingsLocal {
-    print("*****");
-    print(wholeSaleSettings?.toJson());
     return Settings(
         picklistSort: this.picklistSortType(),
         finishedProductsAtBottom: this.finishedProductsAtBottom,
@@ -125,8 +123,7 @@ class SettingProvider extends ChangeNotifier {
   }
 
   Warehouse? get currentWareHouse {
-    return this
-        .warehouses
+    return this.warehouses
         ?.firstWhere((w) => w.id == this.settingsRemote?.warehouseId);
   }
 

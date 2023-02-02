@@ -11,7 +11,6 @@ class ProductView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(product.toJson());
     return SliverList(
       delegate: SliverChildListDelegate([
         ListTile(

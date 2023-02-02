@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/resources/stock_mutation_api_provider.dart';
@@ -46,9 +44,6 @@ class StockMutationRepository {
         }
       }
     } else {
-      log("No INTERNET");
-      log("No NO NO");
-      log("No INTERNET");
       final id = await _dbProvider.addStockMutation(mutation);
       addStockMutation(id, mutation);
       return BaseResponse(success: true, message: '');
@@ -57,12 +52,6 @@ class StockMutationRepository {
 
   Future<dynamic> processQueue() async {
     final mutations = await _dbProvider.getStockMutations();
-    // print("mutation que".toUpperCase());
-    // print("mutation queue".toUpperCase());
-    // print(mutations.length);
-    // (mutations.forEach((key, value) {
-    //   print("$key ---  ${value.toJson().toString()}");
-    // }));
     mutations.forEach(addStockMutation);
   }
 
