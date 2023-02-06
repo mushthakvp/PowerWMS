@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scanner/models/picklist.dart';
 
@@ -24,7 +25,7 @@ class PicklistView extends StatelessWidget {
       controller: refreshController,
       onRefresh: onRefresh,
       child: ListView.separated(
-        padding: EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.symmetric(vertical: 16),
           separatorBuilder: (context, index) => Divider(
                 height: 1,
               ),
@@ -56,14 +57,18 @@ class PicklistView extends StatelessWidget {
                           list[index].uid,
                           style: TextStyle(fontSize: 12),
                         ),
-                        SizedBox(width: 10),
+                        if (list[index].uid.isNotEmpty) SizedBox(width: 10),
                         Expanded(
-                          child: Text(list[index].debtor.city ?? '',
+                          child: Text(
+                              (list[index].debtor?.city?.isEmpty ?? true)
+                                  ? AppLocalizations.of(context)!.unavailable
+                                  : list[index].debtor!.city.toString(),
                               overflow: TextOverflow.ellipsis),
                         ),
                       ],
                     ),
-                    Text(list[index].debtor.name),
+                    Text(list[index].debtor?.name ??
+                        AppLocalizations.of(context)!.unavailable),
                   ],
                 ),
                 trailing: Icon(Icons.chevron_right),

@@ -55,7 +55,7 @@ class Picklist {
   final String? orderDateFormatted;
   final String? deliveryDate;
   final String? deliveryDateFormatted;
-  final Debtor debtor;
+  final Debtor? debtor;
   final String? agent;
   final double? colliAmount;
   final double? palletAmount;

@@ -21,7 +21,7 @@ class _PicklistHeaderState extends State<PicklistHeader> {
         children: ([
       ListTile(
         onTap: _onTapHandler,
-        title: Text(picklist.debtor.name),
+        title: Text(picklist.debtor?.name ?? ''),
         trailing: IconButton(
           icon: Icon(_open ? Icons.expand_less : Icons.expand_more),
           onPressed: _onTapHandler,
@@ -36,9 +36,9 @@ class _PicklistHeaderState extends State<PicklistHeader> {
     var orderReference = widget._picklist.orderReference;
     var internalMemo = widget._picklist.internalMemo;
     return [
-      if (widget._picklist.debtor.address != null) ...[
+      if (widget._picklist.debtor?.address != null) ...[
         ListTile(
-          title: Text(widget._picklist.debtor.address ?? ''),
+          title: Text(widget._picklist.debtor?.address ?? ''),
         ),
       ],
       if (orderReference != null) ...[

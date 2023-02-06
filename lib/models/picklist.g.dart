@@ -6,32 +6,32 @@ part of 'picklist.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Picklist _$PicklistFromJson(Map<String, dynamic> json) {
-  return Picklist(
-    timezone: json['timezone'] as String?,
-    uid: json['uid'] as String,
-    orderDate: json['orderDate'] as String?,
-    orderDateFormatted: json['orderDateFormatted'] as String?,
-    deliveryDate: json['deliveryDate'] as String?,
-    deliveryDateFormatted: json['deliveryDateFormatted'] as String?,
-    debtor: Debtor.fromJson(json['debtor'] as Map<String, dynamic>),
-    agent: json['agent'] as String?,
-    colliAmount: (json['colliAmount'] as num?)?.toDouble(),
-    palletAmount: (json['palletAmount'] as num?)?.toDouble(),
-    invoiceId: json['invoiceId'] as String?,
-    deliveryConditionId: json['deliveryConditionId'] as String?,
-    orderReference: json['orderReference'] as String?,
-    internalMemo: json['internalMemo'] as String?,
-    picker: json['picker'] as String?,
-    lines: json['lines'] as int,
-    status: _$enumDecode(_$PicklistStatusEnumMap, json['status']),
-    hasCancelled: json['hasCancelled'] as bool,
-    id: json['id'] as int,
-    isNew: json['isNew'] as bool,
-    defaultStatus:
-        _$enumDecodeNullable(_$PicklistStatusEnumMap, json['defaultStatus']),
-  );
-}
+Picklist _$PicklistFromJson(Map<String, dynamic> json) => Picklist(
+      timezone: json['timezone'] as String?,
+      uid: json['uid'] as String,
+      orderDate: json['orderDate'] as String?,
+      orderDateFormatted: json['orderDateFormatted'] as String?,
+      deliveryDate: json['deliveryDate'] as String?,
+      deliveryDateFormatted: json['deliveryDateFormatted'] as String?,
+      debtor: json['debtor'] == null
+          ? null
+          : Debtor.fromJson(json['debtor'] as Map<String, dynamic>),
+      agent: json['agent'] as String?,
+      colliAmount: (json['colliAmount'] as num?)?.toDouble(),
+      palletAmount: (json['palletAmount'] as num?)?.toDouble(),
+      invoiceId: json['invoiceId'] as String?,
+      deliveryConditionId: json['deliveryConditionId'] as String?,
+      orderReference: json['orderReference'] as String?,
+      internalMemo: json['internalMemo'] as String?,
+      picker: json['picker'] as String?,
+      lines: json['lines'] as int,
+      status: $enumDecode(_$PicklistStatusEnumMap, json['status']),
+      hasCancelled: json['hasCancelled'] as bool,
+      id: json['id'] as int,
+      isNew: json['isNew'] as bool,
+      defaultStatus:
+          $enumDecodeNullable(_$PicklistStatusEnumMap, json['defaultStatus']),
+    );
 
 Map<String, dynamic> _$PicklistToJson(Picklist instance) => <String, dynamic>{
       'timezone': instance.timezone,
@@ -40,7 +40,7 @@ Map<String, dynamic> _$PicklistToJson(Picklist instance) => <String, dynamic>{
       'orderDateFormatted': instance.orderDateFormatted,
       'deliveryDate': instance.deliveryDate,
       'deliveryDateFormatted': instance.deliveryDateFormatted,
-      'debtor': instance.debtor.toJson(),
+      'debtor': instance.debtor?.toJson(),
       'agent': instance.agent,
       'colliAmount': instance.colliAmount,
       'palletAmount': instance.palletAmount,
@@ -50,38 +50,12 @@ Map<String, dynamic> _$PicklistToJson(Picklist instance) => <String, dynamic>{
       'internalMemo': instance.internalMemo,
       'picker': instance.picker,
       'lines': instance.lines,
-      'status': _$PicklistStatusEnumMap[instance.status],
+      'status': _$PicklistStatusEnumMap[instance.status]!,
       'hasCancelled': instance.hasCancelled,
       'id': instance.id,
       'isNew': instance.isNew,
       'defaultStatus': _$PicklistStatusEnumMap[instance.defaultStatus],
     };
-
-K _$enumDecode<K, V>(
-  Map<K, V> enumValues,
-  Object? source, {
-  K? unknownValue,
-}) {
-  if (source == null) {
-    throw ArgumentError(
-      'A value must be provided. Supported values: '
-      '${enumValues.values.join(', ')}',
-    );
-  }
-
-  return enumValues.entries.singleWhere(
-    (e) => e.value == source,
-    orElse: () {
-      if (unknownValue == null) {
-        throw ArgumentError(
-          '`$source` is not one of the supported values: '
-          '${enumValues.values.join(', ')}',
-        );
-      }
-      return MapEntry(unknownValue, enumValues.values.first);
-    },
-  ).key;
-}
 
 const _$PicklistStatusEnumMap = {
   PicklistStatus.added: 1,
@@ -93,14 +67,3 @@ const _$PicklistStatusEnumMap = {
   PicklistStatus.priority: 7,
   PicklistStatus.check: 8,
 };
-
-K? _$enumDecodeNullable<K, V>(
-  Map<K, V> enumValues,
-  dynamic source, {
-  K? unknownValue,
-}) {
-  if (source == null) {
-    return null;
-  }
-  return _$enumDecode<K, V>(enumValues, source, unknownValue: unknownValue);
-}

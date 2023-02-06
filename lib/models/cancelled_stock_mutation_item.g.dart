@@ -7,13 +7,12 @@ part of 'cancelled_stock_mutation_item.dart';
 // **************************************************************************
 
 CancelledStockMutationItem _$CancelledStockMutationItemFromJson(
-    Map<String, dynamic> json) {
-  return CancelledStockMutationItem(
-    id: json['id'] as int,
-    productId: json['productId'] as int,
-    amount: json['amount'] as int,
-  );
-}
+        Map<String, dynamic> json) =>
+    CancelledStockMutationItem(
+      id: json['id'] as int,
+      productId: json['productId'] as int,
+      amount: json['amount'] as int,
+    );
 
 Map<String, dynamic> _$CancelledStockMutationItemToJson(
         CancelledStockMutationItem instance) =>

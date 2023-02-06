@@ -290,7 +290,6 @@ class ScanForm extends StatelessWidget {
         });
       }
       if (isThrowError == true) {
-        CustomSnackBar.showSnackBar(context, title: "$e\n$stack");
         throw '$e\n$stack';
       }
     }

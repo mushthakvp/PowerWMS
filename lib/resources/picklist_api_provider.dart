@@ -20,6 +20,8 @@ class PicklistApiProvider {
               .toList(),
         )
         .catchError((error, _) {
+          throw error;
+          print(error.toString());
           throw Failure(error.toString());
         });
   }

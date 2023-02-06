@@ -1,7 +1,9 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -1228,7 +1230,8 @@ class _ETextFieldState extends State<ETextField> with RestorationMixin implement
           expands: widget.expands,
           // Only show the selection highlight when the text field is focused.
           selectionColor: focusNode.hasFocus ? selectionColor : null,
-          selectionControls: widget.selectionEnabled ? textSelectionControls : null,
+          selectionControls:
+              widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
           onSelectionChanged: _handleSelectionChanged,
           onEditingComplete: widget.onEditingComplete,
@@ -1237,7 +1240,8 @@ class _ETextFieldState extends State<ETextField> with RestorationMixin implement
           onSelectionHandleTapped: _handleSelectionHandleTapped,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
-          mouseCursor: MouseCursor.defer, // TextField will handle the cursor
+          mouseCursor: MouseCursor.defer,
+          // TextField will handle the cursor
           cursorWidth: widget.cursorWidth,
           cursorHeight: widget.cursorHeight,
           cursorRadius: cursorRadius,
@@ -1266,7 +1270,7 @@ class _ETextFieldState extends State<ETextField> with RestorationMixin implement
 
     if (widget.decoration != null) {
       child = AnimatedBuilder(
-        animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
+        animation: Listenable.merge(<Listenable>[focusNode, controller]),
         builder: (BuildContext context, Widget? child) {
           return InputDecorator(
             decoration: _getEffectiveDecoration(),
@@ -1283,7 +1287,8 @@ class _ETextFieldState extends State<ETextField> with RestorationMixin implement
         child: child,
       );
     }
-    final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
+    final MouseCursor effectiveMouseCursor =
+        MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.textable,
       <MaterialState>{
         if (!_isEnabled) MaterialState.disabled,
@@ -1302,33 +1307,34 @@ class _ETextFieldState extends State<ETextField> with RestorationMixin implement
       semanticsMaxValueLength = null;
     }
 
-    return FocusTrapArea(
-      focusNode: focusNode,
-      child: MouseRegion(
-        cursor: effectiveMouseCursor,
-        onEnter: (PointerEnterEvent event) => _handleHover(true),
-        onExit: (PointerExitEvent event) => _handleHover(false),
-        child: IgnorePointer(
-          ignoring: !_isEnabled,
-          child: AnimatedBuilder(
-            animation: controller, // changes the _currentLength
-            builder: (BuildContext context, Widget? child) {
-              return Semantics(
-                maxValueLength: semanticsMaxValueLength,
-                currentValueLength: _currentLength,
-                onTap: widget.readOnly ? null : () {
-                  if (!_effectiveController.selection.isValid)
-                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-                  // _requestKeyboard();
-                },
-                onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-                child: child,
-              );
-            },
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
+    return MouseRegion(
+      cursor: effectiveMouseCursor,
+      onEnter: (PointerEnterEvent event) => _handleHover(true),
+      onExit: (PointerExitEvent event) => _handleHover(false),
+      child: IgnorePointer(
+        ignoring: !_isEnabled,
+        child: AnimatedBuilder(
+          animation: controller, // changes the _currentLength
+          builder: (BuildContext context, Widget? child) {
+            return Semantics(
+              maxValueLength: semanticsMaxValueLength,
+              currentValueLength: _currentLength,
+              onTap: widget.readOnly
+                  ? null
+                  : () {
+                if (!_effectiveController.selection.isValid)
+                  _effectiveController.selection =
+                      TextSelection.collapsed(
+                          offset: _effectiveController.text.length);
+                // _requestKeyboard();
+              },
+              onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
               child: child,
-            ),
+            );
+          },
+          child: _selectionGestureDetectorBuilder.buildGestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: child,
           ),
         ),
       ),

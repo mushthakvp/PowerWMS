@@ -7,14 +7,13 @@ part of 'packaging_unit_translation.dart';
 // **************************************************************************
 
 PackagingUnitTranslation _$PackagingUnitTranslationFromJson(
-    Map<String, dynamic> json) {
-  return PackagingUnitTranslation(
-    culture: json['culture'] as String,
-    value: json['value'] as String,
-    id: json['id'] as int,
-    isNew: json['isNew'] as bool,
-  );
-}
+        Map<String, dynamic> json) =>
+    PackagingUnitTranslation(
+      culture: json['culture'] as String,
+      value: json['value'] as String,
+      id: json['id'] as int,
+      isNew: json['isNew'] as bool,
+    );
 
 Map<String, dynamic> _$PackagingUnitTranslationToJson(
         PackagingUnitTranslation instance) =>

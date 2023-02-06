@@ -6,11 +6,14 @@ pop() {
   navigatorKey.currentState?.pop();
 }
 
-Future showErrorAlert({required String message}) async {
+Future showErrorAlert({
+  String? title,
+  required String message,
+}) async {
   return await showDialog(
       context: navigatorKey.currentContext!,
       builder: (context) => AlertDialog(
-            title: Text('An Error Occurred!'),
+            title: Text(title ?? 'An Error Occurred!'),
             content: Text(message),
             actions: <Widget>[
               TextButton(

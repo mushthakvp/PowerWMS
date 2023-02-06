@@ -173,7 +173,7 @@ class _PicklistScreenState extends State<PicklistsScreen> with RouteAware {
               if (notPicked.length == 1 &&
                   (_search != '') &&
                   (notPicked.first.uid.contains(_search) ||
-                      notPicked.first.debtor.name.contains(_search))) {
+                      notPicked.first.debtor!.name.contains(_search))) {
                 _moveToPickList(notPicked.first);
               }
               return TabBarView(

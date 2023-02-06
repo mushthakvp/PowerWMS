@@ -96,6 +96,7 @@
   "processing": "Processing",
   "reference": "Reference",
   "note": "Note",
+  "unavailable": "Unavailable",
   "status": "Status",
   "cannotProcessed": "Completing picklist not allowed. Still unprocessed mutations."
 }

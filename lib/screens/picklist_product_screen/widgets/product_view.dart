@@ -17,7 +17,6 @@ import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/product_adjustment.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
 import 'package:scanner/util/widget/popup.dart';
-import 'package:scanner/widgets/dialogs/custom_snack_bar.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -169,7 +168,6 @@ class ProductView extends StatelessWidget {
               /// Barcode
               ScanForm(
                 onParse: (process) {
-                  CustomSnackBar.showSnackBar(context, title: "Processed");
                   if (process) {
                     _onProcessHandler(provider, context);
                   }
@@ -329,9 +327,20 @@ class ProductView extends StatelessWidget {
             .read<StockMutationNeedToProcessProvider>()
             .changePendingMutation(isPending: false);
       } else {
-        Future.delayed(const Duration(), () async {
-          await showErrorAlert(message: value.message);
-        });
+        if (value.message == "No Internet") {
+          Future.delayed(const Duration(), () async {
+            await showErrorAlert(
+              title: value.message,
+              message: 'Saving Locally',
+            );
+          });
+        } else {
+          Future.delayed(const Duration(), () async {
+            await showErrorAlert(
+              message: value.message,
+            );
+          });
+        }
       }
     }, onError: (error) {
       var response = error as BaseResponse;

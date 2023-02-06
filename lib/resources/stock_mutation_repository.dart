@@ -46,7 +46,7 @@ class StockMutationRepository {
     } else {
       final id = await _dbProvider.addStockMutation(mutation);
       addStockMutation(id, mutation);
-      return BaseResponse(success: true, message: '');
+      return BaseResponse(success: false, message: 'No Internet');
     }
   }
 

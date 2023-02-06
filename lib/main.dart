@@ -44,7 +44,7 @@ Future<void> main() async {
   interceptErpDio();
   await UserLatestSession.ensureInitialized();
   await InternetState.shared.ensureInitialized();
-  initLogs();
+  // initLogs();
   final db = await createDb();
 
   runApp(WMSApp(db));

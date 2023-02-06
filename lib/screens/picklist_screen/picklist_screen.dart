@@ -67,7 +67,7 @@ class _PicklistScreenState extends State<PicklistScreen>
       body: PicklistView(widget._picklist, this),
       bottomNavigationBar: Consumer<CompleteStockMutationProvider>(
         builder: (context, provider, _) {
-          return provider.status == PicklistStatus.picked
+          return provider.status == PicklistStatus.picked && widget._picklist.lines != 0
               ? PicklistFooter(widget._picklist, (isProcessSuccess, message,
                   picklist, stocksNeedToProcess) async {
                   if (isProcessSuccess) {
