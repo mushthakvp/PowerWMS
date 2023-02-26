@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/settings_remote.dart';
 import 'package:scanner/models/user_info.dart';
@@ -123,7 +123,8 @@ class SettingProvider extends ChangeNotifier {
   }
 
   Warehouse? get currentWareHouse {
-    return this.warehouses
+    return this
+        .warehouses
         ?.firstWhere((w) => w.id == this.settingsRemote?.warehouseId);
   }
 

@@ -1,7 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/util/user_latest_session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -101,6 +102,12 @@ class LoginScreen extends StatelessWidget {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
                       try {
+                        print(
+                          {
+                            'email': _authData['username'],
+                            'password': _authData['password']
+                          },
+                        );
                         final response = await dio.post(
                           '/account/token',
                           data: {
@@ -108,12 +115,19 @@ class LoginScreen extends StatelessWidget {
                             'password': _authData['password']
                           },
                         );
+                        print(response.statusCode);
+                        print(response.statusMessage);
                         dio.options.headers = {
                           'authorization': 'Bearer ${response.data}',
                         };
                         await prefs.setString('token', response.data);
                         Navigator.pushReplacementNamed(context, '/');
                       } catch (e, stack) {
+                        if(e is DioError){
+                          print(e.response?.statusMessage);
+                          print(e.response?.statusCode);
+                        }
+
                         print('$e\n$stack');
                         _showErrorDialog(context, 'Invalid credentials');
                       }

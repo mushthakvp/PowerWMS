@@ -2,12 +2,11 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/db.dart';
 import 'package:scanner/dio.dart';
-import 'package:scanner/log.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
@@ -25,15 +24,16 @@ import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
+import 'package:scanner/screens/picklist_detail_screen/picklist_detail_screen.dart';
 import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
-import 'package:scanner/screens/picklist_screen/picklist_screen.dart';
-import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/util/user_latest_session.dart';
 import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'screens/picklist_home_screen/picklists_home_screen.dart';
 
 RouteObserver<ModalRoute<void>> navigationObserver =
     RouteObserver<ModalRoute<void>>();
@@ -125,13 +125,14 @@ class WMSApp extends StatelessWidget {
                   iconTheme: IconThemeData(color: Colors.grey[500]),
                 ),
                 textTheme:
-                    TextTheme(button: TextStyle(color: Colors.blueAccent)),
+                    TextTheme(labelLarge: TextStyle(color: Colors.blueAccent)),
                 textButtonTheme: TextButtonThemeData(
-                  style: TextButton.styleFrom(primary: Colors.blueAccent),
+                  style:
+                      TextButton.styleFrom(foregroundColor: Colors.blueAccent),
                 ),
                 elevatedButtonTheme: ElevatedButtonThemeData(
                   style: TextButton.styleFrom(
-                    primary: Colors.white,
+                    foregroundColor: Colors.white,
                     backgroundColor: Colors.blueAccent,
                   ),
                 ),

@@ -97,6 +97,9 @@
   "reference": "Reference",
   "note": "Note",
   "unavailable": "Unavailable",
+  "statusDescending":"statusDescending",
+  "statusDiscontinued":"statusDiscontinued",
+  "count":"Count",
   "status": "Status",
   "cannotProcessed": "Completing picklist not allowed. Still unprocessed mutations."
 }

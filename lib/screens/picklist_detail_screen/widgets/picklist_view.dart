@@ -5,9 +5,9 @@ import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
-import 'package:scanner/screens/picklist_screen/widgets/picklist_body.dart';
-import 'package:scanner/screens/picklist_screen/widgets/picklist_header.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scanner/screens/picklist_detail_screen/widgets/picklist_body.dart';
+import 'package:scanner/screens/picklist_detail_screen/widgets/picklist_header.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 
 class PicklistView extends StatefulWidget {
   const PicklistView(this.picklist, this.delegate, {Key? key}) : super(key: key);

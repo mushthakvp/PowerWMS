@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/product.dart';
 import 'package:scanner/util/extensions/text_style_ext.dart';
 import 'package:scanner/widgets/product_image.dart';

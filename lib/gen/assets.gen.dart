@@ -8,6 +8,8 @@
 // ignore_for_file: directives_ordering,unnecessary_import
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
 
 class $AssetsImagesGen {
   const $AssetsImagesGen();
@@ -25,11 +27,41 @@ class $AssetsImagesGen {
       const AssetGenImage('assets/images/no_internet.png');
 }
 
+class $AssetsSvgGen {
+  const $AssetsSvgGen();
+
+  /// File path: assets/svg/focus_rectangle.svg
+  SvgGenImage get focusRectangle =>
+      const SvgGenImage('assets/svg/focus_rectangle.svg');
+
+  /// File path: assets/svg/ic_close_scanner.svg
+  SvgGenImage get icCloseScanner =>
+      const SvgGenImage('assets/svg/ic_close_scanner.svg');
+
+  /// File path: assets/svg/ic_confirmation.svg
+  SvgGenImage get icConfirmation =>
+      const SvgGenImage('assets/svg/ic_confirmation.svg');
+
+  /// File path: assets/svg/ic_error.svg
+  SvgGenImage get icError => const SvgGenImage('assets/svg/ic_error.svg');
+
+  /// File path: assets/svg/ic_flash_off.svg
+  SvgGenImage get icFlashOff =>
+      const SvgGenImage('assets/svg/ic_flash_off.svg');
+
+  /// File path: assets/svg/ic_flash_on.svg
+  SvgGenImage get icFlashOn => const SvgGenImage('assets/svg/ic_flash_on.svg');
+
+  /// File path: assets/svg/ic_info.svg
+  SvgGenImage get icInfo => const SvgGenImage('assets/svg/ic_info.svg');
+}
+
 class Assets {
   Assets._();
 
   static const String error = 'assets/error.mp3';
   static const $AssetsImagesGen images = $AssetsImagesGen();
+  static const $AssetsSvgGen svg = $AssetsSvgGen();
 }
 
 class AssetGenImage {
@@ -87,6 +119,54 @@ class AssetGenImage {
       filterQuality: filterQuality,
       cacheWidth: cacheWidth,
       cacheHeight: cacheHeight,
+    );
+  }
+
+  String get path => _assetName;
+}
+
+class SvgGenImage {
+  const SvgGenImage(this._assetName);
+
+  final String _assetName;
+
+  SvgPicture svg({
+    Key? key,
+    bool matchTextDirection = false,
+    AssetBundle? bundle,
+    String? package,
+    double? width,
+    double? height,
+    BoxFit fit = BoxFit.contain,
+    AlignmentGeometry alignment = Alignment.center,
+    bool allowDrawingOutsideViewBox = false,
+    WidgetBuilder? placeholderBuilder,
+    Color? color,
+    BlendMode colorBlendMode = BlendMode.srcIn,
+    String? semanticsLabel,
+    bool excludeFromSemantics = false,
+    Clip clipBehavior = Clip.hardEdge,
+    bool cacheColorFilter = false,
+    SvgTheme? theme,
+  }) {
+    return SvgPicture.asset(
+      _assetName,
+      key: key,
+      matchTextDirection: matchTextDirection,
+      bundle: bundle,
+      package: package,
+      width: width,
+      height: height,
+      fit: fit,
+      alignment: alignment,
+      allowDrawingOutsideViewBox: allowDrawingOutsideViewBox,
+      placeholderBuilder: placeholderBuilder,
+      color: color,
+      colorBlendMode: colorBlendMode,
+      semanticsLabel: semanticsLabel,
+      excludeFromSemantics: excludeFromSemantics,
+      clipBehavior: clipBehavior,
+      cacheColorFilter: cacheColorFilter,
     );
   }
 

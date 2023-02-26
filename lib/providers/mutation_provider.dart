@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/packaging.dart';
@@ -8,9 +9,7 @@ import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum CacheProductStatus {
-  set, get, remove
-}
+enum CacheProductStatus { set, get, remove }
 
 class MutationProvider extends ChangeNotifier {
   factory MutationProvider.create(
@@ -127,21 +126,18 @@ class MutationProvider extends ChangeNotifier {
 
   bool get shallAllowScan {
     // When item is not yet processed
-    if (askedAmount >= 0 && askedAmount <= idleItems
-        .map((e) => e.amount)
-        .toList()
-        .fold(0, (p, c) => p + c))
-    {
+    if (askedAmount >= 0 &&
+        askedAmount <=
+            idleItems.map((e) => e.amount).toList().fold(0, (p, c) => p + c)) {
       return false;
-    // When item was processed
+      // When item was processed
     } else if (askedAmount >= 0 && askedAmount <= totalPickedAmount) {
       return false;
-    // When total picked amount (ready for process || processed)
-    // == asked amount
-    } else if (totalPickedAmount + idleItems
-        .map((e) => e.amount)
-        .toList()
-        .fold(0, (p, c) => p + c) == askedAmount) {
+      // When total picked amount (ready for process || processed)
+      // == asked amount
+    } else if (totalPickedAmount +
+            idleItems.map((e) => e.amount).toList().fold(0, (p, c) => p + c) ==
+        askedAmount) {
       return false;
     }
     return true;

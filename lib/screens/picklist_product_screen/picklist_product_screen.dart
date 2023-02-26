@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/log.dart';
 import 'package:scanner/models/base_response.dart';
@@ -102,6 +102,7 @@ class _PicklistProductScreenState extends State<PicklistProductScreen> {
                             provider.mutationProvider!,
                             context,
                           );
+                          print("Picklist_product_screen 105 ********");
                           context
                               .read<StockMutationNeedToProcessProvider>()
                               .changePendingMutation(isPending: false);

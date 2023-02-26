@@ -63,9 +63,14 @@ class _WMSAppBarState extends State<WMSAppBar> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               (isAvailableInternet)
-                  ? Image.asset('assets/images/logo_horizontal.png',
-                      width: MediaQuery.of(context).size.width * 0.23)
-                  : Image.asset('assets/images/no_internet.png', width: 38),
+                  ? Image.asset(
+                      'assets/images/logo_horizontal.png',
+                      width: MediaQuery.of(context).size.width * 0.23,
+                    )
+                  : Image.asset(
+                      'assets/images/no_internet.png',
+                      width: 38,
+                    ),
               Text(widget.title,
                   style: Theme.of(context).appBarTheme.titleTextStyle),
             ],

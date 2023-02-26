@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/main.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
@@ -17,7 +17,6 @@ import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.
 import 'package:scanner/widgets/barcode_input.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 
 filter(String search) => (PicklistLine line) =>
     search == '' || line.product.ean == search || line.product.uid == search;
@@ -27,11 +26,13 @@ List<PicklistLine> scanFilter(String search, List<PicklistLine> line) {
   if (search.length == 13) {
     final request = '0$search';
     result = line
-        .where((l) => l.product.ean == request || l.product.uid == request).toList();
+        .where((l) => l.product.ean == request || l.product.uid == request)
+        .toList();
   }
   if (result.isEmpty) {
     result = line
-        .where((l) => l.product.ean == search || l.product.uid == search).toList();
+        .where((l) => l.product.ean == search || l.product.uid == search)
+        .toList();
   }
   return result;
 }
@@ -70,8 +71,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       prefs = await SharedPreferences.getInstance();
-      setState(() {
-      });
+      setState(() {});
     });
   }
 
@@ -84,9 +84,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
 
   @override
   void didPopNext() async {
-    setState(() {
-
-    });
+    setState(() {});
     super.didPopNext();
   }
 
@@ -99,7 +97,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
 
   bool isCurrentWarehouse(PicklistLine line) {
     final warehouseId = context.read<SettingProvider>().currentWareHouse?.id;
-    final warehouse= context.read<SettingProvider>().currentWareHouse?.name;
+    final warehouse = context.read<SettingProvider>().currentWareHouse?.name;
     return warehouseId == line.warehouseId || warehouse == line.warehouse;
   }
 
@@ -207,7 +205,13 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
               break;
           }
           // Sort on priority
-          lines.sort((a, b) => a.priority.compareTo(b.priority));
+          if (settings.picklistSort == PicklistSortType.warehouseLocation) {
+            lines.sort((a, b) => (int.tryParse(a.location ?? "0") ?? 0)
+                .compareTo(int.tryParse(b.location ?? "0") ?? 0));
+          } else {
+            lines.sort((a, b) => a.priority.compareTo(b.priority));
+          }
+
           Widget getWidget(bool isFinishAtBottom) {
             var children = lines
                 .where(
@@ -383,7 +387,7 @@ extension PicklistLineColor on PicklistLine {
 
     // case 2: pickAmount = the amount of process product
     List<StockMutationItem> idleList = _getIdleAmount(prefs, this);
-    print("**********");
+    print("*****Picklist body 390 line*****");
     print(idleList.length);
     if (idleList.length > 0) {
       context

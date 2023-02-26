@@ -97,6 +97,9 @@
   "reference": "Reference",
   "note": "Notitie",
   "unavailable":"Niet beschikbaar",
+  "statusDescending":"Aflopend",
+  "statusDiscontinued":"Niet meer leverbaar",
+  "count":"Tellen",
   "status": "Staat",
   "cannotProcessed": "Afronden niet toegestaan. Nog onverwerkte mutaties."
 }

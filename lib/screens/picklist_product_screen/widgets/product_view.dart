@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/log.dart';
 import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
@@ -16,6 +16,7 @@ import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/product_adjustment.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
+import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/util/widget/popup.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -82,10 +83,13 @@ class ProductView extends StatelessWidget {
         builder: (context, provider, _) {
           Future.delayed(const Duration(milliseconds: 500), () {
             if (provider != null) {
-              context.read<ProcessProductProvider>().canProcess =
-                  provider.idleItems.length > 0;
-              context.read<ProcessProductProvider>().mutationProvider =
-                  provider;
+              if (context.mounted){
+                context.read<ProcessProductProvider>().canProcess =
+                    provider.idleItems.length > 0;
+                context.read<ProcessProductProvider>().mutationProvider =
+                    provider;
+              }
+
             }
           });
           if (provider == null) {
@@ -168,7 +172,7 @@ class ProductView extends StatelessWidget {
               /// Barcode
               ScanForm(
                 onParse: (process) {
-                  if (process) {
+                  if (process && InternetState.shared.connectivityAvailable()) {
                     _onProcessHandler(provider, context);
                   }
                 },
@@ -329,10 +333,17 @@ class ProductView extends StatelessWidget {
       } else {
         if (value.message == "No Internet") {
           Future.delayed(const Duration(), () async {
-            await showErrorAlert(
-              title: value.message,
-              message: 'Saving Locally',
-            );
+            bool? shouldGoBack = await showErrorAlert(
+                title: value.message,
+                message: 'Saving Locally',
+                onClose: () {
+                  provider.clear();
+                  Navigator.of(context).pop(true);
+                  Navigator.of(context).pop(true);
+                });
+            if (shouldGoBack ?? true) {
+              Navigator.of(context).pop();
+            }
           });
         } else {
           Future.delayed(const Duration(), () async {

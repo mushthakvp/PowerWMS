@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/main.dart';
@@ -9,7 +9,7 @@ import 'package:scanner/models/settings.dart';
 import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/screens/home_screen/widgets/grid_item.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
-import 'package:scanner/screens/picklists_screen/picklists_screen.dart';
+import 'package:scanner/screens/picklist_home_screen/picklists_home_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:scanner/util/user_latest_session.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
@@ -24,7 +24,12 @@ final List<Map<String, dynamic>> items = [
     'title': (context) => AppLocalizations.of(context)!.warehouseReceipts,
     'icon': Icons.list_alt,
     'route': PicklistsScreen.routeName,
-  }
+  },
+  // {
+  //   'title': (context) => AppLocalizations.of(context)!.count,
+  //   'icon': Icons.leaderboard_rounded,
+  //   'route': PicklistsScreen.routeName,
+  // }
 ];
 
 class HomeScreen extends StatefulWidget {

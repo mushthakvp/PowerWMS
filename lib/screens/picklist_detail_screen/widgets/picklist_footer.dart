@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/stock_mutation.dart';
@@ -31,9 +31,12 @@ class _PicklistFooterState extends State<PicklistFooter> {
     return Consumer2<CompletePicklistProvider,
         StockMutationNeedToProcessProvider>(
       builder: (context, provider, stockProvider, _) {
-        isPendingMutation = stockProvider.isPendingMutation;
-        print("%%%%%%%%%%");
-        print(isPendingMutation);
+        stockProvider.addListener(() {
+          isPendingMutation = stockProvider.isPendingMutation;
+          print("%%%%%%%%%%");
+          print(isPendingMutation);
+        });
+
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: ElevatedButton(
@@ -49,6 +52,7 @@ class _PicklistFooterState extends State<PicklistFooter> {
               onPressed: isProcessing
                   ? null
                   : () async {
+                      print(isPendingMutation);
                       if (!isPendingMutation) {
                         setState(() {
                           isProcessing = true;

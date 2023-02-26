@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scanner/models/picklist.dart';
 

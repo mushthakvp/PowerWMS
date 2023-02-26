@@ -1,18 +1,17 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
 import 'package:scanner/exceptions/domain_exception.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/error_barcode.dart';
 import 'package:scanner/widgets/barcode_input.dart';
-import 'package:scanner/widgets/dialogs/custom_snack_bar.dart';
 
 final audio = Audio('assets/error.mp3');
 
@@ -48,20 +47,29 @@ class ScanForm extends StatelessWidget {
                       ? null
                       : () async {
                           // formKey.currentState?.save();
-                          final String ean = _parseHandler(
-                              context,
-                              provider,
-                              context.read<AddProductProvider>().value ?? '',
-                              null);
+
+                          String? ean = _parseHandler(
+                            context,
+                            provider,
+                            context.read<AddProductProvider>().value ?? '',
+                            null,
+                          );
+                          if (ean == null) {
+                            ean = '';
+                          }
                           if (ean.length == 13) {
+                            print("1");
                             String request = '0$ean';
                             try {
+                              print("2");
                               _parseHandler(context, provider, request, null,
                                   isThrowError: true);
                             } catch (_) {
+                              print("3");
                               _parseHandler(context, provider, ean, null);
                             }
                           } else {
+                            print("4");
                             _parseHandler(context, provider, ean, null);
                           }
                           context.read<AddProductProvider>().canAdd = false;
@@ -110,7 +118,7 @@ class ScanForm extends StatelessWidget {
 
   _parseHandler(BuildContext context, MutationProvider mutation, String ean,
       GS1Barcode? barcode,
-      {bool? isThrowError = false}) {
+      {bool? isThrowError = false}) async {
     final settings = context.read<ValueNotifier<Settings>>().value;
     try {
       if (ean != '' &&
@@ -279,14 +287,14 @@ class ScanForm extends StatelessWidget {
       }
     } catch (e, stack) {
       if (isThrowError == false) {
-        AssetsAudioPlayer.newPlayer()
+        await AssetsAudioPlayer.newPlayer()
             .open(audio, autoStart: true)
             .then((value) {
           final snackBar = SnackBar(
             content: Text(e.toString()),
             duration: Duration(seconds: 2),
           );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(snackBar);
         });
       }
       if (isThrowError == true) {
