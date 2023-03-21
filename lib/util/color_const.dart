@@ -7,4 +7,5 @@ class AppColors{
   static const white = Colors.white;
   static const black87 = Colors.black87;
   static Color grey = Colors.grey.shade500;
+  static Color grey50 = Colors.grey.shade50;
 }

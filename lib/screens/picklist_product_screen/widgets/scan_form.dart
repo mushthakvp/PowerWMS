@@ -82,11 +82,15 @@ class ScanForm extends StatelessWidget {
               child: BarcodeInput(
                   onParse: (value, barcode) {
                     if (!provider.needToScan() || value.length > 0) {
-                      if (value.length == 13) {
+                      if (value.length == 13 && value.substring(0, 1) != "0") {
                         String request = '0$value';
                         try {
-                          _parseHandler(context, provider, request, barcode,
-                              isThrowError: true);
+                          _parseHandler(
+                            context,
+                            provider,
+                            request,
+                            barcode,
+                          );
                         } catch (_) {
                           _parseHandler(context, provider, value, barcode);
                         }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +20,7 @@ import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
 import 'package:scanner/resources/picklist_repository.dart';
 import 'package:scanner/resources/product_repository.dart';
+import 'package:scanner/resources/serial_number_repository.dart';
 import 'package:scanner/resources/stock_mutation_item_repository.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/home_screen/home_screen.dart';
@@ -27,6 +29,7 @@ import 'package:scanner/screens/login_screen.dart';
 import 'package:scanner/screens/picklist_detail_screen/picklist_detail_screen.dart';
 import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
+import 'package:scanner/screens/serial_number_homescreen/seriel_number_home_screen.dart';
 import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/util/user_latest_session.dart';
 import 'package:scanner/widgets/settings_dialog.dart';
@@ -34,6 +37,7 @@ import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/picklist_home_screen/picklists_home_screen.dart';
+import 'widgets/wms_app_bar.dart';
 
 RouteObserver<ModalRoute<void>> navigationObserver =
     RouteObserver<ModalRoute<void>>();
@@ -80,6 +84,9 @@ class WMSApp extends StatelessWidget {
               ),
               Provider<ProductRepository>(
                 create: (_) => ProductRepository(_db),
+              ),
+              Provider<SerialNumberRepository>(
+                create: (_) => SerialNumberRepository(_db),
               ),
               Provider<StockMutationItemRepository>(
                 create: (_) => StockMutationItemRepository(_db),
@@ -141,7 +148,13 @@ class WMSApp extends StatelessWidget {
                 builder: (context) {
                   if (prefs.getString('token') != null &&
                       prefs.getString('server') != null &&
-                      UserLatestSession.isOutOfSession() == false) {
+                      !UserLatestSession.isOutOfSession()) {
+                    dio.interceptors.add(InterceptorsWrapper(
+                        onError: (DioError e, ErrorInterceptorHandler handler) {
+                      if (e.error.toString().contains("401")) {
+                        logout(context);
+                      }
+                    }));
                     dio.options.baseUrl = '${prefs.getString('server')!}/api';
                     dio.options.headers = {
                       'authorization': 'Bearer ${prefs.getString('token')}',
@@ -167,6 +180,8 @@ class WMSApp extends StatelessWidget {
                   );
                 },
                 PicklistsScreen.routeName: (context) => PicklistsScreen(),
+                SerialNumberHomeScreen.routeName: (context) =>
+                    SerialNumberHomeScreen(),
                 PicklistScreen.routeName: (context) {
                   final picklist =
                       ModalRoute.of(context)!.settings.arguments as Picklist;

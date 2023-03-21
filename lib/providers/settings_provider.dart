@@ -80,6 +80,18 @@ class SettingProvider extends ChangeNotifier {
     saveSettingLocal();
   }
 
+  Future<bool?> postSerialNumbers(
+      {required List<String> serialNumberList,
+      String? receiptCode,
+      int? lineNumber}) async {
+    var _apiProvider = SettingsApiProvider(db);
+    return await _apiProvider.postSerialNumbers(
+      serialNumberList: serialNumberList,
+      lineNumber: lineNumber,
+      receiptCode: receiptCode,
+    );
+  }
+
   getWholeSetting() async {
     var settings = await Settings.fromMemory();
     print("settings.toJson()");

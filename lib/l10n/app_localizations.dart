@@ -465,11 +465,47 @@ abstract class AppLocalizations {
   /// **'statusDescending'**
   String get statusDescending;
 
+  /// No description provided for @serial_numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial Numbers'**
+  String get serial_numbers;
+
   /// No description provided for @statusDiscontinued.
   ///
   /// In en, this message translates to:
   /// **'statusDiscontinued'**
   String get statusDiscontinued;
+
+  /// No description provided for @add_serial_numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add serial numbers'**
+  String get add_serial_numbers;
+
+  /// No description provided for @receiptLineNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt line number'**
+  String get receiptLineNumber;
+
+  /// No description provided for @receiptCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt code'**
+  String get receiptCode;
+
+  /// No description provided for @total_scanned_serial_numbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Scanned Serial Numbers'**
+  String get total_scanned_serial_numbers;
+
+  /// No description provided for @whole_sale_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Wholesale data'**
+  String get whole_sale_data;
 
   /// No description provided for @count.
   ///
@@ -482,6 +518,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Status'**
   String get status;
+
+  /// No description provided for @invalid_credentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid credentials'**
+  String get invalid_credentials;
 
   /// No description provided for @cannotProcessed.
   ///

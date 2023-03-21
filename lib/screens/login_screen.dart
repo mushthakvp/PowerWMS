@@ -123,13 +123,14 @@ class LoginScreen extends StatelessWidget {
                         await prefs.setString('token', response.data);
                         Navigator.pushReplacementNamed(context, '/');
                       } catch (e, stack) {
-                        if(e is DioError){
+                        if (e is DioError) {
                           print(e.response?.statusMessage);
                           print(e.response?.statusCode);
                         }
 
                         print('$e\n$stack');
-                        _showErrorDialog(context, 'Invalid credentials');
+                        _showErrorDialog(context,
+                            AppLocalizations.of(context)!.invalid_credentials);
                       }
                     }
                   },

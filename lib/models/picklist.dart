@@ -62,6 +62,7 @@ class Picklist {
   final String? invoiceId;
   final String? deliveryConditionId;
   final String? orderReference;
+  final String? countryCode;
   final String? internalMemo;
   final String? picker;
   final int lines;
@@ -80,6 +81,7 @@ class Picklist {
     required this.deliveryDateFormatted,
     required this.debtor,
     required this.agent,
+    required this.countryCode,
     required this.colliAmount,
     required this.palletAmount,
     required this.invoiceId,

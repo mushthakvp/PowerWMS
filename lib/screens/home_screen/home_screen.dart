@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:scanner/l10n/app_localizations.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/main.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/providers/settings_provider.dart';
@@ -11,26 +11,10 @@ import 'package:scanner/screens/home_screen/widgets/grid_item.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/picklist_home_screen/picklists_home_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
+import 'package:scanner/screens/serial_number_homescreen/seriel_number_home_screen.dart';
 import 'package:scanner/util/user_latest_session.dart';
+import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
-
-final List<Map<String, dynamic>> items = [
-  {
-    'title': (context) => AppLocalizations.of(context)!.products,
-    'icon': Icons.inventory_2,
-    'route': ProductsScreen.routeName,
-  },
-  {
-    'title': (context) => AppLocalizations.of(context)!.warehouseReceipts,
-    'icon': Icons.list_alt,
-    'route': PicklistsScreen.routeName,
-  },
-  // {
-  //   'title': (context) => AppLocalizations.of(context)!.count,
-  //   'icon': Icons.leaderboard_rounded,
-  //   'route': PicklistsScreen.routeName,
-  // }
-];
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -41,23 +25,63 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with RouteAware {
+  List<Map<String, dynamic>> items = [
+    {
+      'title': (context) => AppLocalizations.of(context)!.products,
+      'icon': Icons.inventory_2,
+      'route': ProductsScreen.routeName,
+    },
+    {
+      'title': (context) => AppLocalizations.of(context)!.warehouseReceipts,
+      'icon': Icons.list_alt,
+      'route': PicklistsScreen.routeName,
+    },
+
+    // {
+    //   'title': (context) => AppLocalizations.of(context)!.count,
+    //   'icon': Icons.leaderboard_rounded,
+    //   'route': PicklistsScreen.routeName,
+    // }
+  ];
+
   _getSettingInfo() async {
     await Future.wait([
       context.read<SettingProvider>().getSettingInfo(),
       context.read<SettingProvider>().getWarehouses(),
       context.read<SettingProvider>().getUserInfo()
     ]);
-    if (mounted)
+    if (mounted) {
       context.read<ValueNotifier<Settings>>().value =
           context.read<SettingProvider>().settingsLocal;
+      addSerialNumber();
+    }
+  }
+
+  addSerialNumber() {
+    if (items.length < 3 &&
+        (context
+                .read<SettingProvider>()
+                .settingsLocal
+                .wholeSaleSettings
+                ?.server
+                ?.isNotEmpty ??
+            false)) {
+      items.add(
+        {
+          'title': (context) => AppLocalizations.of(context)!.serial_numbers,
+          'icon': Icons.barcode_reader,
+          'route': SerialNumberHomeScreen.routeName,
+        },
+      );
+    }
   }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _getSettingInfo();
       await UserLatestSession.shared.startTimer();
+      await _getSettingInfo();
     });
   }
 
@@ -86,6 +110,13 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     return Scaffold(
       appBar: WMSAppBar(
         context.watch<SettingProvider>().userInfo?.firstName ?? '    ',
+        leading: IconButton(
+          onPressed: () async {
+            await Navigator.of(context).pushNamed(SettingsDialog.routeName);
+            addSerialNumber();
+          },
+          icon: Icon(Icons.settings),
+        ),
       ),
       body: CustomScrollView(
         slivers: <Widget>[

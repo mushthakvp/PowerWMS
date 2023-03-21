@@ -67,8 +67,6 @@ class Settings {
 
   save() async {
     final prefs = await SharedPreferences.getInstance();
-    print("pref Saving (())))(())))");
-    print(toJson());
     prefs.setString('settings', jsonEncode(toJson()));
   }
 }

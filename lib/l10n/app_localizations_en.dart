@@ -212,13 +212,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusDescending => 'statusDescending';
 
   @override
+  String get serial_numbers => 'Serial Numbers';
+
+  @override
   String get statusDiscontinued => 'statusDiscontinued';
+
+  @override
+  String get add_serial_numbers => 'Add serial numbers';
+
+  @override
+  String get receiptLineNumber => 'Receipt line number';
+
+  @override
+  String get receiptCode => 'Receipt code';
+
+  @override
+  String get total_scanned_serial_numbers => 'Total Scanned Serial Numbers';
+
+  @override
+  String get whole_sale_data => 'Wholesale data';
 
   @override
   String get count => 'Count';
 
   @override
   String get status => 'Status';
+
+  @override
+  String get invalid_credentials => 'Invalid credentials';
 
   @override
   String get cannotProcessed => 'Completing picklist not allowed. Still unprocessed mutations.';

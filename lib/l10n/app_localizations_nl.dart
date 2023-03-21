@@ -212,13 +212,34 @@ class AppLocalizationsNl extends AppLocalizations {
   String get statusDescending => 'Aflopend';
 
   @override
+  String get serial_numbers => 'Serienummers';
+
+  @override
   String get statusDiscontinued => 'Niet meer leverbaar';
+
+  @override
+  String get add_serial_numbers => 'Serienummers toevoegen';
+
+  @override
+  String get receiptLineNumber => 'Regelnummer';
+
+  @override
+  String get receiptCode => 'Ontvangtsnummer';
+
+  @override
+  String get total_scanned_serial_numbers => 'Totaal gescande serienummers';
+
+  @override
+  String get whole_sale_data => 'Wholesale gegevens';
 
   @override
   String get count => 'Tellen';
 
   @override
   String get status => 'Staat';
+
+  @override
+  String get invalid_credentials => 'Gebruikersnaam of wachtwoord onjuist';
 
   @override
   String get cannotProcessed => 'Afronden niet toegestaan. Nog onverwerkte mutaties.';

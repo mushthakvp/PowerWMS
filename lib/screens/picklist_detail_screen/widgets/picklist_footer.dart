@@ -33,8 +33,6 @@ class _PicklistFooterState extends State<PicklistFooter> {
       builder: (context, provider, stockProvider, _) {
         stockProvider.addListener(() {
           isPendingMutation = stockProvider.isPendingMutation;
-          print("%%%%%%%%%%");
-          print(isPendingMutation);
         });
 
         return Padding(

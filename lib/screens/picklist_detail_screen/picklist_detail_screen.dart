@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:scanner/l10n/app_localizations.dart';
@@ -10,6 +11,7 @@ import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_detail_screen/widgets/picklist_body.dart';
 import 'package:scanner/screens/picklist_detail_screen/widgets/picklist_footer.dart';
 import 'package:scanner/screens/picklist_detail_screen/widgets/picklist_view.dart';
+import 'package:scanner/util/extensions/text_style_ext.dart';
 import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
@@ -114,8 +116,11 @@ class _PicklistScreenState extends State<PicklistScreen>
                         }
                         await showDialog(
                           context: context,
-                          builder: (ctx) => successAlert(
-                              ctx, message, picklist.uid, onPop: () async {
+                          builder: (ctx) => successAlert(ctx,
+                              msg: message,
+                              countryCode: picklist.countryCode,
+                              internalMemo: picklist.internalMemo,
+                              picklistNumber: picklist.uid, onPop: () async {
                             await Future.delayed(
                                 const Duration(milliseconds: 100), () async {
                               Navigator.of(ctx).pop();
@@ -126,8 +131,11 @@ class _PicklistScreenState extends State<PicklistScreen>
                     } else {
                       await showDialog(
                         context: context,
-                        builder: (ctx) => successAlert(
-                            ctx, message, picklist.uid, onPop: () async {
+                        builder: (ctx) => successAlert(ctx,
+                            msg: message,
+                            countryCode: picklist.countryCode,
+                            internalMemo: picklist.internalMemo,
+                            picklistNumber: picklist.uid, onPop: () async {
                           await Future.delayed(
                               const Duration(milliseconds: 100), () async {
                             Navigator.of(ctx).pop();
@@ -175,9 +183,12 @@ class _PicklistScreenState extends State<PicklistScreen>
     );
   }
 
-  AlertDialog successAlert(
-      BuildContext context, String mgs, String picklistNumber,
-      {required VoidCallback onPop}) {
+  AlertDialog successAlert(BuildContext context,
+      {String? msg,
+      required String picklistNumber,
+      String? countryCode,
+      String? internalMemo,
+      required VoidCallback onPop}) {
     Widget qrWidget() {
       return Container(
           height: 200,
@@ -190,8 +201,26 @@ class _PicklistScreenState extends State<PicklistScreen>
     }
 
     return AlertDialog(
-      title: Text(mgs),
-      content: qrWidget(),
+      title: Text(msg ?? "",textAlign: TextAlign.center,),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            internalMemo ?? "",
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge?.s18.normal.black,
+          ),
+          Gap(8),
+          qrWidget(),
+          Gap(8),
+          Text(
+            countryCode ?? "",
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge?.s20.semiBold.black,
+          ),
+        ],
+      ),
       actions: <Widget>[
         TextButton(
           child: Text(AppLocalizations.of(context)!.ok.toUpperCase()),

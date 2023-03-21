@@ -16,6 +16,7 @@ import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/product_adjustment.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
+import 'package:scanner/util/color_const.dart';
 import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/util/widget/popup.dart';
 import 'package:scanner/widgets/product_image.dart';
@@ -83,13 +84,12 @@ class ProductView extends StatelessWidget {
         builder: (context, provider, _) {
           Future.delayed(const Duration(milliseconds: 500), () {
             if (provider != null) {
-              if (context.mounted){
+              if (context.mounted) {
                 context.read<ProcessProductProvider>().canProcess =
                     provider.idleItems.length > 0;
                 context.read<ProcessProductProvider>().mutationProvider =
                     provider;
               }
-
             }
           });
           if (provider == null) {
@@ -153,7 +153,8 @@ class ProductView extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
                     "Totaal ${totalStock?.toInt()} x ${provider.line.product.unit} ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: AppColors.primary),
                   ),
                 ),
                 Divider(),

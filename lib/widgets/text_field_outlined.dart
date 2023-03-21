@@ -26,6 +26,7 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.isEnabled,
     this.height,
+    this.label,
     this.onChanged,
     this.isUnderLine = false,
     this.onTap,
@@ -37,6 +38,7 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String? hint;
   final String? initialValue;
+  final Widget? label;
   final Widget? suffix;
   final Widget? prefix;
   final Widget? icon;
@@ -99,6 +101,7 @@ class CustomTextField extends StatelessWidget {
         isCollapsed: true,
         fillColor: color /*?? kScaffoldColor*/,
         filled: isFilled,
+        label: label,
         labelStyle: hintStyle,
         enabledBorder: isUnderLine
             ? UnderlineInputBorder(

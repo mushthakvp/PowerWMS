@@ -390,11 +390,13 @@ extension PicklistLineColor on PicklistLine {
     print("*****Picklist body 390 line*****");
     print(idleList.length);
     if (idleList.length > 0) {
-      context
-          .read<StockMutationNeedToProcessProvider>()
-          .changePendingMutation(isPending: true);
-      print(idleList.first.warehouse);
-      print(idleList.first.status.toString());
+        context
+            .read<StockMutationNeedToProcessProvider>()
+            .changePendingMutation(isPending: true);
+    } else {
+        context
+            .read<StockMutationNeedToProcessProvider>()
+            .changePendingMutation(isPending: false);
     }
     print("**********");
 

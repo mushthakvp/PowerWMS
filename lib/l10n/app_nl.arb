@@ -98,8 +98,15 @@
   "note": "Notitie",
   "unavailable":"Niet beschikbaar",
   "statusDescending":"Aflopend",
+  "serial_numbers":"Serienummers",
+  "add_serial_numbers": "Serienummers toevoegen",
   "statusDiscontinued":"Niet meer leverbaar",
+  "receiptCode": "Ontvangtsnummer",
+  "receiptLineNumber": "Regelnummer",
+  "total_scanned_serial_numbers": "Totaal gescande serienummers",
+  "whole_sale_data": "Wholesale gegevens",
   "count":"Tellen",
   "status": "Staat",
+  "invalid_credentials": "Gebruikersnaam of wachtwoord onjuist",
   "cannotProcessed": "Afronden niet toegestaan. Nog onverwerkte mutaties."
 }

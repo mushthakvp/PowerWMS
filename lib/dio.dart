@@ -8,6 +8,27 @@ var dio = Dio();
 /// ERP Dio
 var erpDio = Dio();
 
+// interceptNormalDio(){
+//   dio.interceptors.add(InterceptorsWrapper(
+//       onRequest: (RequestOptions options, RequestInterceptorHandler handler) async {
+//         // Check if the token is expired
+//         bool isTokenExpired = checkIfTokenIsExpired();
+//
+//         if (isTokenExpired) {
+//           // Log out the user
+//           logout();
+//         } else {
+//           // Set the token in the header
+//           String token = getToken();
+//           options.headers["Authorization"] = "Bearer $token";
+//
+//           // Proceed with the request
+//           handler.next(options);
+//         }
+//       }
+//   ));
+// }
+
 interceptErpDio() {
   erpDio.interceptors.add(
     InterceptorsWrapper(onRequest: (options, handler) {

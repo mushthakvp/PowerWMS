@@ -1,4 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/models/settings_remote.dart';
 import 'package:scanner/models/user_info.dart';
@@ -12,6 +13,7 @@ const int warehouse = 11008903;
 class SettingsApiProvider {
   final store = intMapStoreFactory.store('settings_remote');
   final storeWarehouse = intMapStoreFactory.store('store_warehouse');
+
   SettingsApiProvider(this.db);
 
   final Database db;
@@ -139,6 +141,40 @@ class SettingsApiProvider {
       return await _getSettingsRemoteFromLocal();
     }
     return null;
+  }
+
+  Future<bool?> postSerialNumbers(
+      {required List<String> serialNumberList,
+      String? receiptCode,
+      int? lineNumber}) async {
+    if (await connectivityAvailable()) {
+      try {
+        final response = await erpDio.post('/receiptLineSerialNumbers', data: {
+          "serialNumber": serialNumberList.first,
+          "receiptLineNumber": lineNumber ?? 1,
+          "receiptCode": receiptCode ?? "21001373"
+        });
+        print(response.statusCode);
+        print(response.statusMessage);
+        print(response.data.toString());
+        if (response.statusCode == 200) {
+          return true;
+        } else {
+          return false;
+        }
+      } catch (error) {
+        print((error as DioError).requestOptions.path);
+        print((error).requestOptions.uri.path);
+        print((error).requestOptions.baseUrl);
+        print((error).requestOptions.headers);
+        print((error).requestOptions.data);
+        print((error).requestOptions.queryParameters);
+        print(error);
+        return false;
+      }
+    } else {
+      return false;
+    }
   }
 
   Future<SettingsRemote?> _getSettingsRemoteFromLocal() async {

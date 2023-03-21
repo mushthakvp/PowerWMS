@@ -1,13 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:scanner/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/product.dart';
 import 'package:scanner/resources/product_repository.dart';
 import 'package:scanner/screens/product_screen/product_screen.dart';
+import 'package:scanner/widgets/e_textfield.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,8 +61,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
             title: Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: ETextField(
                     controller: _searchTermController,
+                    onTap: () {
+                      SystemChannels.textInput
+                          .invokeMethod<void>('TextInput.show');
+                    },
                     onSubmitted: _parse,
                     autofocus: true,
                     focusNode: focusNode,
@@ -70,6 +76,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           AppLocalizations.of(context)!.productScreenSearch,
                     ),
                   ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.clear),
+                  onPressed: () async {
+                    _searchTermController.clear();
+                    _result = '';
+                    setState(() {});
+                  },
                 ),
                 IconButton(
                   icon: Icon(Icons.photo_camera_rounded),
@@ -311,7 +325,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   _parse(String value) {
-    print("_parse");
+    if (value.length == 13) {
+      value = "0$value";
+    }
     setState(() {
       try {
         var barcode = parser.parse(value.trim());

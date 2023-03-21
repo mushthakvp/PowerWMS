@@ -18,15 +18,19 @@ class WMSAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.title, {
     Key? key,
     this.leading,
+    this.isShowLogo = true,
     this.action,
+    this.elevation,
     this.bottom,
     double? preferredSize,
   })  : _preferredSize = Size.fromHeight(preferredSize ?? kToolbarHeight),
         super(key: key);
 
   final String title;
+  final double? elevation;
   final Widget? leading;
   final Widget? action;
+  final bool? isShowLogo;
   final PreferredSizeWidget? bottom;
   final Size _preferredSize;
 
@@ -59,18 +63,26 @@ class _WMSAppBarState extends State<WMSAppBar> {
         });
         return AppBar(
           key: widget.key,
+          elevation: widget.elevation,
           title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              (isAvailableInternet)
-                  ? Image.asset(
+              if (isAvailableInternet)
+                if (widget.isShowLogo!)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Image.asset(
                       'assets/images/logo_horizontal.png',
                       width: MediaQuery.of(context).size.width * 0.23,
-                    )
-                  : Image.asset(
-                      'assets/images/no_internet.png',
-                      width: 38,
                     ),
+                  )
+                else
+                  SizedBox()
+              else
+                Image.asset(
+                  'assets/images/no_internet.png',
+                  width: 38,
+                ),
               Text(widget.title,
                   style: Theme.of(context).appBarTheme.titleTextStyle),
             ],
@@ -88,19 +100,7 @@ class _WMSAppBarState extends State<WMSAppBar> {
                 IconButton(
                   icon: Icon(Icons.logout),
                   onPressed: () async {
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    prefs.getKeys().forEach((key) async {
-                      if (key != 'username' &&
-                          key != 'password' &&
-                          key != 'server') {
-                        await prefs.remove(key);
-                      }
-                    });
-                    dio = Dio();
-                    await deleteDb();
-                    UserLatestSession.shared.cancelTimer();
-                    Navigator.pushReplacementNamed(context, '/');
+                    logout(context);
                   },
                 )
           ],
@@ -108,4 +108,17 @@ class _WMSAppBarState extends State<WMSAppBar> {
       },
     );
   }
+}
+
+logout(context) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.getKeys().forEach((key) async {
+    if (key != 'username' && key != 'password' && key != 'server') {
+      await prefs.remove(key);
+    }
+  });
+  dio = Dio();
+  await deleteDb();
+  UserLatestSession.shared.cancelTimer();
+  Navigator.pushReplacementNamed(context, '/');
 }

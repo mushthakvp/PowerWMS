@@ -23,6 +23,8 @@ class ReservedList extends StatefulWidget {
 }
 
 class _ReservedListState extends State<ReservedList> with RouteAware {
+  bool pressedOnce = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -86,13 +88,18 @@ class _ReservedListState extends State<ReservedList> with RouteAware {
         list = items
             .map((stock) => Column(
                   children: [
-                    _itemTile(stock, () async {
-                      var updatedLine = await context
-                          .read<PicklistLineRepository>()
-                          .updatePicklistLinePickedAmount(line, stock);
-                      await provider.cancelledMutation(stock.id!, line);
-                      widget.updatedPicklistLine(updatedLine);
-                    }),
+                    _itemTile(
+                        item: stock,
+                        onCancel: () async {
+                          if (!pressedOnce) {
+                            pressedOnce = true;
+                            var updatedLine = await context
+                                .read<PicklistLineRepository>()
+                                .updatePicklistLinePickedAmount(line, stock);
+                            await provider.cancelledMutation(stock.id!, line);
+                            widget.updatedPicklistLine(updatedLine);
+                          }
+                        }),
                     Divider(height: 1),
                   ],
                 ))
@@ -102,7 +109,8 @@ class _ReservedListState extends State<ReservedList> with RouteAware {
     });
   }
 
-  _itemTile(StockMutationItem item, void Function() onCancel) {
+  _itemTile(
+      {required StockMutationItem item, required void Function() onCancel}) {
     return ListTile(
       title: Text(
         '${item.amount} x ${item.batch} | ${item.stickerCode}       ${item.createdDate != null ? DateFormat('yy-MM-dd HH:mm').format(item.createdDate!) : ''}',

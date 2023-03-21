@@ -5,12 +5,12 @@ class StockMutationNeedToProcessProvider extends ChangeNotifier {
   List<StockMutation> stocks = [];
   bool _isPendingMutation = false;
 
-  changePendingMutation({required bool isPending}) {
-    print("@@@@@@@@@@@");
-    print(isPending.toString());
-    print("changedPendingMutation");
+  changePendingMutation({required bool isPending}) async{
     _isPendingMutation = isPending;
-    // notifyListeners();
+    await Future.delayed(Duration(milliseconds: 500),(){
+      notifyListeners();
+    });
+
   }
 
    bool get isPendingMutation => _isPendingMutation;
