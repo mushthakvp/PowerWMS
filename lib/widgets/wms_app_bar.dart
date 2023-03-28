@@ -119,6 +119,6 @@ logout(context) async {
   });
   dio = Dio();
   await deleteDb();
-  UserLatestSession.shared.cancelTimer();
+  // UserLatestSession.shared.cancelTimer();
   Navigator.pushReplacementNamed(context, '/');
 }

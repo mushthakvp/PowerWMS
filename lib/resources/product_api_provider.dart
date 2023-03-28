@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/models/ProductDetailModel.dart';
 import 'package:scanner/models/product.dart';
 import 'package:scanner/models/product_price_model.dart';
 import 'package:scanner/models/product_stock.dart';
@@ -14,6 +15,11 @@ Future<ProductStock> parseProductStock(Map<String, dynamic> response) async {
 Future<ProductPriceModel> parseProductPrice(
     Map<String, dynamic> response) async {
   return ProductPriceModel.fromJson(response);
+}
+
+Future<ProductDetailModel> parseProductDetail(
+    Map<String, dynamic> response) async {
+  return ProductDetailModel.fromJson(response);
 }
 
 class ProductApiProvider {
@@ -78,9 +84,8 @@ class ProductApiProvider {
   Future<ProductPriceModel> fetchProductPrice(
       {required String productCode, unitCode}) async {
     if (kDebugMode) {
-      print('HTTP Headers: ${dio.options.baseUrl}');
-      print('HTTP Headers: ${erpDio.options.baseUrl}');
-      print('HTTP Headers: ${erpDio.options.baseUrl}');
+      // print('HTTP Headers: ${dio.options.baseUrl}');
+      // print('HTTP Headers: ${erpDio.options.baseUrl}');
     }
     erpDio.options.extra = {"isLoading": false};
     final response = await erpDio.get(
@@ -100,6 +105,25 @@ class ProductApiProvider {
     } else {
       print("badd errirr");
       return ProductPriceModel();
+    }
+  }
+
+  Future<ProductDetailModel> fetchProductDetails(
+      {required String productCode, unitCode}) async {
+    erpDio.options.extra = {"isLoading": false};
+    final response = await erpDio.get(
+      '/products/$productCode,$unitCode',
+    );
+
+    if (response.statusCode == 200) {
+      print(json.encode(response.data));
+      print(response.statusMessage);
+      print(response.statusCode);
+      return compute(
+          parseProductDetail, response.data[0]! as Map<String, dynamic>);
+    } else {
+      print("badd errirr");
+      return ProductDetailModel();
     }
   }
 }

@@ -94,16 +94,14 @@ class SettingProvider extends ChangeNotifier {
 
   getWholeSetting() async {
     var settings = await Settings.fromMemory();
-    print("settings.toJson()");
-    print(settings.toJson());
 
     wholeSaleSettings = settings.wholeSaleSettings;
     if (settings.wholeSaleSettings != null) {
       updateErpDio(
-        server: wholeSaleSettings!.server!,
-        admin: wholeSaleSettings!.admin!,
-        userName: wholeSaleSettings!.userName!,
-        password: wholeSaleSettings!.password!,
+        server: wholeSaleSettings!.server ?? "",
+        admin: wholeSaleSettings!.admin ?? "",
+        userName: wholeSaleSettings!.userName ?? "",
+        password: wholeSaleSettings!.password ?? "",
       );
     }
   }

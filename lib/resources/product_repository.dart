@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:scanner/models/ProductDetailModel.dart';
 import 'package:scanner/models/product.dart';
 import 'package:scanner/models/product_price_model.dart';
 import 'package:scanner/models/product_stock.dart';
@@ -49,6 +50,20 @@ class ProductRepository {
     ProductStock productStock = await _apiProvider.fetchProductStock(
         productCode: productCode, unitCode: unitCode);
     return productStock.copyWith(priceValue: priceModel.price?.toDouble());
+  }
+
+  Future<ProductDetailModel> fetchProductDetails(
+      {required String productCode, unitCode}) async {
+    if (kDebugMode) {
+      print('====== Fetch searched products from Local');
+    }
+    ProductDetailModel productDetailModel = await _apiProvider.fetchProductDetails(
+        productCode: productCode, unitCode: unitCode);
+
+    print("dfvd");
+    print(productDetailModel.locationCode);
+    print(productDetailModel.warehouseCode);
+    return productDetailModel;
   }
 
   clearCache() async {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/picklist_line.dart';
+import 'package:scanner/util/color_const.dart';
 
 class LineInfo extends StatefulWidget {
   final PicklistLine _line;
@@ -20,17 +22,35 @@ class _ProductDescriptionState extends State<LineInfo> {
     return SliverList(
       delegate: SliverChildListDelegate([
         ListTile(
-          visualDensity: VisualDensity.compact,
+          // visualDensity: VisualDensity.compact,
           title: Text(line.product.description ?? '-'),
-          trailing: Icon(_open ? Icons.expand_less : Icons.expand_more),
+          trailing: IconButton(
+              icon: Icon(Icons.qr_code,color: AppColors.primary,),
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          content: Container(
+                            color: Colors.white,
+                            height: 250,
+                            width: 200,
+                            alignment: Alignment.center,
+                            child: QrImage(
+                                padding: EdgeInsets.zero,
+                                data: line.product.uid,
+                                version: QrVersions.auto),
+                          ),
+                        ));
+              }),
+          // trailing: Icon(_open ? Icons.expand_less : Icons.expand_more),
           onTap: () {
             setState(() {
               _open = !_open;
             });
           },
         ),
-        Divider(height: 1),
-        if (_open) ..._tiles(line),
+        Divider(height: 2),
+        // if (_open) ..._tiles(line),
       ]),
     );
   }

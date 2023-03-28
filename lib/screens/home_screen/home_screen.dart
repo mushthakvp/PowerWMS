@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await UserLatestSession.shared.startTimer();
+      // await UserLatestSession.shared.startTimer();
       await _getSettingInfo();
     });
   }

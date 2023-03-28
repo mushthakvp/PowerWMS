@@ -3,10 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/barcode_parser/barcode_parser.dart';
 import 'package:scanner/l10n/app_localizations.dart';
+import 'package:scanner/models/ProductDetailModel.dart';
 import 'package:scanner/models/product.dart';
+import 'package:scanner/models/product_stock.dart';
+import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/resources/product_repository.dart';
 import 'package:scanner/screens/product_screen/product_screen.dart';
 import 'package:scanner/widgets/e_textfield.dart';
@@ -30,6 +34,22 @@ class _ProductsScreenState extends State<ProductsScreen> {
   String _result = '';
   FocusNode focusNode = FocusNode();
   TextEditingController _searchTermController = TextEditingController();
+
+  Future<ProductStock?> getProductStock(productCode, unit) async {
+    final _productProvider = context.read<ProductRepository>();
+    return _productProvider.fetchProductStock(
+      productCode: productCode,
+      unitCode: unit,
+    );
+  }
+
+  Future<ProductDetailModel?> getProductDetails(productCode, unit) async {
+    final _productProvider = context.read<ProductRepository>();
+    return _productProvider.fetchProductDetails(
+      productCode: productCode,
+      unitCode: unit,
+    );
+  }
 
   @override
   void initState() {
@@ -250,6 +270,177 @@ class _ProductsScreenState extends State<ProductsScreen> {
           visualDensity: VisualDensity.compact,
           title: Text(product.description ?? '-'),
         ),
+        if (context.read<SettingProvider>().wholeSaleSettings != null)
+          FutureBuilder<ProductStock?>(
+              future: getProductStock(
+                product.uid,
+                product.unit,
+              ),
+              builder: (context, AsyncSnapshot<ProductStock?> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator()),
+                    ),
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData) {
+                  TextStyle textStyle = const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w400);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Verkoopprijs:",
+                                textAlign: TextAlign.start,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textStyle,
+                              ),
+                              Gap(4),
+                              Text(
+                                "Technische voorraad:",
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.start,
+                                maxLines: 1,
+                                style: textStyle,
+                              ),
+                              Gap(4),
+                              Text(
+                                "Vrije voorraad:",
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.start,
+                                maxLines: 1,
+                                style: textStyle,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "${snapshot.data?.price}",
+                              textAlign: TextAlign.start,
+                              maxLines: 1,
+                              style: textStyle,
+                            ),
+                            Gap(4),
+                            Text(
+                              "${snapshot.data?.resultData?.first.actualStock}",
+                              textAlign: TextAlign.start,
+                              maxLines: 1,
+                              style: textStyle,
+                            ),
+                            Gap(4),
+                            Text(
+                              "${snapshot.data?.resultData?.first.freeStock}",
+                              textAlign: TextAlign.start,
+                              maxLines: 1,
+                              style: textStyle,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return const SizedBox();
+                }
+              }),
+        if (context.read<SettingProvider>().wholeSaleSettings != null)
+          FutureBuilder<ProductDetailModel?>(
+              future: getProductDetails(
+                product.uid,
+                product.unit,
+              ),
+              builder: (context, AsyncSnapshot<ProductDetailModel?> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator()),
+                    ),
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData) {
+                  TextStyle textStyle = const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w400);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Gap(4),
+                              Text(
+                                "Voorraad locatie:",
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.start,
+                                maxLines: 1,
+                                style: textStyle,
+                              ),
+                              Gap(4),
+                              Text(
+                                "Magazijn locatie:",
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.start,
+                                maxLines: 1,
+                                style: textStyle,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Gap(4),
+                            Text(
+                              "${snapshot.data?.locationCode}",
+                              textAlign: TextAlign.start,
+                              maxLines: 1,
+                              style: textStyle,
+                            ),
+                            Gap(4),
+                            Text(
+                              "${snapshot.data?.warehouseCode}",
+                              textAlign: TextAlign.start,
+                              maxLines: 1,
+                              style: textStyle,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return const SizedBox();
+                }
+              }),
         Divider(height: 1),
         ListTile(
           title: Row(
@@ -276,10 +467,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
           ),
         ),
         Divider(height: 1),
-        ListTile(
-          dense: true,
-          title: Text('Packaging'),
-        ),
+        if (product.packagings.isNotEmpty)
+          ListTile(
+            dense: true,
+            title: Text('Packaging'),
+          ),
         ...product.packagings.map((packaging) => Column(
               children: [
                 ListTile(
@@ -295,27 +487,27 @@ class _ProductsScreenState extends State<ProductsScreen> {
               ],
             )),
         Divider(height: 1),
-        if (product.extra1 != null)
+        if (product.extra1 != null && product.extra1!.isNotEmpty)
           ListTile(
             dense: true,
             title: Text('Extra 1: ${product.extra1}'),
           ),
-        if (product.extra2 != null)
+        if (product.extra2 != null && product.extra2!.isNotEmpty)
           ListTile(
             dense: true,
             title: Text('Extra 2: ${product.extra2}'),
           ),
-        if (product.extra3 != null)
+        if (product.extra3 != null && product.extra3!.isNotEmpty)
           ListTile(
             dense: true,
             title: Text('Extra 3: ${product.extra3}'),
           ),
-        if (product.extra4 != null)
+        if (product.extra4 != null && product.extra4!.isNotEmpty)
           ListTile(
             dense: true,
             title: Text('Extra 4: ${product.extra4}'),
           ),
-        if (product.extra5 != null)
+        if (product.extra5 != null && product.extra5!.isNotEmpty)
           ListTile(
             dense: true,
             title: Text('Extra 5: ${product.extra5}'),

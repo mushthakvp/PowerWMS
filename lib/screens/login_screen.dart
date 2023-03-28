@@ -98,7 +98,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
-                    await UserLatestSession.shared.removeTimestamp();
+                    // await UserLatestSession.shared.removeTimestamp();
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
                       try {

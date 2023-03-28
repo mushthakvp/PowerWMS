@@ -46,7 +46,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   interceptErpDio();
-  await UserLatestSession.ensureInitialized();
+  // await UserLatestSession.ensureInitialized();
   await InternetState.shared.ensureInitialized();
   // initLogs();
   final db = await createDb();
@@ -147,8 +147,8 @@ class WMSApp extends StatelessWidget {
               home: Builder(
                 builder: (context) {
                   if (prefs.getString('token') != null &&
-                      prefs.getString('server') != null &&
-                      !UserLatestSession.isOutOfSession()) {
+                      prefs.getString('server') != null /*&&
+                      !UserLatestSession.isOutOfSession()*/) {
                     dio.interceptors.add(InterceptorsWrapper(
                         onError: (DioError e, ErrorInterceptorHandler handler) {
                       if (e.error.toString().contains("401")) {

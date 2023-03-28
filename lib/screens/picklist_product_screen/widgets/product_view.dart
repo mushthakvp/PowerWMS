@@ -100,7 +100,7 @@ class ProductView extends StatelessWidget {
           return SliverList(
             delegate: SliverChildListDelegate([
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
                 child: Row(
                   children: <Widget>[
                     Column(

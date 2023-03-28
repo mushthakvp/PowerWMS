@@ -36,6 +36,13 @@ interceptErpDio() {
     }, onResponse: (response, handler) {
       return handler.next(response);
     }, onError: (DioError e, handler) {
+      if (kDebugMode) {
+        print('HTTP Headers: ${e.requestOptions.baseUrl}');
+        print('HTTP Headers: ${e.requestOptions.path}');
+        print('HTTP Headers: ${e.requestOptions.uri.path}');
+        print('HTTP Headers: ${e.requestOptions.uri.data?.uri.path}');
+        print('HTTP Headers: ${e.requestOptions.queryParameters}');
+      }
       return handler.next(e);
     }),
   );

@@ -318,7 +318,9 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                 if (children.isNotEmpty)
                   Container(
                     child: Text(
-                      isFinishAtBottom ? 'To Pick' : 'Picked',
+                      isFinishAtBottom
+                          ? 'To Pick (${lines.where((e) => isFinishAtBottom ? e.priority <= 1 : e.priority > 1).where(filter(_search)).length}/${lines.length})'
+                          : 'Picked (${lines.where((e) => isFinishAtBottom ? e.priority <= 1 : e.priority > 1).where(filter(_search)).length}/${lines.length})',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
@@ -390,13 +392,13 @@ extension PicklistLineColor on PicklistLine {
     print("*****Picklist body 390 line*****");
     print(idleList.length);
     if (idleList.length > 0) {
-        context
-            .read<StockMutationNeedToProcessProvider>()
-            .changePendingMutation(isPending: true);
+      context
+          .read<StockMutationNeedToProcessProvider>()
+          .changePendingMutation(isPending: true);
     } else {
-        context
-            .read<StockMutationNeedToProcessProvider>()
-            .changePendingMutation(isPending: false);
+      context
+          .read<StockMutationNeedToProcessProvider>()
+          .changePendingMutation(isPending: false);
     }
     print("**********");
 
