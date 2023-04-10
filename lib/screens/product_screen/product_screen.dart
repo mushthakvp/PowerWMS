@@ -154,8 +154,6 @@ class _ProductScreenState extends State<ProductScreen> {
                 future: productDetails,
                 builder:
                     (context, AsyncSnapshot<ProductDetailModel?> snapshot) {
-                  print(snapshot.hasError);
-                  print(snapshot.error);
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -174,12 +172,11 @@ class _ProductScreenState extends State<ProductScreen> {
                         fontSize: 16.0,
                         fontWeight: FontWeight.w400);
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 14,vertical: 4),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Gap(4),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,7 +202,6 @@ class _ProductScreenState extends State<ProductScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Gap(4),
                               Text(
                                 "${snapshot.data?.locationCode}",
                                 textAlign: TextAlign.start,

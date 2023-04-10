@@ -180,61 +180,62 @@ class _ProductsScreenState extends State<ProductsScreen> {
                               }
                               return Column(
                                 children: [
-                                  Dismissible(
-                                    key: Key(product.id.toString()),
-                                    onDismissed: (value) {
-                                      final repository =
-                                          context.read<ProductRepository>();
-                                      repository.deleteProduct(product);
+                                  // Dismissible(
+                                  // key: Key(product.id.toString()),
+                                  // onDismissed: (value) {
+                                  //   final repository =
+                                  //       context.read<ProductRepository>();
+                                  //   repository.deleteProduct(product);
+                                  // },
+                                  // background: Container(
+                                  //   padding: EdgeInsets.only(right: 16),
+                                  //   alignment: Alignment.centerRight,
+                                  //   color: Colors.red,
+                                  //   child: Icon(
+                                  //     Icons.delete_forever_outlined,
+                                  //     color: Colors.white,
+                                  //     size: 25,
+                                  //   ),
+                                  // ),
+                                  // child:
+                                  ListTile(
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              ProductScreen(product),
+                                        ),
+                                      );
                                     },
-                                    background: Container(
-                                      padding: EdgeInsets.only(right: 16),
-                                      alignment: Alignment.centerRight,
-                                      color: Colors.red,
-                                      child: Icon(
-                                        Icons.delete_forever_outlined,
-                                        color: Colors.white,
-                                        size: 25,
-                                      ),
+                                    leading: ProductImage(
+                                      product.id,
+                                      width: 60,
+                                      key: widget.key,
                                     ),
-                                    child: ListTile(
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                ProductScreen(product),
-                                          ),
-                                        );
-                                      },
-                                      leading: ProductImage(
-                                        product.id,
-                                        width: 60,
-                                        key: widget.key,
-                                      ),
-                                      subtitle: Text(product.unit),
-                                      title: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            product.uid,
-                                            style: TextStyle(fontSize: 14),
-                                          ),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                    product.description ?? '',
-                                                    overflow:
-                                                        TextOverflow.ellipsis),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      trailing: Icon(Icons.chevron_right),
+                                    subtitle: Text(product.unit),
+                                    title: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          product.uid,
+                                          style: TextStyle(fontSize: 14),
+                                        ),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                  product.description ?? '',
+                                                  overflow:
+                                                      TextOverflow.ellipsis),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
+                                    trailing: Icon(Icons.chevron_right),
                                   ),
+                                  // ),
                                   Divider(
                                     height: 1,
                                   ),

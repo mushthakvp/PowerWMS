@@ -97,9 +97,6 @@ class ProductApiProvider {
     );
 
     if (response.statusCode == 200) {
-      print(json.encode(response.data));
-      print(response.statusMessage);
-      print(response.statusCode);
       return compute(
           parseProductPrice, response.data[0]! as Map<String, dynamic>);
     } else {
@@ -120,7 +117,7 @@ class ProductApiProvider {
       print(response.statusMessage);
       print(response.statusCode);
       return compute(
-          parseProductDetail, response.data[0]! as Map<String, dynamic>);
+          parseProductDetail, response.data as Map<String, dynamic>);
     } else {
       print("badd errirr");
       return ProductDetailModel();

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -110,11 +111,14 @@ class _BarcodeInputState extends State<BarcodeInput> {
       try {
         var barcode = parser.parse(value);
         if (barcode.hasAI('01')) {
+          print("has 01");
           widget.onParse(barcode.getAIData('01'), barcode);
         } else {
           widget.onParse(value, null);
         }
       } catch (e) {
+        print("119_bracode_input");
+        print(e.toString());
         widget.onParse(value, null);
       }
       setState(() {

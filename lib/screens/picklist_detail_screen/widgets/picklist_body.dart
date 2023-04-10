@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -206,8 +207,12 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
           }
           // Sort on priority
           if (settings.picklistSort == PicklistSortType.warehouseLocation) {
-            lines.sort((a, b) => (int.tryParse(a.location ?? "0") ?? 0)
-                .compareTo(int.tryParse(b.location ?? "0") ?? 0));
+            print("Before Sort");
+            log(lines.map((e) => e.lineLocationCode).toList().toString());
+            lines.sort((a, b) => (int.tryParse(a.lineLocationCode ?? "0") ?? 0)
+                .compareTo(int.tryParse(b.lineLocationCode ?? "0") ?? 0));
+            print("After Sort");
+            log(lines.map((e) => e.lineLocationCode).toList().toString());
           } else {
             lines.sort((a, b) => a.priority.compareTo(b.priority));
           }

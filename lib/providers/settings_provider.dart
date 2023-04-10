@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/l10n/app_localizations.dart';
+import 'package:scanner/models/setting_api.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/settings_remote.dart';
 import 'package:scanner/models/user_info.dart';
@@ -27,13 +28,14 @@ class SettingProvider extends ChangeNotifier {
   SettingProvider(this.db);
 
   UserInfo? userInfo;
+  SettingApi? apiSettings;
   List<Warehouse>? warehouses;
   SettingsRemote? settingsRemote;
   WholeSaleSettings? wholeSaleSettings;
   final Database db;
 
   bool get finishedProductsAtBottom {
-    return settingsRemote!.finishedProductsAtBottom!;
+    return settingsRemote?.finishedProductsAtBottom ?? false;
   }
 
   setFinishedProductsAtBottom(bool value) {
@@ -42,7 +44,7 @@ class SettingProvider extends ChangeNotifier {
   }
 
   bool get oneScanPickAll {
-    return settingsRemote!.oneScanPickAll!;
+    return settingsRemote?.oneScanPickAll ?? false;
   }
 
   setOneScanPickAll(bool value) {
@@ -67,7 +69,7 @@ class SettingProvider extends ChangeNotifier {
   Settings get settingsLocal {
     return Settings(
         picklistSort: this.picklistSortType(),
-        finishedProductsAtBottom: this.finishedProductsAtBottom,
+        finishedProductsAtBottom: finishedProductsAtBottom,
         oneScanPickAll: this.oneScanPickAll,
         directlyProcess: this.directProcessing,
         wholeSaleSettings: wholeSaleSettings);
@@ -76,8 +78,9 @@ class SettingProvider extends ChangeNotifier {
   Future<void> getSettingInfo() async {
     var _apiProvider = SettingsApiProvider(db);
     settingsRemote = await _apiProvider.getSettingsRemote();
-    await getWholeSetting();
+    print(")))))${settingsRemote?.wholeSaleSettings}");
     saveSettingLocal();
+    // await getWholeSetting();
   }
 
   Future<bool?> postSerialNumbers(
@@ -92,19 +95,23 @@ class SettingProvider extends ChangeNotifier {
     );
   }
 
-  getWholeSetting() async {
-    var settings = await Settings.fromMemory();
-
-    wholeSaleSettings = settings.wholeSaleSettings;
-    if (settings.wholeSaleSettings != null) {
-      updateErpDio(
-        server: wholeSaleSettings!.server ?? "",
-        admin: wholeSaleSettings!.admin ?? "",
-        userName: wholeSaleSettings!.userName ?? "",
-        password: wholeSaleSettings!.password ?? "",
-      );
-    }
-  }
+  // getWholeSetting() async {
+  //   var settings = await Settings.fromMemory();
+  //
+  //   wholeSaleSettings = settings.wholeSaleSettings;
+  //   print(settings.wholeSaleSettings);
+  //   if (settings.wholeSaleSettings != null) {
+  //     print("UPDATING WEP DIO");
+  //     updateErpDio(
+  //       server: wholeSaleSettings!.server ?? "",
+  //       admin: wholeSaleSettings!.admin ?? "",
+  //       userName: wholeSaleSettings!.userName ?? "",
+  //       password: wholeSaleSettings!.password ?? "",
+  //     );
+  //   }else{
+  //     print("NOT UPDATING WEP DIO");
+  //   }
+  // }
 
   Future<void> saveSettingInfo() async {
     // Save to local
@@ -142,6 +149,31 @@ class SettingProvider extends ChangeNotifier {
   Future<void> getUserInfo() async {
     var _apiProvider = SettingsApiProvider(db);
     userInfo = await _apiProvider.getUserInfo();
+    notifyListeners();
+  }
+
+  // User Info API
+  Future<void> getApiInfo() async {
+    var _apiProvider = SettingsApiProvider(db);
+    apiSettings = await _apiProvider.getSettingApi();
+    ApiSettings? settingsApi = apiSettings?.apiSettings?.first;
+    if (settingsApi?.type == 1) {
+      wholeSaleSettings = WholeSaleSettings(
+          server: settingsApi?.baseEndpoint,
+          admin: settingsApi?.administrationCode,
+          userName: settingsApi?.basicAuthorizationUser,
+          password: settingsApi?.basicAuthorizationPassword);
+      updateErpDio(
+        server: wholeSaleSettings!.server ?? "",
+        admin: wholeSaleSettings!.admin ?? "",
+        userName: wholeSaleSettings!.userName ?? "",
+        password: wholeSaleSettings!.password ?? "",
+      );
+      print("wholeSaleSettings.toJson()");
+      print(wholeSaleSettings?.toJson());
+      // await saveSettingInfo();
+    }
+
     notifyListeners();
   }
 

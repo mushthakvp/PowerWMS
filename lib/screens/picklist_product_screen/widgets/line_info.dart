@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/util/color_const.dart';
+import 'package:scanner/util/extensions/text_style_ext.dart';
 
 class LineInfo extends StatefulWidget {
   final PicklistLine _line;
@@ -23,9 +25,34 @@ class _ProductDescriptionState extends State<LineInfo> {
       delegate: SliverChildListDelegate([
         ListTile(
           // visualDensity: VisualDensity.compact,
-          title: Text(line.product.description ?? '-'),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Gap(6),
+              Text(line.product.description ?? '-'),
+              if (line.descriptionB?.isNotEmpty ?? false) ...[
+                Gap(4),
+                Text(
+                  line.descriptionB ?? "",
+                  style: Theme.of(context).textTheme.titleMedium?.semiBold,
+                ),
+              ],
+              if (line.internalMemo?.isNotEmpty ?? false) ...[
+                Gap(4),
+                Text(
+                  line.internalMemo ?? "",
+                  style: Theme.of(context).textTheme.titleMedium?.semiBold,
+                ),
+              ]
+            ],
+          ),
+
           trailing: IconButton(
-              icon: Icon(Icons.qr_code,color: AppColors.primary,),
+              icon: Icon(
+                Icons.qr_code,
+                color: AppColors.primary,
+              ),
               onPressed: () {
                 showDialog(
                     context: context,

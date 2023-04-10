@@ -131,61 +131,61 @@ class _SettingsDialogState extends State<SettingsDialog> {
                     thickness: 1,
                   ),
                   Gap(16),
-                  AppButton(
-                    onPressed: () {
-                      WholeSaleSettings wholeSaleSettings = WholeSaleSettings();
-                      if (provider.wholeSaleSettings != null)
-                        wholeSaleSettings = provider.wholeSaleSettings!;
-                      CustomAlertBox.showAlertBox(context,
-                          title: "Update Wholesale Api",
-                          confirmText: "Update",
-                          message: Column(
-                            children: [
-                              TextFieldWithTitle(
-                                initialValue:
-                                    provider.wholeSaleSettings?.server,
-                                title: "Server",
-                                onChanged: (value) {
-                                  wholeSaleSettings.server = value;
-                                },
-                              ),
-                              TextFieldWithTitle(
-                                initialValue: provider.wholeSaleSettings?.admin,
-                                title: "Admin",
-                                onChanged: (value) {
-                                  wholeSaleSettings.admin = value;
-                                },
-                              ),
-                              TextFieldWithTitle(
-                                initialValue:
-                                    provider.wholeSaleSettings?.userName,
-                                title: "Username",
-                                onChanged: (value) {
-                                  wholeSaleSettings.userName = value;
-                                },
-                              ),
-                              TextFieldWithTitle(
-                                initialValue:
-                                    provider.wholeSaleSettings?.password,
-                                title: "Password",
-                                onChanged: (value) {
-                                  wholeSaleSettings.password = value;
-                                },
-                              )
-                            ],
-                          ), onConfirm: () async {
-                        print("wholeSaleSettings.toJson()");
-                        print(wholeSaleSettings.toJson());
-                        provider.wholeSaleSettings = wholeSaleSettings;
-                        context.read<ValueNotifier<Settings>>().value =
-                            provider.settingsLocal;
-                        await provider.saveSettingInfo();
-                        Navigator.pop(context);
-                      });
-                    },
-                    buttonColor: AppColors.black,
-                    title: "Update WholeSale Api",
-                  )
+                  // AppButton(
+                  //   onPressed: () {
+                  //     WholeSaleSettings wholeSaleSettings = WholeSaleSettings();
+                  //     if (provider.wholeSaleSettings != null)
+                  //       wholeSaleSettings = provider.wholeSaleSettings!;
+                  //     CustomAlertBox.showAlertBox(context,
+                  //         title: "Update Wholesale Api",
+                  //         confirmText: "Update",
+                  //         message: Column(
+                  //           children: [
+                  //             TextFieldWithTitle(
+                  //               initialValue:
+                  //                   provider.wholeSaleSettings?.server,
+                  //               title: "Server",
+                  //               onChanged: (value) {
+                  //                 wholeSaleSettings.server = value;
+                  //               },
+                  //             ),
+                  //             TextFieldWithTitle(
+                  //               initialValue: provider.wholeSaleSettings?.admin,
+                  //               title: "Admin",
+                  //               onChanged: (value) {
+                  //                 wholeSaleSettings.admin = value;
+                  //               },
+                  //             ),
+                  //             TextFieldWithTitle(
+                  //               initialValue:
+                  //                   provider.wholeSaleSettings?.userName,
+                  //               title: "Username",
+                  //               onChanged: (value) {
+                  //                 wholeSaleSettings.userName = value;
+                  //               },
+                  //             ),
+                  //             TextFieldWithTitle(
+                  //               initialValue:
+                  //                   provider.wholeSaleSettings?.password,
+                  //               title: "Password",
+                  //               onChanged: (value) {
+                  //                 wholeSaleSettings.password = value;
+                  //               },
+                  //             )
+                  //           ],
+                  //         ), onConfirm: () async {
+                  //       print("wholeSaleSettings.toJson()");
+                  //       print(wholeSaleSettings.toJson());
+                  //       provider.wholeSaleSettings = wholeSaleSettings;
+                  //       context.read<ValueNotifier<Settings>>().value =
+                  //           provider.settingsLocal;
+                  //       await provider.saveSettingInfo();
+                  //       Navigator.pop(context);
+                  //     });
+                  //   },
+                  //   buttonColor: AppColors.black,
+                  //   title: "Update WholeSale Api",
+                  // )
                 ],
               ),
             ),

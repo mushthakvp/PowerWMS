@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/models/setting_api.dart';
 import 'package:scanner/models/settings_remote.dart';
 import 'package:scanner/models/user_info.dart';
 import 'package:scanner/models/warehouse.dart';
@@ -44,6 +45,18 @@ class SettingsApiProvider {
     }
   }
 
+  Future<SettingApi?> getSettingApi() async {
+    if (await connectivityAvailable()) {
+      final response = await dio.post('/account/api');
+      var result = SettingApi.fromJson(response.data);
+      print("getSettingApi");
+      print(response);
+      return result;
+    } else {
+      print('NO INTERNET');
+    }
+  }
+
   Future<UserInfo?> _getUserInfoFromLocal() async {
     var jsn = await store.record(user_info).get(db);
     if (jsn == null) {
@@ -70,6 +83,8 @@ class SettingsApiProvider {
           var result = (response.data as List<dynamic>)
               .map((x) => Warehouse.fromJson(x))
               .toList();
+          print(result.map((e) => e.toJson()));
+          print(await _getWarehouseFromLocal() == []);
           if (await _getWarehouseFromLocal() == []) {
             await _saveWarehouseToLocal(result);
           } else {
@@ -125,6 +140,8 @@ class SettingsApiProvider {
         final response = await dio.get('/account/defaults');
         if (response.statusCode == 200) {
           var data = SettingsRemote.fromJson(response.data);
+          print("getSettingsRemote");
+          print(data.toJson());
           if (await _getSettingsRemoteFromLocal() == null) {
             _saveSettingsRemote(data);
           } else {

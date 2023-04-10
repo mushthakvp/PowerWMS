@@ -173,6 +173,8 @@ class ProductView extends StatelessWidget {
               /// Barcode
               ScanForm(
                 onParse: (process) {
+                  print("process");
+                  print(process);
                   if (process && InternetState.shared.connectivityAvailable()) {
                     _onProcessHandler(provider, context);
                   }
@@ -325,6 +327,8 @@ class ProductView extends StatelessWidget {
         .read<StockMutationRepository>()
         .saveMutation(provider.getStockMutation())
         .then((value) {
+          print("value");
+          print(value);
       if (value.success) {
         provider.clear();
         Navigator.of(context).pop();
@@ -356,6 +360,8 @@ class ProductView extends StatelessWidget {
       }
     }, onError: (error) {
       var response = error as BaseResponse;
+      print("response");
+      print(response);
       Future.delayed(const Duration(), () async {
         await showErrorAlert(message: response.message);
       });

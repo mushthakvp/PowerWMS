@@ -57,12 +57,11 @@ class ProductRepository {
     if (kDebugMode) {
       print('====== Fetch searched products from Local');
     }
-    ProductDetailModel productDetailModel = await _apiProvider.fetchProductDetails(
-        productCode: productCode, unitCode: unitCode);
-
-    print("dfvd");
-    print(productDetailModel.locationCode);
-    print(productDetailModel.warehouseCode);
+    ProductDetailModel productDetailModel =
+        await _apiProvider.fetchProductDetails(
+      productCode: productCode,
+      unitCode: unitCode,
+    );
     return productDetailModel;
   }
 

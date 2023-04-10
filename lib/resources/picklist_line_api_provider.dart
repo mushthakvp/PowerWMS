@@ -3,6 +3,7 @@ import 'package:scanner/models/picklist_line.dart';
 
 class PicklistLineApiProvider {
   Future<List<PicklistLine>> getPicklistLines(int picklistId) {
+    print("GETPICKLISTLINES");
     return dio.post<Map<String, dynamic>>(
       '/picklist/lines',
       data: {

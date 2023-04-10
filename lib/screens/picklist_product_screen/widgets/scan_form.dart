@@ -81,24 +81,51 @@ class ScanForm extends StatelessWidget {
             Expanded(
               child: BarcodeInput(
                   onParse: (value, barcode) {
-                    if (!provider.needToScan() || value.length > 0) {
-                      if (value.length == 13 && value.substring(0, 1) != "0") {
-                        String request = '0$value';
-                        try {
-                          _parseHandler(
-                            context,
-                            provider,
-                            request,
-                            barcode,
-                          );
-                        } catch (_) {
-                          _parseHandler(context, provider, value, barcode);
-                        }
-                      } else {
-                        _parseHandler(context, provider, value, barcode);
-                      }
-                      context.read<AddProductProvider>().canAdd = false;
+                    // formKey.currentState?.save();
+
+                    String? ean = _parseHandler(
+                      context,
+                      provider,
+                      context.read<AddProductProvider>().value ?? '',
+                      null,
+                    );
+                    if (ean == null) {
+                      ean = '';
                     }
+                    if (ean.length == 13) {
+                      print("1");
+                      String request = '0$ean';
+                      try {
+                        print("2");
+                        _parseHandler(context, provider, request, null,
+                            isThrowError: true);
+                      } catch (_) {
+                        print("3");
+                        _parseHandler(context, provider, ean, null);
+                      }
+                    } else {
+                      print("4");
+                      _parseHandler(context, provider, ean, null);
+                    }
+                    context.read<AddProductProvider>().canAdd = false;
+                    // if (!provider.needToScan() || value.length > 0) {
+                    //   if (value.length == 13 && value.substring(0, 1) != "0") {
+                    //     String request = '0$value';
+                    //     try {
+                    //       _parseHandler(
+                    //         context,
+                    //         provider,
+                    //         request,
+                    //         barcode,
+                    //       );
+                    //     } catch (_) {
+                    //       _parseHandler(context, provider, value, barcode);
+                    //     }
+                    //   } else {
+                    //     _parseHandler(context, provider, value, barcode);
+                    //   }
+                    //   context.read<AddProductProvider>().canAdd = false;
+                    // }
                   },
                   onBarCodeChanged: (String barcode) {
                     if (barcode.isEmpty) {
@@ -290,6 +317,9 @@ class ScanForm extends StatelessWidget {
         onParse(true);
       }
     } catch (e, stack) {
+      print("fsafsf");
+      print(e);
+      print(stack.toString());
       if (isThrowError == false) {
         await AssetsAudioPlayer.newPlayer()
             .open(audio, autoStart: true)

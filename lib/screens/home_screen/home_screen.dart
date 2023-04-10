@@ -12,7 +12,6 @@ import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/picklist_home_screen/picklists_home_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:scanner/screens/serial_number_homescreen/seriel_number_home_screen.dart';
-import 'package:scanner/util/user_latest_session.dart';
 import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
 
@@ -46,9 +45,10 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   _getSettingInfo() async {
     await Future.wait([
+      context.read<SettingProvider>().getApiInfo(),
       context.read<SettingProvider>().getSettingInfo(),
       context.read<SettingProvider>().getWarehouses(),
-      context.read<SettingProvider>().getUserInfo()
+      context.read<SettingProvider>().getUserInfo(),
     ]);
     if (mounted) {
       context.read<ValueNotifier<Settings>>().value =
@@ -59,13 +59,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   addSerialNumber() {
     if (items.length < 3 &&
-        (context
-                .read<SettingProvider>()
-                .settingsLocal
-                .wholeSaleSettings
-                ?.server
-                ?.isNotEmpty ??
-            false)) {
+        (context.read<SettingProvider>().apiSettings?.apiSettings?.first.type ??
+                2) ==
+            1) {
       items.add(
         {
           'title': (context) => AppLocalizations.of(context)!.serial_numbers,
