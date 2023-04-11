@@ -23,6 +23,10 @@ import 'package:scanner/resources/product_repository.dart';
 import 'package:scanner/resources/serial_number_repository.dart';
 import 'package:scanner/resources/stock_mutation_item_repository.dart';
 import 'package:scanner/resources/stock_mutation_repository.dart';
+import 'package:scanner/screens/count_screen/count_screen.dart';
+import 'package:scanner/screens/count_screen/home_provider.dart';
+import 'package:scanner/screens/count_screen/resource/product_repository.dart'
+    as productRepoCount;
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
@@ -31,7 +35,6 @@ import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.
 import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:scanner/screens/serial_number_homescreen/seriel_number_home_screen.dart';
 import 'package:scanner/util/internet_state.dart';
-import 'package:scanner/util/user_latest_session.dart';
 import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -111,6 +114,11 @@ class WMSApp extends StatelessWidget {
                   create: (_) => CompleteStockMutationProvider()),
               ChangeNotifierProvider<StockMutationNeedToProcessProvider>(
                   create: (_) => StockMutationNeedToProcessProvider()),
+              ChangeNotifierProvider<HomeProvider>(
+                  create: (_) => HomeProvider(
+                        productRepository:
+                            productRepoCount.ProductRepository(_db),
+                      ))
             ],
             child: MaterialApp(
               navigatorKey: navigatorKey,
@@ -147,8 +155,10 @@ class WMSApp extends StatelessWidget {
               home: Builder(
                 builder: (context) {
                   if (prefs.getString('token') != null &&
-                      prefs.getString('server') != null /*&&
-                      !UserLatestSession.isOutOfSession()*/) {
+                          prefs.getString('server') !=
+                              null /*&&
+                      !UserLatestSession.isOutOfSession()*/
+                      ) {
                     dio.interceptors.add(InterceptorsWrapper(
                         onError: (DioError e, ErrorInterceptorHandler handler) {
                       if (e.error.toString().contains("401")) {
@@ -180,6 +190,7 @@ class WMSApp extends StatelessWidget {
                   );
                 },
                 PicklistsScreen.routeName: (context) => PicklistsScreen(),
+                CountHomeScreen.routeName: (context) => CountHomeScreen(),
                 SerialNumberHomeScreen.routeName: (context) =>
                     SerialNumberHomeScreen(),
                 PicklistScreen.routeName: (context) {

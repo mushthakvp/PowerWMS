@@ -7,6 +7,7 @@ import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/main.dart';
 import 'package:scanner/models/settings.dart';
 import 'package:scanner/providers/settings_provider.dart';
+import 'package:scanner/screens/count_screen/count_screen.dart';
 import 'package:scanner/screens/home_screen/widgets/grid_item.dart';
 import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/picklist_home_screen/picklists_home_screen.dart';
@@ -35,12 +36,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       'icon': Icons.list_alt,
       'route': PicklistsScreen.routeName,
     },
-
-    // {
-    //   'title': (context) => AppLocalizations.of(context)!.count,
-    //   'icon': Icons.leaderboard_rounded,
-    //   'route': PicklistsScreen.routeName,
-    // }
+    {
+      'title': (context) => AppLocalizations.of(context)!.count,
+      'icon': Icons.leaderboard_rounded,
+      'route': CountHomeScreen.routeName,
+    }
   ];
 
   _getSettingInfo() async {

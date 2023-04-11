@@ -12,7 +12,7 @@ class Product {
   final String? productGroupName;
   final String unit;
   final int status;
-  final num stock;
+  late final num stock;
   final bool hasImage;
   final String? extra1;
   final String? extra2;
