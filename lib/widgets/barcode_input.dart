@@ -14,13 +14,17 @@ typedef OnBarCodeChanged = Function(String);
 class BarcodeInput extends StatefulWidget {
   final void Function(String value, GS1Barcode? barcode) onParse;
   final bool willShowKeyboardButton;
+  final FocusNode? focusNodeArg;
   final OnBarCodeChanged? onBarCodeChanged;
+  final TextInputType? keyBoardType;
 
   const BarcodeInput(
       {required this.onParse,
       this.onBarCodeChanged,
+      this.keyBoardType,
       required this.willShowKeyboardButton,
-      Key? key})
+      Key? key,
+      this.focusNodeArg})
       : super(key: key);
 
   @override
@@ -30,6 +34,7 @@ class BarcodeInput extends StatefulWidget {
 class _BarcodeInputState extends State<BarcodeInput> {
   FocusNode focusNode = FocusNode();
   final controller = TextEditingController();
+
   bool willShowKeyboard = false;
   late StreamSubscription<bool> keyboardSubscription;
 
@@ -71,8 +76,8 @@ class _BarcodeInputState extends State<BarcodeInput> {
             },
             onSubmitted: _parse,
             autofocus: true,
-            focusNode: focusNode,
-            keyboardType: TextInputType.number,
+            focusNode: widget.focusNodeArg ?? focusNode,
+            keyboardType: widget.keyBoardType ?? TextInputType.number,
             decoration: InputDecoration(hintText: 'Barcode'),
             onChanged: widget.onBarCodeChanged,
           ),

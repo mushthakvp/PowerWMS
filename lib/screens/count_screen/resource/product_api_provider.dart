@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/models/product_price_model.dart';
 import 'package:scanner/models/product_stock.dart';
+import 'package:scanner/screens/count_screen/model/CountListModel.dart';
 import 'package:scanner/screens/count_screen/model/product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,47 +26,34 @@ Future<ProductPriceModel> parseProductPrice(
 }
 
 class ProductApiProvider {
-  Future<bool> addOrderCount(List<Map> itemList) async {
-    if (kDebugMode) {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      print('HTTP Headeers: ${dio.options.baseUrl}');
-      log('Auth Token: ${prefs.getString('token')}');
-    }
+  Future<List<CountListModel>?> getOrderCount() async {
+    var response = await dio.get('/countstockmutation/count/all');
+    print(response.data);
+    return ((response.data as List)
+        .map((e) => CountListModel.fromJson(e))
+        .toList());
+  }
+
+  Future<bool> addOrderCount(
+      {required int warehouseId,
+      required int countId,
+      required List<Map> itemList}) async {
     return await dio.post<Map<String, dynamic>>(
       '/countstockmutation/count/add',
       data: {
-        "warehouseId": 10,
-        "countId": 2,
+        "warehouseId": warehouseId,
+        "countId": countId,
         "isBook": true,
         "items": itemList,
       },
     ).then((response) {
-      print(response.data.toString());
-      return true;
-    }).onError((error, stackTrace) {
-      print(error.toString());
+      if (response.data!['success'])
+        return true;
+      else
+        return false;
+    }).onError((DioError error, stackTrace) {
       return false;
     });
-    try {
-      print('Base url: ${dio.options.baseUrl}');
-      Response response = await dio.post('', data: {
-        "warehouseId": 10,
-        "countId": 2,
-        "isBook": true,
-        "items": [
-          {"amount": 99, "productId": 285016}
-        ],
-      });
-      print("svfdv");
-      print(response.statusCode);
-      print(response.statusMessage);
-      print(response.toString());
-      print("response.toString()");
-    } catch (e) {
-      print((e as DioError).requestOptions.data);
-      print((e as DioError).requestOptions.uri.path);
-      print((e as DioError).requestOptions.path);
-    }
   }
 
   Future<List<Product>> getProducts(String? search) async {

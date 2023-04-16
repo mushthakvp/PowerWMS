@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/product_stock.dart';
 import 'package:scanner/screens/count_screen/home_provider.dart';
 import 'package:scanner/screens/count_screen/model/product.dart';
@@ -223,7 +224,7 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
             width: double.maxFinite,
             child: ElevatedButton(
               child: Text(
-                "SAVE",
+                AppLocalizations.of(context)!.save,
                 style: const TextStyle(
                   fontSize: 20.0,
                 ),
@@ -231,6 +232,7 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
               onPressed: () {
                 widget.onConfirmAmount(_productAmount!);
                 Navigator.pop(context);
+                FocusScope.of(context).unfocus();
               },
             ),
           ),

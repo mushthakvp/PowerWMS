@@ -41,9 +41,9 @@ class HomeProvider extends ChangeNotifier {
         isContinues: isContinues, isReturn: isReturn);
   }
 
-  Future<SettingsModel> getSavedSetting() async {
-    return await productRepository.getSavedSetting();
-  }
+  // Future<SettingsModel> getSavedSetting() async {
+    // return await productRepository.getSavedSetting();
+  // }
 
   /// Fetch products stock
   ///

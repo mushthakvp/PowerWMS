@@ -69,10 +69,10 @@ class ProductRepository {
     return SettingsModel.fromJson(response);
   }
 
-  Future<SettingsModel> getSavedSetting() async {
-    final response = await _dbProvider.getSavedSetting();
-    return SettingsModel.fromJson(response);
-  }
+  // Future<SettingsModel> getSavedSetting() async {
+    // final response = await _dbProvider.getSavedSetting();
+    // return SettingsModel.fromJson(response);
+  // }
 
   Future<void> clearSearchedProducts() async {
     await _dbProvider.clearSearchedProducts();

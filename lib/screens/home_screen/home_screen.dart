@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   }
 
   addSerialNumber() {
-    if (items.length < 3 &&
+    if (items.length < 4 &&
         (context.read<SettingProvider>().apiSettings?.apiSettings?.first.type ??
                 2) ==
             1) {

@@ -4,16 +4,21 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/screens/count_screen/home_provider.dart';
+import 'package:scanner/screens/count_screen/model/CountListModel.dart';
 import 'package:scanner/screens/count_screen/model/order/order_request.dart';
 import 'package:scanner/screens/count_screen/model/product.dart';
 import 'package:scanner/screens/count_screen/resource/product_api_provider.dart';
 import 'package:scanner/screens/count_screen/widgets/amount_widget.dart';
 import 'package:scanner/screens/count_screen/widgets/product_adjusment_widget.dart';
 import 'package:scanner/util/color_const.dart';
+import 'package:scanner/util/extensions/text_style_ext.dart';
 import 'package:scanner/widgets/barcode_input.dart';
+import 'package:scanner/widgets/custom_button.dart';
 import 'package:tuple/tuple.dart';
 
 final routeObserver = RouteObserver<ModalRoute<void>>();
@@ -28,7 +33,7 @@ final formatCurrency = NumberFormat.simpleCurrency(
 class CountHomeScreen extends StatefulWidget {
   const CountHomeScreen({Key? key}) : super(key: key);
 
-  static const routeName = '/picklists';
+  static const routeName = '/countHome';
 
   @override
   CountHomeScreenState createState() => CountHomeScreenState();
@@ -38,23 +43,34 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
   LinkedHashMap<String, Tuple2<bool, Product?>> _products =
       LinkedHashMap<String, Tuple2<bool, Product?>>();
 
+  ProductApiProvider productApiProvider = ProductApiProvider();
+
   late HomeProvider _homeProvider;
   bool? isContinuousScan = false;
   bool? goodsReturn = false;
+  CountListModel? countListModel;
+  Future<List<CountListModel>?>? countListFuture;
 
   int get isReturnValue => (goodsReturn! ? -1 : 1);
+
+  FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    countListFuture = productApiProvider.getOrderCount();
+    countListFuture?.then((value) {
+      countListModel = value!.first;
+      setState(() {});
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
       _homeProvider = Provider.of<HomeProvider>(context, listen: false);
-      _homeProvider.getSavedSetting().then((value) {
-        isContinuousScan = value.isContinues;
-        goodsReturn = value.isReturn;
-      });
+      // _homeProvider.getSavedSetting().then((value) {
+      //   isContinuousScan = value.isContinues;
+      //   goodsReturn = value.isReturn;
+      // });
       final searchedProducts = await _homeProvider.fetchSearchedProducts();
       if (searchedProducts.isNotEmpty) {
         setState(() {
@@ -62,9 +78,13 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
             if (product.ean?.length == 13) {
               _products.putIfAbsent(
                   ("0${product.ean}"), () => Tuple2(false, product));
+              print("_products.keys");
+              print(_products.keys);
             } else {
               _products.putIfAbsent(
                   (product.ean ?? product.uid), () => Tuple2(false, product));
+              print("_products.keys 2");
+              print(_products.keys);
             }
           }
         });
@@ -103,15 +123,69 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Count"),
+          title: Text(AppLocalizations.of(context)!.count),
           backgroundColor: AppColors.white,
           centerTitle: true,
         ),
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
+              child: FutureBuilder<List<CountListModel>?>(
+                  future: countListFuture,
+                  builder:
+                      (context, AsyncSnapshot<List<CountListModel>?> snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(child: CircularProgressIndicator());
+                    } else {
+                      // Navigator.pop(context);
+                      return Padding(
+                        padding:
+                            const EdgeInsets.only(top: 16, left: 16, right: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                color: AppColors.primary.withOpacity(0.2),
+                              ),
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              child: DropdownButton<CountListModel>(
+                                  value: countListModel ?? snapshot.data?.first,
+                                  isExpanded: true,
+                                  underline: SizedBox(),
+                                  items: snapshot.data
+                                      ?.map(
+                                        (e) => DropdownMenuItem<CountListModel>(
+                                          child: Text(
+                                              "${e.reference} | ${e.plannedDate}"),
+                                          onTap: () {
+                                            countListModel = e;
+                                            setState(() {});
+                                            _focusNode.requestFocus();
+                                          },
+                                          value: e,
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {}),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                countListModel?.warehouse ?? "",
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    }
+                  }),
+            ),
+            SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+                padding: const EdgeInsets.only(top: 4, left: 20, right: 16),
                 child: Row(
                   children: [
                     Expanded(
@@ -123,6 +197,8 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
                         //     isReturn: goodsReturn!,
                         //   );
                         // },
+                        focusNodeArg: _focusNode,
+                        keyBoardType: TextInputType.text,
                         onBarCodeChanged: (String value) {},
                         onParse: (String value, __) {
                           _onSubmit(value);
@@ -148,6 +224,7 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
             SliverToBoxAdapter(
               child: Row(
                 children: [
+                  Gap(2),
                   Expanded(
                     child: CheckboxListTile(
                       value: isContinuousScan,
@@ -345,34 +422,55 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
         bottomNavigationBar: SafeArea(
           child: Container(
             padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: _products.isEmpty
-                  ? null
-                  : () async {
+            child: AppButton(
+              buttonColor: _products.isNotEmpty && countListModel != null
+                  ? AppColors.primary
+                  : AppColors.grey,
+              onPressed: _products.isNotEmpty && countListModel != null
+                  ? () async {
                       // await showOrderPopup(
                       //   context: context,
                       //   onSubmitOrder: _orderProduct,
                       // );
 
-                      await showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              content: CountWidget(
-                                  products: _products,
-                                  callBack: () async {
-                                    await _homeProvider.clearSearchedProducts();
+                      bool success = await showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  content: CountWidget(
+                                      countListModel: countListModel!,
+                                      products: _products,
+                                      callBack: () async {
+                                        await _homeProvider
+                                            .clearSearchedProducts();
 
-                                    setState(
-                                      () {
-                                        _products.clear();
-                                      },
-                                    );
-                                  }),
-                            );
-                          });
-                    },
-              child: const Text('Toevoegen aan telling', style: TextStyle(fontSize: 16)),
+                                        setState(
+                                          () {
+                                            _products.clear();
+                                          },
+                                        );
+                                      }),
+                                );
+                              }) ??
+                          false;
+                      if (!success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("Something went wrong")));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text(
+                                "Count stock mutation has been saved successfully")));
+                      }
+                    }
+                  : null,
+              child: Text('Toevoegen aan telling',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.semiBold
+                      .s16
+                      .white),
             ),
           ),
         ),
@@ -385,9 +483,10 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
     if (barcode.length == 13) {
       barcode = '0$barcode';
     }
+    final productsList = await _homeProvider.searchProducts(barcodeStr);
+    barcode = productsList.first.ean!;
     if (_products.containsKey(barcode)) {
-      final products = await _homeProvider.searchProducts(barcodeStr);
-      final product = products.first;
+      final product = productsList.first;
       if (goodsReturn!) {
         product.moq = (product.moq ?? 1) * -1;
       }
@@ -402,45 +501,59 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
           quantity: moq,
         );
         setState(() {
-          print("45445455");
+          print("barcode: $barcode");
           _products.update(barcode, (_) => Tuple2(false, currentProduct));
         });
       }
       return;
     } else {
       setState(() {
-        print("PUT IF ABSENT");
-        print("PUT IF ------");
-        print("PUT IF ABSENT");
         if (!_products.containsValue(barcode)) {
           LinkedHashMap<String, Tuple2<bool, Product?>> newProducts =
               LinkedHashMap<String, Tuple2<bool, Product?>>();
-          newProducts.addAll({barcode: const Tuple2(true, null)});
-          newProducts.addAll(_products as Map<String, Tuple2<bool, Product?>>);
+          newProducts
+              .addAll({productsList.first.ean!: const Tuple2(true, null)});
+          newProducts.addAll(_products);
           _products = newProducts;
           // _products.addAll({barcode: const Tuple2(true, null)});
         }
+        print("barcode2: $barcode");
+        print("_products: ${_products.keys}");
+        print("_products: ${_products.entries}");
       });
     }
 
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final list = await _homeProvider.searchProducts(barcodeStr);
+      // final list = await _homeProvider.searchProducts(barcodeStr);
       Product? product;
-      if (list.isEmpty) {
+      if (productsList.isEmpty) {
         if (!mounted) return;
         product = null;
         // final snackBar = SnackBar(content: Text(S.of(context).productNotFound));
         // messenger.showSnackBar(snackBar);
         throw "Product Not Found";
       } else {
-        product = list.first;
-        product = product?.copyWith(
-            stock: (list.first.moq ?? 1) * (goodsReturn! ? -1 : 1));
+        product = productsList.first;
+        product = product.copyWith(
+            stock: (productsList.first.moq ?? 1) * (goodsReturn! ? -1 : 1));
+        print("productsList.first.moq");
+        print(productsList.first.moq);
       }
       setState(() {
+        // if (!_products.containsValue(barcode)) {
+        //   LinkedHashMap<String, Tuple2<bool, Product?>> newProducts =
+        //       LinkedHashMap<String, Tuple2<bool, Product?>>();
+        //   newProducts.addAll({barcode: const Tuple2(true, null)});
+        //   // newProducts.addAll(_products);
+        //   _products = newProducts;
+        //   // _products.addAll({barcode: const Tuple2(true, null)});
+        // }
         print("()()()()()()(");
-        _products.update(barcode, (_) => Tuple2(false, product));
+        print(productsList.first.ean!);
+        print(_products.entries);
+        _products.update(
+            productsList.first.ean!, (_) => Tuple2(false, product));
       });
       final p = _products.values
           .where((e) => e.item2 != null)
@@ -495,10 +608,14 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
 }
 
 class CountWidget extends StatefulWidget {
-  const CountWidget({required this.products, required this.callBack});
+  const CountWidget(
+      {required this.products,
+      required this.callBack,
+      required this.countListModel});
 
   final Map<String, Tuple2<bool, Product?>> products;
   final VoidCallback callBack;
+  final CountListModel countListModel;
 
   @override
   State<CountWidget> createState() => _CountWidgetState();
@@ -506,9 +623,19 @@ class CountWidget extends StatefulWidget {
 
 class _CountWidgetState extends State<CountWidget> {
   ProductApiProvider productApiProvider = ProductApiProvider();
+  Future? future;
 
   @override
   void initState() {
+    future = productApiProvider.addOrderCount(
+        countId: widget.countListModel.id,
+        warehouseId: widget.countListModel.warehouseId,
+        itemList: widget.products.entries
+            .map((e) => {
+                  "amount": e.value.item2?.stock,
+                  "productId": e.value.item2?.id
+                })
+            .toList());
     super.initState();
   }
 
@@ -518,22 +645,13 @@ class _CountWidgetState extends State<CountWidget> {
       mainAxisSize: MainAxisSize.min,
       children: [
         FutureBuilder(
-            future: productApiProvider.addOrderCount(widget.products.entries
-                .map((e) => {
-                      "amount": e.value.item2?.stock,
-                      "productId": e.value.item2?.id
-                    })
-                .toList()),
+            future: future,
             builder: (context, snapshot) {
               if (snapshot.data == true) {
-                Navigator.pop(context);
+                Navigator.pop(context, true);
                 widget.callBack();
               } else if (snapshot.hasData && snapshot.data == false) {
-                Navigator.pop(context);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Something went wrong")));
-                }
+                Navigator.pop(context, false);
               }
               return const CircularProgressIndicator();
             }),

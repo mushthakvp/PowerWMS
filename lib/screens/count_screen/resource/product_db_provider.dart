@@ -77,10 +77,10 @@ class ProductDbProvider {
     });
   }
 
-  Future<Map> getSavedSetting() async {
-    var settings = await _generalSettings.record('settings').get(db) as Map;
-    return settings;
-  }
+  // Future<Map> getSavedSetting() async {
+    // var settings = await _generalSettings.record('settings').get(db) as Map;
+    // return settings;
+  // }
 
   Future<int> count() {
     return _store.count(db);
