@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:scanner/models/product_stock.dart';
+import 'package:scanner/models/count_product_stock/product_stock.dart';
 import 'package:scanner/screens/count_screen/model/order/order_request.dart';
 import 'package:scanner/screens/count_screen/model/order/order_response.dart';
 import 'package:scanner/screens/count_screen/model/product.dart';

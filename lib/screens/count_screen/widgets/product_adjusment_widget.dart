@@ -1,13 +1,16 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/l10n/app_localizations.dart';
-import 'package:scanner/models/product_stock.dart';
+import 'package:scanner/models/count_product_stock/product_stock.dart';
 import 'package:scanner/screens/count_screen/home_provider.dart';
 import 'package:scanner/screens/count_screen/model/product.dart';
 import 'package:scanner/util/color_const.dart';
+import 'package:scanner/util/extensions/text_style_ext.dart';
 
-typedef OnConfirmAmount = Function(num amount);
+typedef OnConfirmAmount = Function(
+    {num amount, int countDifferenceAmount, String warehouseLocation});
 
 Future<void> showProductAdjustmentPopup(
     {required BuildContext context,
@@ -46,6 +49,14 @@ class ProductAdjustmentWidget extends StatefulWidget {
 class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
   late HomeProvider _homeProvider;
 
+  String? selectedLocationCode;
+
+  void onLocationSelected(String locationCode) {
+    setState(() {
+      selectedLocationCode = locationCode;
+    });
+  }
+
   String get headerTitle {
     return widget.product.unit;
   }
@@ -60,18 +71,28 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
     setState(() {
       _productAmount = amount;
     });
-    if (kDebugMode) {
-      print("========== $amount");
-    }
   }
 
   Future<ProductStock?>? productStock;
+  Map<String, int> locationStockMap = {};
 
   getProductStock() async {
     productStock = _homeProvider.fetchProductStock(
       productCode: widget.product.uid,
       unitCode: widget.product.unit,
     );
+    ProductStock? fetchedProductStock = await productStock;
+    if (fetchedProductStock?.resultData?.isNotEmpty ?? false) {
+      fetchedProductStock?.resultData?.first.locationStock?.forEach((e) {
+        if (locationStockMap.containsKey(e.locationCode)) {
+          locationStockMap[e.locationCode!] =
+              (locationStockMap[e.locationCode] ?? 0) +
+                  e.physicalStock!.toInt();
+        } else {
+          locationStockMap[e.locationCode!] = e.physicalStock!.toInt();
+        }
+      });
+    }
   }
 
   @override
@@ -79,7 +100,7 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _homeProvider = Provider.of<HomeProvider>(context, listen: false);
-      setProductAmount(widget.product.moq?.toInt() ?? 1);
+      setProductAmount(widget.product.moq?.toInt() ?? productAmount);
       await getProductStock();
     });
   }
@@ -91,7 +112,6 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          /// Header
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -109,14 +129,22 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
                         fontSize: 26.0,
                         fontWeight: FontWeight.bold),
                   ),
-                  const CloseButton()
+                  CloseButton(
+                    onPressed: () {
+                      SystemChannels.textInput
+                          .invokeMethod<void>('TextInput.hide');
+                      Navigator.pop(context);
+                    },
+                  )
                 ],
               ),
               FutureBuilder<ProductStock?>(
                   future: productStock,
                   builder: (context, AsyncSnapshot<ProductStock?> snapshot) {
-                    print(snapshot.hasError);
-                    print(snapshot.error);
+                    TextStyle textStyle = const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w500);
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const SizedBox(
                           height: 20,
@@ -125,100 +153,215 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
                     }
                     if (snapshot.connectionState == ConnectionState.done &&
                         snapshot.hasData) {
-                      TextStyle textStyle = const TextStyle(
-                          color: Colors.black54,
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.w500);
+                      Map<String, int> locationStockMap = {};
+                      if (snapshot.data?.resultData?.isNotEmpty ?? false)
+                        snapshot.data?.resultData?.first.locationStock
+                            ?.forEach((e) {
+                          if (locationStockMap.containsKey(e.locationCode)) {
+                            locationStockMap[e.locationCode!] =
+                                (locationStockMap[e.locationCode] ?? 0) +
+                                    e.physicalStock!.toInt();
+                          } else {
+                            locationStockMap[e.locationCode!] =
+                                e.physicalStock!.toInt();
+                          }
+                        });
                       return Padding(
                         padding: const EdgeInsets.all(6.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Verkoopprijs:",
-                                    textAlign: TextAlign.start,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: textStyle,
-                                  ),
-                                  Text(
-                                    "Technische voorraad:",
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.start,
-                                    maxLines: 1,
-                                    style: textStyle,
-                                  ),
-                                  Text(
-                                    "Vrije voorraad:",
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.start,
-                                    maxLines: 1,
-                                    style: textStyle,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                            if (snapshot.data?.resultData?.isNotEmpty ?? false)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  "${snapshot.data?.price}",
-                                  textAlign: TextAlign.start,
-                                  maxLines: 1,
-                                  style: textStyle,
+                                Expanded(
+                                  child: Text(
+                                    "Locatie",
+                                    textAlign: TextAlign.start,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: textStyle.black,
+                                  ),
                                 ),
-                                Text(
-                                  "${snapshot.data?.resultData?.first.actualStock}",
-                                  textAlign: TextAlign.start,
-                                  maxLines: 1,
-                                  style: textStyle,
+                                Gap(12),
+                                Expanded(
+                                  child: Text(
+                                    " Partij",
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.start,
+                                    maxLines: 1,
+                                    style: textStyle.black,
+                                  ),
                                 ),
-                                Text(
-                                  "${snapshot.data?.resultData?.first.freeStock}",
-                                  textAlign: TextAlign.start,
-                                  maxLines: 1,
-                                  style: textStyle,
+                                Expanded(
+                                  child: Text(
+                                    "Aantal",
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.end,
+                                    maxLines: 1,
+                                    style: textStyle.black,
+                                  ),
                                 ),
                               ],
                             ),
+                            if (snapshot.data?.resultData?.isNotEmpty ?? false)
+                              ...?snapshot.data?.resultData!.first.locationStock
+                                  ?.map((e) => Card(
+                                        elevation: 2,
+                                        margin: EdgeInsets.only(top: 8),
+                                        child: InkWell(
+                                          onTap: () => onLocationSelected(
+                                              e.locationCode!),
+                                          child: Container(
+                                            color: selectedLocationCode ==
+                                                    e.locationCode
+                                                ? Colors.grey.withOpacity(0.3)
+                                                : Colors.transparent,
+                                            padding: const EdgeInsets.all(3),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    "${e.locationCode}",
+                                                    textAlign: TextAlign.start,
+                                                    maxLines: 1,
+                                                    style: textStyle.s15,
+                                                  ),
+                                                ),
+                                                Gap(12),
+                                                Expanded(
+                                                  child: Text(
+                                                    "${e.batchCode}",
+                                                    textAlign: TextAlign.start,
+                                                    maxLines: 1,
+                                                    style: textStyle.s15,
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Text(
+                                                    "${e.physicalStock?.toInt()}",
+                                                    textAlign: TextAlign.end,
+                                                    maxLines: 1,
+                                                    style: textStyle.s15,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ))
+                                  .toList(),
+                            if (snapshot.data?.resultData?.isNotEmpty ?? false)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info,
+                                      color: AppColors.grey,
+                                      size: 13,
+                                    ),
+                                    Gap(4),
+                                    Expanded(
+                                      child: Text(
+                                        "Tik op een locatie om het totaal te bekijken",
+                                        style: textStyle.black60.s12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (selectedLocationCode != null)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 12.0, right: 4),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        "${_productAmount!.toInt()} van ${locationStockMap[selectedLocationCode]} : ",
+                                        style: textStyle.black.s15,
+                                      ),
+                                    ),
+                                    Text(
+                                      "${(_productAmount?.toInt() ?? 0) - (locationStockMap[selectedLocationCode] ?? 0)}",
+                                      style: textStyle.s15,
+                                    ),
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
                       );
                     } else {
-                      return const Text(
-                        "Technische voorraad: Niet beschikbaar\nVrije voorraad: Niet beschikbaar",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.w500),
+                      return Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Locatie",
+                                textAlign: TextAlign.start,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textStyle,
+                              ),
+                              Text(
+                                "Partij",
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.start,
+                                maxLines: 1,
+                                style: textStyle,
+                              ),
+                              Text(
+                                "Aantal",
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.end,
+                                maxLines: 1,
+                                style: textStyle,
+                              ),
+                            ],
+                          ),
+                          Gap(16),
+                          Text(
+                            "Niet beschikbaar",
+                            style: textStyle,
+                          )
+                        ],
                       );
                     }
                   }),
             ],
           ),
           const SizedBox(height: 24),
-
-          /// Increase/Decrease product amount
           Amount(
             productAmount,
             (amount) {
               setProductAmount(amount);
             },
+            locationStockMap: locationStockMap,
+            // Pass locationStockMap to Amount widget
+            selectedLocationCode: selectedLocationCode,
+            // Pass selectedLocationCode to Amount widget
             moq: widget.product.moq?.toInt() ?? 1,
             autofocus: true,
             onCompleteEditing: (num amount) {
-              widget.onConfirmAmount(amount);
+              widget.onConfirmAmount(
+                amount: amount,
+                warehouseLocation: selectedLocationCode ?? "",
+                countDifferenceAmount: ((_productAmount?.toInt() ?? 0) -
+                        (locationStockMap[selectedLocationCode] ?? 0))
+                    .toInt(),
+              );
               Navigator.pop(context);
             },
           ),
           const SizedBox(height: 24),
-
-          /// Confirm button
           SizedBox(
             height: 49,
             width: double.maxFinite,
@@ -230,7 +373,13 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
                 ),
               ),
               onPressed: () {
-                widget.onConfirmAmount(_productAmount!);
+                widget.onConfirmAmount(
+                    amount: _productAmount!,
+                    warehouseLocation: selectedLocationCode ?? "",
+                    countDifferenceAmount: ((_productAmount?.toInt() ?? 0) -
+                        (locationStockMap[selectedLocationCode] ?? 0))
+                        .toInt());
+                SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
                 Navigator.pop(context);
                 FocusScope.of(context).unfocus();
               },
@@ -243,18 +392,24 @@ class _ProductAdjustmentWidgetState extends State<ProductAdjustmentWidget> {
 }
 
 class Amount extends StatefulWidget {
-  const Amount(this._productAmount, this._onChange,
-      {required this.autofocus,
-      required this.onCompleteEditing,
-      Key? key,
-      required this.moq})
-      : super(key: key);
+  const Amount(
+    this._productAmount,
+    this._onChange, {
+    required this.autofocus,
+    required this.onCompleteEditing,
+    Key? key,
+    required this.moq,
+    required this.locationStockMap,
+    required this.selectedLocationCode,
+  }) : super(key: key);
 
   final num _productAmount;
   final num moq;
   final void Function(num value) _onChange;
   final void Function(num value) onCompleteEditing;
   final bool? autofocus;
+  final Map<String, int> locationStockMap;
+  final String? selectedLocationCode;
 
   @override
   AmountState createState() => AmountState();
@@ -298,6 +453,9 @@ class AmountState extends State<Amount> {
 
   @override
   Widget build(BuildContext context) {
+    // Access locationStockMap and selectedLocationCode using widget.locationStockMap and widget.selectedLocationCode
+    // Add your logic based on the available data
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -324,7 +482,7 @@ class AmountState extends State<Amount> {
             ),
             onChanged: (String txt) {
               if (txt != '') {
-                productAmount = int.tryParse(txt) ?? 1;
+                productAmount = int.tryParse(txt) ?? 22;
               } else {
                 productAmount = 0;
               }

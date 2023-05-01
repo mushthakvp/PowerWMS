@@ -29,6 +29,8 @@ class Product {
     required this.moq,
     required this.extra1,
     required this.generalSalePriceIncluding,
+    required this.warehouseLocation, // Add this line
+    required this.countDifferenceAmount, // Add this line
   });
 
   final String uid;
@@ -49,6 +51,8 @@ class Product {
   num? moq;
   final String? extra1;
   final num? generalSalePriceIncluding;
+  String? warehouseLocation; // Add this line
+  int? countDifferenceAmount; // Add this line
 
   Product copyWith({
     String? name,
@@ -66,6 +70,8 @@ class Product {
     num? moq,
     String? extra1,
     num? generalSalePriceIncluding,
+    String? warehouseLocation, // Add this line
+    int? countDifferenceAmount, // Add this line
   }) {
     return Product(
       uid: uid,
@@ -90,6 +96,10 @@ class Product {
       extra1: extra1 ?? this.extra1,
       generalSalePriceIncluding:
           generalSalePriceIncluding ?? this.generalSalePriceIncluding,
+      warehouseLocation: warehouseLocation ?? this.warehouseLocation,
+      // Add this line
+      countDifferenceAmount:
+          countDifferenceAmount ?? this.countDifferenceAmount, // Add this line
     );
   }
 

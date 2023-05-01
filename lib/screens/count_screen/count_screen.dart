@@ -151,24 +151,26 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
                               ),
                               padding: EdgeInsets.symmetric(horizontal: 16),
                               child: DropdownButton<CountListModel>(
-                                  value: countListModel ?? snapshot.data?.first,
-                                  isExpanded: true,
-                                  underline: SizedBox(),
-                                  items: snapshot.data
-                                      ?.map(
-                                        (e) => DropdownMenuItem<CountListModel>(
-                                          child: Text(
-                                              "${e.reference} | ${e.plannedDate}"),
-                                          onTap: () {
-                                            countListModel = e;
-                                            setState(() {});
-                                            _focusNode.requestFocus();
-                                          },
-                                          value: e,
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (value) {}),
+                                value: countListModel ?? snapshot.data?.first,
+                                isExpanded: true,
+                                underline: SizedBox(),
+                                items: snapshot.data
+                                    ?.map(
+                                      (e) => DropdownMenuItem<CountListModel>(
+                                        child: Text(
+                                            "${e.reference} | ${e.plannedDate}"),
+                                        onTap: () {
+                                          countListModel = e;
+                                          setState(() {});
+                                        },
+                                        value: e,
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) {
+                                  _focusNode.requestFocus();
+                                },
+                              ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -322,18 +324,25 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
                         await showProductAdjustmentPopup(
                             context: context,
                             product: product,
-                            onConfirmAmount: (num amount) async {
+                            onConfirmAmount: (
+                                {num? amount,
+                                int? countDifferenceAmount,
+                                String? warehouseLocation}) async {
                               product.stock = amount;
+                              product.countDifferenceAmount =
+                                  countDifferenceAmount;
+                              product.warehouseLocation = warehouseLocation ?? "";
                               await _homeProvider.updateProductMoq(
                                 id: product.id,
                                 moq: product.moq ?? 1,
-                                quantity: amount,
+                                quantity: amount!,
                               );
                               setState(() {
                                 _products.update(
                                     ean, (_) => Tuple2(false, product));
                               });
                             });
+                        _focusNode.requestFocus();
                       },
                       title: Container(
                         margin: const EdgeInsets.only(top: 8),
@@ -443,7 +452,6 @@ class CountHomeScreenState extends State<CountHomeScreen> with RouteAware {
                                       callBack: () async {
                                         await _homeProvider
                                             .clearSearchedProducts();
-
                                         setState(
                                           () {
                                             _products.clear();
@@ -633,7 +641,9 @@ class _CountWidgetState extends State<CountWidget> {
         itemList: widget.products.entries
             .map((e) => {
                   "amount": e.value.item2?.stock,
-                  "productId": e.value.item2?.id
+                  "productId": e.value.item2?.id,
+                  "warehouseLocation": e.value.item2?.warehouseLocation,
+                  "countDifferenceAmount": e.value.item2?.countDifferenceAmount,
                 })
             .toList());
     super.initState();

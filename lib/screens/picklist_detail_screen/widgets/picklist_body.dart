@@ -208,12 +208,13 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
           // Sort on priority
           if (settings.picklistSort == PicklistSortType.warehouseLocation) {
             print("Before Sort");
-            log(lines.map((e) => e.lineLocationCode).toList().toString());
-            lines.sort((a, b) => (int.tryParse(a.lineLocationCode ?? "0") ?? 0)
-                .compareTo(int.tryParse(b.lineLocationCode ?? "0") ?? 0));
+            log(lines.map((e) => e.lineLocationCode ?? e.location).toList().toString());
+            lines.sort((a, b) => (int.tryParse((a.lineLocationCode ?? a.location) ?? "0") ?? 0)
+                .compareTo(int.tryParse((b.lineLocationCode ?? b.location) ?? "0") ?? 0));
             print("After Sort");
-            log(lines.map((e) => e.lineLocationCode).toList().toString());
+            // log(lines.map((e) => e.lineLocationCode).toList().toString());
           } else {
+            print("No warehouse location");
             lines.sort((a, b) => a.priority.compareTo(b.priority));
           }
 
@@ -394,7 +395,7 @@ extension PicklistLineColor on PicklistLine {
 
     // case 2: pickAmount = the amount of process product
     List<StockMutationItem> idleList = _getIdleAmount(prefs, this);
-    print("*****Picklist body 390 line*****");
+    print("*****Picklist body 397 line*****");
     print(idleList.length);
     if (idleList.length > 0) {
       context

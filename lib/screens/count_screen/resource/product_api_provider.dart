@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/models/count_product_stock/product_stock.dart';
 import 'package:scanner/models/product_price_model.dart';
-import 'package:scanner/models/product_stock.dart';
 import 'package:scanner/screens/count_screen/model/CountListModel.dart';
 import 'package:scanner/screens/count_screen/model/product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,10 +34,11 @@ class ProductApiProvider {
         .toList());
   }
 
-  Future<bool> addOrderCount(
-      {required int warehouseId,
-      required int countId,
-      required List<Map> itemList}) async {
+  Future<bool> addOrderCount({
+    required int warehouseId,
+    required int countId,
+    required List<Map> itemList,
+  }) async {
     return await dio.post<Map<String, dynamic>>(
       '/countstockmutation/count/add',
       data: {
@@ -94,37 +95,34 @@ class ProductApiProvider {
     });
   }
 
-  Future<ProductStock> fetchProductStock(
+  Future<ProductStock?> fetchProductStock(
       {required String productCode, unitCode}) async {
-    if (kDebugMode) {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      print('HTTP Headers: ${dio.options.baseUrl}');
-      print('Auth Token: ${prefs.getString('token')}');
-    }
-
-    erpDio.options.extra = {"isLoading": false};
-    final response = await erpDio.post(
-      '/requestProductStock',
-      data: {
-        "limit": 10,
-        "offset": 0,
-        "onlyActiveProducts": true,
-        "productIdentifiers": [
-          {
-            "productIdentifier": {"productCode": productCode},
-            "unitCode": unitCode
-          }
-        ]
-      },
-    );
-    if (response.statusCode == 200) {
-      print(json.encode(response.data));
-      print(response.statusMessage);
-      print(response.statusCode);
-      return compute(parseProductStock, response.data! as Map<String, dynamic>);
-    } else {
+    try {
+      erpDio.options.extra = {"isLoading": false};
+      final response = await erpDio.post(
+        '/requestProductPhysicalStock',
+        data: {
+          "productIdentifiers": [
+            {
+              "productIdentifier": {"productCode": productCode},
+              "unitCode": unitCode
+            }
+          ],
+          "warehouseGroup": "LWD",
+          "propertiesToInclude": "*"
+        },
+      );
+      if (response.statusCode == 200) {
+        print(json.encode(response.data));
+        print(response.statusMessage);
+        print(response.statusCode);
+        return compute(
+            parseProductStock, response.data! as Map<String, dynamic>);
+      } else {
+        print("sdfkv");
+      }
+    } catch (e) {
       print("sdfkv");
-      return ProductStock();
     }
   }
 
@@ -137,7 +135,7 @@ class ProductApiProvider {
     }
     erpDio.options.extra = {"isLoading": false};
     final response = await erpDio.get(
-      '/productSalesPrices',
+      '/requestProductPhysicalStock',
       queryParameters: {
         "filter":
             "ProductCode EQ \"$productCode\" and showExpired EQ no and UnitCode EQ \"$unitCode\""

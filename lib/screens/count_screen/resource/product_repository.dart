@@ -1,8 +1,6 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:scanner/dio.dart';
-import 'package:scanner/models/product_price_model.dart';
-import 'package:scanner/models/product_stock.dart';
+import 'package:scanner/models/count_product_stock/product_stock.dart';
 import 'package:scanner/screens/count_screen/model/order/order_request.dart';
 import 'package:scanner/screens/count_screen/model/order/order_response.dart';
 import 'package:scanner/screens/count_screen/model/product.dart';
@@ -41,20 +39,17 @@ class ProductRepository {
     return await _dbProvider.getSearchedProducts();
   }
 
-  Future<ProductStock> fetchProductStock(
+  Future<ProductStock?> fetchProductStock(
       {required String productCode, unitCode}) async {
-    if (kDebugMode) {
-      print('====== Fetch searched products from Local');
-    }
-    ProductPriceModel priceModel = await _apiProvider.fetchProductPrice(
-        productCode: productCode, unitCode: unitCode);
+    // ProductPriceModel priceModel = await _apiProvider.fetchProductPrice(
+    //     productCode: productCode, unitCode: unitCode);
 
-    print("dfvd");
-    print(priceModel.price);
+    // print("dfvd");
+    // print(priceModel.price);
 
-    ProductStock productStock = await _apiProvider.fetchProductStock(
+    ProductStock? productStock = await _apiProvider.fetchProductStock(
         productCode: productCode, unitCode: unitCode);
-    return productStock.copyWith(priceValue: priceModel.price?.toDouble());
+    return productStock;
   }
 
   Future<void> saveSearchedProducts(List<Product> products) async {
@@ -70,8 +65,8 @@ class ProductRepository {
   }
 
   // Future<SettingsModel> getSavedSetting() async {
-    // final response = await _dbProvider.getSavedSetting();
-    // return SettingsModel.fromJson(response);
+  // final response = await _dbProvider.getSavedSetting();
+  // return SettingsModel.fromJson(response);
   // }
 
   Future<void> clearSearchedProducts() async {
