@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -162,18 +161,17 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
             lines[index].priority =
                 line.getPriority(context, prefs, this.isCurrentWarehouse(line));
           });
-          if (lines
-              .where(
-                  (element) => element.priority == 0 || element.priority == 1)
+
+          if (lines.where((element) => element.priority == 0 || element.priority == 1)
               .toList()
               .isEmpty) {
             widget.delegate.onUpdateStatus(PicklistStatus.picked);
             if (lines.isNotEmpty) {
               context.read<PicklistRepository>().updatePicklistStatus(
-                    lines.first.picklistId,
-                    PicklistStatus.picked,
-                    false,
-                  );
+                lines.first.picklistId,
+                PicklistStatus.picked,
+                false,
+              );
             }
           } else {
             widget.delegate.onUpdateStatus(PicklistStatus.added);
@@ -183,14 +181,17 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                   lines.first.picklistId, PicklistStatus.added, true);
             }
           }
+
+          // Sort on priority
+          lines.sort((a, b) => a.priority.compareTo(b.priority));
+
+          // Sorting based on settings.picklistSort
           switch (settings.picklistSort) {
             case PicklistSortType.warehouseLocation:
               lines.sort((a, b) {
                 var aLocation = a.lineLocationCode ?? a.location ?? '';
                 var bLocation = b.lineLocationCode ?? b.location ?? '';
-                print('====== $aLocation ======= $bLocation');
                 var compare = aLocation.compareTo(bLocation);
-                // In case warehouse location is similar
                 if (compare == 0) {
                   return a.product.uid.compareTo(b.product.uid);
                 }
@@ -204,18 +205,6 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
               lines.sort((a, b) => (a.product.description ?? '')
                   .compareTo(b.product.description ?? ''));
               break;
-          }
-          // Sort on priority
-          if (settings.picklistSort == PicklistSortType.warehouseLocation) {
-            print("Before Sort");
-            log(lines.map((e) => e.lineLocationCode ?? e.location).toList().toString());
-            lines.sort((a, b) => (int.tryParse((a.lineLocationCode ?? a.location) ?? "0") ?? 0)
-                .compareTo(int.tryParse((b.lineLocationCode ?? b.location) ?? "0") ?? 0));
-            print("After Sort");
-            // log(lines.map((e) => e.lineLocationCode).toList().toString());
-          } else {
-            print("No warehouse location");
-            lines.sort((a, b) => a.priority.compareTo(b.priority));
           }
 
           Widget getWidget(bool isFinishAtBottom) {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-import 'package:scanner/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/log.dart';
 import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
@@ -65,8 +64,11 @@ class _PicklistProductScreenState extends State<PicklistProductScreen> {
             return CustomScrollView(
               slivers: <Widget>[
                 LineInfo(newLine),
-                ProductView(newLine, snapshot.data ?? [],
-                    totalStock: widget.totalStock),
+                ProductView(
+                  newLine,
+                  snapshot.data ?? [],
+                  totalStock: widget.totalStock,
+                ),
                 ReservedList(newLine, snapshot.data ?? [], (PicklistLine line) {
                   setState(() {
                     newLine = line;
