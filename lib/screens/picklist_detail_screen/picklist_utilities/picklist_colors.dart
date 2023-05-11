@@ -5,8 +5,8 @@ const white = Colors.white;
 final black = Colors.grey[900];
 
 const List<Color?> picklistColors = [
-  null,
+  Colors.transparent,
   Colors.grey,
   Colors.yellow,
-  Color(0xFF034784)
+  blue
 ];

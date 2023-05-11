@@ -49,7 +49,7 @@ class _PicklistProductScreenState extends State<PicklistProductScreen> {
       body: StreamBuilder<List<CancelledStockMutationItem>>(
         stream: context
             .read<StockMutationItemRepository>()
-            .getCancelledStockMutationItemsStream(newLine.product.id),
+            .getCancelledStockMutationItemsStream(newLine.product!.id),
         builder: (_, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());

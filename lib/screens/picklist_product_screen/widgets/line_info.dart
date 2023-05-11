@@ -30,7 +30,7 @@ class _ProductDescriptionState extends State<LineInfo> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Gap(6),
-              Text(line.product.description ?? '-'),
+              Text(line.product?.description ?? '-'),
               if (line.descriptionB?.isNotEmpty ?? false) ...[
                 Gap(4),
                 Text(

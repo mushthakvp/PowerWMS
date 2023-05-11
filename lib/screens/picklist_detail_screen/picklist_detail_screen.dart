@@ -31,15 +31,19 @@ class _PicklistScreenState extends State<PicklistScreen>
   late CompleteStockMutationProvider completeStockMutationProvider;
   SharedPreferences? prefs;
 
+  Picklist get _picklist => widget._picklist;
+
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      completeStockMutationProvider =
-          Provider.of<CompleteStockMutationProvider>(context, listen: false);
-      completeStockMutationProvider.status = widget._picklist.status;
-      prefs = await SharedPreferences.getInstance();
-    });
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initStateAsync());
+  }
+
+  Future _initStateAsync() async {
+    completeStockMutationProvider =
+        Provider.of<CompleteStockMutationProvider>(context, listen: false);
+    completeStockMutationProvider.status = _picklist.status;
+    prefs = await SharedPreferences.getInstance();
   }
 
   @override
@@ -65,119 +69,110 @@ class _PicklistScreenState extends State<PicklistScreen>
         ),
       ),
       body: PicklistView(widget._picklist, this),
-      bottomNavigationBar: Consumer<CompleteStockMutationProvider>(
-        builder: (context, provider, _) {
-          return provider.status == PicklistStatus.picked &&
-                  widget._picklist.lines != 0
-              ? PicklistFooter(widget._picklist, (isProcessSuccess, message,
-                  picklist, stocksNeedToProcess) async {
-                  if (isProcessSuccess) {
-                    if (InternetState.shared.connectivityAvailable()) {
-                      Future.delayed(const Duration(), () async {
-                        bool isBackorderRemain(StockMutation line) {
-                          final bKey =
-                              '${line.lineId}_${line.items.first.productId}_backorder';
-                          int? bAmount = prefs?.getInt(bKey);
-                          return bAmount != null;
-                        }
-
-                        bool isCancelledRemain(StockMutation line) {
-                          final cKey =
-                              '${line.lineId}_${line.items.first.productId}';
-                          int? cAmount = prefs?.getInt(cKey);
-                          return cAmount != null;
-                        }
-
-                        Future<void> processCancelBackorder(
-                            StockMutation item) async {
-                          if (isBackorderRemain(item)) {
-                            await context
-                                .read<StockMutationRepository>()
-                                .doBackorderRemain(item);
-                          }
-                          if (isCancelledRemain(item)) {
-                            await context
-                                .read<StockMutationRepository>()
-                                .doCancelledRemain(item);
-                          }
-                        }
-
-                        if (stocksNeedToProcess.isNotEmpty) {
-                          await Future.forEach(
-                              stocksNeedToProcess, processCancelBackorder);
-                          await context
-                              .read<PicklistRepository>()
-                              .updatePicklistStatus(
-                                  stocksNeedToProcess.first.picklistId,
-                                  PicklistStatus.completed,
-                                  false);
-                        }
-                        await showDialog(
-                          context: context,
-                          builder: (ctx) => successAlert(ctx,
-                              msg: message,
-                              countryCode: picklist.countryCode,
-                              internalMemo: picklist.internalMemo,
-                              picklistNumber: picklist.uid, onPop: () async {
-                            await Future.delayed(
-                                const Duration(milliseconds: 100), () async {
-                              Navigator.of(ctx).pop();
-                            });
-                          }),
-                        );
-                      });
-                    } else {
-                      await showDialog(
-                        context: context,
-                        builder: (ctx) => successAlert(ctx,
-                            msg: message,
-                            countryCode: picklist.countryCode,
-                            internalMemo: picklist.internalMemo,
-                            picklistNumber: picklist.uid, onPop: () async {
-                          await Future.delayed(
-                              const Duration(milliseconds: 100), () async {
-                            Navigator.of(ctx).pop();
-                          });
-                        }),
-                      );
-                    }
-                  } else {
-                    Future.delayed(const Duration(milliseconds: 300), () async {
-                      await showDialog(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                                title: Text('An Error Occurred!'),
-                                content: Text(message),
-                                actions: <Widget>[
-                                  TextButton(
-                                    child: Text(AppLocalizations.of(context)!
-                                        .ok
-                                        .toUpperCase()),
-                                    onPressed: () {
-                                      Future.delayed(
-                                          const Duration(milliseconds: 100),
-                                          () {
-                                        Navigator.of(ctx).pop();
-                                      });
-                                    },
-                                  )
-                                ],
-                              ));
-                    });
-                  }
-                  // Clear cache
-                  Future<void> clearCache(int lineId) async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.remove('$lineId');
-                  }
-
-                  await Future.forEach(
-                      stocksNeedToProcess.map((e) => e.lineId).toList(),
-                      clearCache);
-                })
-              : SizedBox(height: 1);
-        },
-      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return Consumer<CompleteStockMutationProvider>(
+      builder: (context, provider, _) {
+        if (provider.status == PicklistStatus.picked && _picklist.lines != 0) {
+          return _buildPicklistFooter(provider);
+        } else {
+          return SizedBox();
+        }
+      },
+    );
+  }
+
+  Widget _buildPicklistFooter(CompleteStockMutationProvider provider) {
+    return PicklistFooter(_picklist,
+        (isProcessSuccess, message, picklist, stocksNeedToProcess) async {
+      if (isProcessSuccess) {
+        await _processSuccess(message, picklist, stocksNeedToProcess);
+      } else {
+        _showErrorDialog(message);
+      }
+      await _clearCache(stocksNeedToProcess.map((e) => e.lineId).toList());
+    });
+  }
+
+  Future<void> _processSuccess(String message, Picklist picklist,
+      List<StockMutation> stocksNeedToProcess) async {
+    if (InternetState.shared.connectivityAvailable()) {
+      await _processStocks(stocksNeedToProcess);
+    }
+    await _showSuccessDialog(message, picklist);
+  }
+
+  Future<void> _processStocks(List<StockMutation> stocksNeedToProcess) async {
+    await Future.forEach(stocksNeedToProcess, (StockMutation item) async {
+      if (_isBackorderRemain(item) || _isCancelledRemain(item)) {
+        await context.read<StockMutationRepository>().doBackorderRemain(item);
+      }
+    });
+    if (stocksNeedToProcess.isNotEmpty) {
+      await context.read<PicklistRepository>().updatePicklistStatus(
+            stocksNeedToProcess.first.picklistId,
+            PicklistStatus.completed,
+            false,
+          );
+    }
+  }
+
+  Future<void> _showSuccessDialog(String message, Picklist picklist) async {
+    await showDialog(
+      context: context,
+      builder: (ctx) => successAlert(ctx,
+          msg: message,
+          countryCode: picklist.countryCode,
+          internalMemo: picklist.internalMemo,
+          picklistNumber: picklist.uid, onPop: () async {
+        await Future.delayed(const Duration(milliseconds: 100), () async {
+          Navigator.of(ctx).pop();
+        });
+      }),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    Future.delayed(const Duration(milliseconds: 300), () async {
+      await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('An Error Occurred!'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.ok.toUpperCase()),
+              onPressed: () {
+                Future.delayed(const Duration(milliseconds: 100), () {
+                  Navigator.of(ctx).pop();
+                });
+              },
+            )
+          ],
+        ),
+      );
+    });
+  }
+
+  Future<void> _clearCache(List<int> lineIds) async {
+    await Future.forEach(lineIds, (id) async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('$id');
+    });
+  }
+
+  bool _isBackorderRemain(StockMutation line) {
+    final bKey = '${line.lineId}_${line.items.first.productId}_backorder';
+    int? bAmount = prefs?.getInt(bKey);
+    return bAmount != null;
+  }
+
+  bool _isCancelledRemain(StockMutation line) {
+    final cKey = '${line.lineId}_${line.items.first.productId}';
+    int? cAmount = prefs?.getInt(cKey);
+    return cAmount != null;
   }
 }
