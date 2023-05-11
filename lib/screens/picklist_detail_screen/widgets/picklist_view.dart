@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scanner/dio.dart';
+import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/resources/picklist_line_repository.dart';
+import 'package:scanner/screens/picklist_detail_screen/picklist_utilities/picklist_services.dart';
 import 'package:scanner/screens/picklist_detail_screen/widgets/picklist_body.dart';
 import 'package:scanner/screens/picklist_detail_screen/widgets/picklist_header.dart';
-import 'package:scanner/l10n/app_localizations.dart';
+import 'package:scanner/widgets/error_widget.dart';
 
 class PicklistView extends StatefulWidget {
-  const PicklistView(this.picklist, this.delegate, {Key? key}) : super(key: key);
+  const PicklistView(this.picklist, this.delegate, {Key? key})
+      : super(key: key);
 
   final Picklist picklist;
   final PicklistStatusDelegate delegate;
@@ -19,7 +22,8 @@ class PicklistView extends StatefulWidget {
   _PicklistViewState createState() => _PicklistViewState();
 }
 
-class _PicklistViewState extends State<PicklistView> with PicklistStatusDelegate {
+class _PicklistViewState extends State<PicklistView>
+    with PicklistStatusDelegate {
   final _refreshController = RefreshController(initialRefresh: false);
 
   @override
@@ -41,9 +45,11 @@ class _PicklistViewState extends State<PicklistView> with PicklistStatusDelegate
         }
         if (snapshot.hasError) {
           if (snapshot.error is NoConnection) {
-            return errorWidget(mgs: AppLocalizations.of(context)!.load_picklist_error);
+            return CustomErrorWidget(
+                message: AppLocalizations.of(context)!.load_picklist_error);
           } else if (snapshot.error is Failure) {
-            return errorWidget(mgs: (snapshot.error as Failure).message);
+            return CustomErrorWidget(
+                message: (snapshot.error as Failure).message);
           } else {
             return Container(
               child: Text('Something is wrong.'),
@@ -72,13 +78,6 @@ class _PicklistViewState extends State<PicklistView> with PicklistStatusDelegate
           child: Text('Something is wrong.'),
         );
       },
-    );
-  }
-
-  Widget errorWidget({required String mgs}) {
-    return Container(
-      margin: EdgeInsets.all(16),
-      child: Text(mgs),
     );
   }
 }

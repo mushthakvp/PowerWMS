@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -8,49 +8,16 @@ import 'package:scanner/main.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
-import 'package:scanner/models/stock_mutation.dart';
-import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
 import 'package:scanner/resources/picklist_repository.dart';
+import 'package:scanner/screens/picklist_detail_screen/picklist_utilities/picklist_color_extension.dart';
+import 'package:scanner/screens/picklist_detail_screen/picklist_utilities/picklist_colors.dart';
+import 'package:scanner/screens/picklist_detail_screen/picklist_utilities/picklist_services.dart';
 import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-filter(String search) => (PicklistLine line) =>
-    search == '' || line.product.ean == search || line.product.uid == search;
-
-List<PicklistLine> scanFilter(String search, List<PicklistLine> line) {
-  List<PicklistLine> result = [];
-  if (search.length == 13) {
-    final request = '0$search';
-    result = line
-        .where((l) => l.product.ean == request || l.product.uid == request)
-        .toList();
-  }
-  if (result.isEmpty) {
-    result = line
-        .where((l) => l.product.ean == search || l.product.uid == search)
-        .toList();
-  }
-  return result;
-}
-
-const blue = Color(0xFF034784);
-const white = Colors.white;
-final black = Colors.grey[900];
-
-const List<Color?> picklistColors = [
-  null,
-  Colors.grey,
-  Colors.yellow,
-  Color(0xFF034784)
-];
-
-mixin PicklistStatusDelegate {
-  onUpdateStatus(PicklistStatus status);
-}
 
 class PicklistBody extends StatefulWidget {
   const PicklistBody(this.lines, this.delegate, {Key? key}) : super(key: key);
@@ -78,7 +45,6 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Subscribe routeAware
     navigationObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
@@ -162,16 +128,18 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                 line.getPriority(context, prefs, this.isCurrentWarehouse(line));
           });
 
-          if (lines.where((element) => element.priority == 0 || element.priority == 1)
+          if (lines
+              .where(
+                  (element) => element.priority == 0 || element.priority == 1)
               .toList()
               .isEmpty) {
             widget.delegate.onUpdateStatus(PicklistStatus.picked);
             if (lines.isNotEmpty) {
               context.read<PicklistRepository>().updatePicklistStatus(
-                lines.first.picklistId,
-                PicklistStatus.picked,
-                false,
-              );
+                    lines.first.picklistId,
+                    PicklistStatus.picked,
+                    false,
+                  );
             }
           } else {
             widget.delegate.onUpdateStatus(PicklistStatus.added);
@@ -219,6 +187,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
               if (prefs == null) {
                 return Container();
               } else {
+                log(line.toJson().toString());
                 return Column(
                   children: [
                     InkWell(
@@ -235,7 +204,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                         await _moveToProduct(line, totalStock: totalStock);
                       },
                       child: Container(
-                          height: 80,
+                          height: 100,
                           padding: EdgeInsets.symmetric(horizontal: 16),
                           key: UniqueKey(),
                           color:
@@ -243,55 +212,98 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              ProductImage(
-                                line.product.id,
-                                width: 60,
-                              ),
-                              Gap(16),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    if (line.lineLocationCode?.isNotEmpty ??
-                                        line.location?.isNotEmpty ??
-                                        false)
-                                      Text(
-                                        line.lineLocationCode ??
-                                            line.location ??
-                                            '',
-                                        style: TextStyle(
-                                          fontSize: 16.5,
-                                          fontWeight: FontWeight.w600,
-                                          color: fullyPicked ? white : black,
-                                        ),
-                                      ),
-                                    Text(
-                                      line.product.uid,
+                                  child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    child: Text(
+                                      line.lineLocationCode ??
+                                          line.location ??
+                                          '',
                                       style: TextStyle(
                                         fontSize: 16.5,
                                         fontWeight: FontWeight.w600,
-                                        color: fullyPicked ? white : black,
+                                        color: white,
                                       ),
                                     ),
-                                    if (line.product.description != null)
+                                  ),
+                                  Text(
+                                    '${line.pickAmount} (${line.product.unit})',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: fullyPicked ? white : black,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${line.pickedAmount}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: fullyPicked ? white : black,
+                                    ),
+                                  ),
+                                ],
+                              )),
+                              Expanded(
+                                flex: 3,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
                                       Text(
-                                        line.product.description!,
+                                        line.product.description ?? "",
                                         style: TextStyle(
                                           fontSize: 13,
                                           color: fullyPicked ? white : black,
                                         ),
+                                        maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
-                                    Text(
-                                      '${line.pickAmount} (${line.product.unit})',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: fullyPicked ? white : black,
+                                      Text(
+                                        line.product.uid,
+                                        style: TextStyle(
+                                          fontSize: 16.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: fullyPicked ? white : black,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      Text(
+                                        line.product.ean ?? "-",
+                                        style: TextStyle(
+                                          fontSize: 16.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: fullyPicked ? white : black,
+                                        ),
+                                      ),
+                                      Text(
+                                        line.product.batchField?.toString() ??
+                                            "-",
+                                        style: TextStyle(
+                                          fontSize: 16.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: fullyPicked ? white : black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                              ),
+                              Gap(16),
+                              ProductImage(
+                                line.product.id,
+                                width: 60,
                               ),
                               Icon(
                                 Icons.chevron_right,
@@ -299,6 +311,68 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                               ),
                             ],
                           )),
+                    ),
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      color: blue,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                line.pickedAmount.toString(),
+                                style: TextStyle(
+                                  fontSize: 16.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: white,
+                                ),
+                              ),
+                              Text(
+                                " (STK)",
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            "|",
+                            style: TextStyle(
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.bold,
+                              color: white,
+                            ),
+                          ),
+                          Text(
+                            line.product.batchField.toString(),
+                            style: TextStyle(
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.bold,
+                              color: white,
+                            ),
+                          ),
+                          Text(
+                            "|",
+                            style: TextStyle(
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.bold,
+                              color: white,
+                            ),
+                          ),
+                          Text(
+                            line.product.id.toString(),
+                            style: TextStyle(
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.bold,
+                              color: white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     Divider(
                       height: 0,
@@ -326,6 +400,7 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
                         EdgeInsets.only(left: 16, top: 8, right: 16, bottom: 8),
                     alignment: Alignment.centerLeft,
                   ),
+                Divider(),
                 ...children
               ],
             );
@@ -343,97 +418,5 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
         }),
       ],
     );
-  }
-}
-
-extension PicklistLineColor on PicklistLine {
-  List<StockMutationItem> _getIdleAmount(
-      SharedPreferences? prefs, PicklistLine line) {
-    final json = prefs?.getString('${line.id}');
-    if (json != null) {
-      final res = (jsonDecode(json) as List<dynamic>)
-          .map((json) => StockMutationItem.fromJson(json))
-          .toList();
-      return res;
-    } else {
-      return [];
-    }
-  }
-
-  int? getBackorderCancelProductAmount(
-      SharedPreferences? prefs, PicklistLine line) {
-    final cKey = '${line.id}_${line.product.id}';
-    int? cAmount = prefs?.getInt(cKey);
-    final bKey = '${line.id}_${line.product.id}_backorder';
-    int? bAmount = prefs?.getInt(bKey);
-    return cAmount ?? bAmount;
-  }
-
-  // 0 - none background
-  // 1 - grey
-  // 2 - yellow
-  // 3 - blue
-  int getPriority(
-    BuildContext context,
-    SharedPreferences? prefs,
-    bool isCurrentWarehouse,
-  ) {
-    // if (!isCurrentWarehouse) {
-    //   return 1;
-    // }
-
-    // case 2: pickAmount = the amount of process product
-    List<StockMutationItem> idleList = _getIdleAmount(prefs, this);
-    print("*****Picklist body 397 line*****");
-    print(idleList.length);
-    if (idleList.length > 0) {
-      context
-          .read<StockMutationNeedToProcessProvider>()
-          .changePendingMutation(isPending: true);
-    } else {
-      context
-          .read<StockMutationNeedToProcessProvider>()
-          .changePendingMutation(isPending: false);
-    }
-    print("**********");
-
-    // case 1: the pickAmount == pickedAmount
-    if (this.isFullyPicked()) {
-      return 3;
-    }
-    if (idleList.isNotEmpty) {
-      if (this.pickAmount >= 0 &&
-          this.pickAmount <=
-              idleList.map((e) => e.amount).toList().fold(0, (p, c) => p + c)) {
-        return 3;
-      }
-    }
-    if (idleList.isNotEmpty) {
-      context
-          .read<StockMutationNeedToProcessProvider>()
-          .addStock(StockMutation(warehouseId, picklistId, id, true, idleList));
-    }
-    // case 3: pickAmount = the amount of process product + picked amount + cancelled amount
-    int? cancelBackorderProductAmount =
-        getBackorderCancelProductAmount(prefs, this);
-    if (cancelBackorderProductAmount != null) {
-      if (idleList.isNotEmpty) {
-        if (cancelBackorderProductAmount +
-                this.pickedAmount +
-                (idleList
-                    .map((e) => e.amount)
-                    .toList()
-                    .fold(0, (p, c) => p + c)) ==
-            this.pickAmount) {
-          return 2;
-        }
-      } else {
-        if (cancelBackorderProductAmount + this.pickedAmount ==
-            this.pickAmount) {
-          return 2;
-        }
-      }
-    }
-    return 0;
   }
 }
