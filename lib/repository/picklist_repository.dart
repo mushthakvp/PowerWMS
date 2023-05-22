@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:scanner/dio.dart';
 import 'package:scanner/models/picklist.dart';
-import 'package:scanner/resources/picklist_api_provider.dart';
-import 'package:scanner/resources/picklist_db_provider.dart';
+import 'package:scanner/repository/remote_db/picklist_api_provider.dart';
+import 'package:scanner/repository/local_db/picklist_db_provider.dart';
 import 'package:scanner/util/internet_state.dart';
 import 'package:sembast/sembast.dart';
 

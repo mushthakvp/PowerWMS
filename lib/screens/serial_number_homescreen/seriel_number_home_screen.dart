@@ -4,7 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/providers/settings_provider.dart';
-import 'package:scanner/resources/serial_number_repository.dart';
+import 'package:scanner/repository/serial_number_repository.dart';
 import 'package:scanner/util/color_const.dart';
 import 'package:scanner/util/extensions/text_style_ext.dart';
 import 'package:scanner/widgets/barcode_input.dart';
@@ -145,8 +145,6 @@ class _SerialNumberHomeScreenState extends State<SerialNumberHomeScreen> {
                       left: 16, right: 16, top: 16, bottom: 8),
                   child: BarcodeInput(
                     onParse: (value, barcode) {
-                      print(value);
-                      print(barcode);
                       serialNumberList.insert(0, value);
                       serialNumberRepository
                           .addSerialNumberList(serialNumberList);

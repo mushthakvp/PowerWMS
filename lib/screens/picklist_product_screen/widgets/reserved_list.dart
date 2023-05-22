@@ -6,7 +6,7 @@ import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
 import 'package:scanner/providers/reversed_provider.dart';
-import 'package:scanner/resources/picklist_line_repository.dart';
+import 'package:scanner/repository/picklist_line_repository.dart';
 import 'package:scanner/util/internet_state.dart';
 
 class ReservedList extends StatefulWidget {

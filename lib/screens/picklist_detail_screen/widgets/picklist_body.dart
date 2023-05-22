@@ -1,20 +1,24 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/main.dart';
+import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
+import 'package:scanner/models/stock_mutation.dart';
+import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
-import 'package:scanner/resources/picklist_repository.dart';
+import 'package:scanner/repository/picklist_repository.dart';
+import 'package:scanner/repository/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_detail_screen/picklist_utilities/picklist_color_extension.dart';
 import 'package:scanner/screens/picklist_detail_screen/picklist_utilities/picklist_colors.dart';
 import 'package:scanner/screens/picklist_detail_screen/picklist_utilities/picklist_services.dart';
+import 'package:scanner/screens/picklist_product_screen/parse_handler_service.dart';
 import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
+import 'package:scanner/util/widget/popup.dart';
 import 'package:scanner/widgets/barcode_input.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -90,29 +94,34 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<MutationProvider>();
     return Column(
       children: <Widget>[
         Column(
           children: [
             ListTile(
               title: BarcodeInput(
-                  onParse: (value, barcode) {
-                    setState(() {
-                      final lineList = scanFilter(value, widget.lines);
-                      if (lineList.length == 1) {
-                        _moveToProduct(lineList.first);
-                      } else {
-                        _search = '';
-                        if (lineList.isEmpty) {
-                          final snackBar = SnackBar(
-                            content: Text(
-                                AppLocalizations.of(context)!.productNotFound),
-                            duration: Duration(seconds: 2),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        }
+                  onParse: (value, barcode) async {
+                    final lineList = scanFilter(value, widget.lines);
+                    if (lineList.length == 1) {
+                      await processPickList(value, barcode);
+                      _onProcessHandler(
+                        context,
+                        provider: provider,
+                        picklistLine: widget.lines.first,
+                      );
+                    } else {
+                      _search = '';
+                      if (lineList.isEmpty) {
+                        final snackBar = SnackBar(
+                          content: Text(
+                              AppLocalizations.of(context)!.productNotFound),
+                          duration: Duration(seconds: 2),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
-                    });
+                    }
+                    setState(() {});
                   },
                   onBarCodeChanged: (String barcode) {},
                   willShowKeyboardButton: false),
@@ -145,10 +154,22 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              PicklistWidget(true, lines, _search, prefs, _moveToProduct,
-                  isCurrentWarehouse),
-              PicklistWidget(false, lines, _search, prefs, _moveToProduct,
-                  isCurrentWarehouse),
+              PicklistWidget(
+                true,
+                lines,
+                _search,
+                prefs,
+                _moveToProduct,
+                isCurrentWarehouse,
+              ),
+              PicklistWidget(
+                false,
+                lines,
+                _search,
+                prefs,
+                _moveToProduct,
+                isCurrentWarehouse,
+              ),
               Gap(36),
             ],
           );
@@ -198,6 +219,66 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
         .where((element) => element.priority == 0 || element.priority == 1)
         .isEmpty;
   }
+
+  Future<void> processPickList(value, barcode) async {
+    final provider = context.read<MutationProvider>();
+    if (!provider.needToScan() || value.length > 0) {
+      if (value.length == 13 && value.substring(0, 1) != "0") {
+        String request = '0$value';
+        try {
+          await parseHandler(context, provider, request, barcode,
+              onParse: (bool) {}, isThrowError: true);
+        } catch (e) {
+          await parseHandler(context, provider, value, barcode,
+              onParse: (bool) {});
+        }
+      } else {
+        await parseHandler(context, provider, value, barcode,
+            onParse: (bool) {});
+      }
+      // context.read<AddProductProvider>().canAdd = false;
+    }
+  }
+
+  void _onProcessHandler(
+    BuildContext context, {
+    required MutationProvider provider,
+    required PicklistLine picklistLine,
+  }) async {
+    await context
+        .read<StockMutationRepository>()
+        .saveMutation(
+          StockMutation(
+            picklistLine.warehouseId,
+            picklistLine.picklistId,
+            picklistLine.id,
+            true,
+            [],
+          ),
+        )
+        .then((value) {
+      if (value.success) {
+        // provider.clear();
+      } else {
+        if (value.message == "No Internet") {
+          showErrorAlert(
+            title: value.message,
+            message: 'Saving Locally',
+            onClose: () {
+              provider.clear();
+              Navigator.of(context).pop(true);
+              Navigator.of(context).pop(true);
+            },
+          );
+        } else {
+          showErrorAlert(message: value.message);
+        }
+      }
+    }).catchError((error) {
+      var response = error as BaseResponse;
+      showErrorAlert(message: response.message);
+    });
+  }
 }
 
 class PicklistWidget extends StatelessWidget {
@@ -229,7 +310,7 @@ class PicklistWidget extends StatelessWidget {
             height: 32,
           ),
         Container(
-          margin: const EdgeInsets.all(8  ),
+          margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             border: Border.all(),
             color: isFinishAtBottom ? blue.withOpacity(0.1) : Colors.grey,
@@ -272,7 +353,6 @@ class PicklistWidget extends StatelessWidget {
     if (prefs == null) {
       return Container();
     } else {
-      log(line.toJson().toString());
       return Column(
         children: [
           InkWell(
@@ -326,6 +406,7 @@ class PicklistWidget extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: Text(
                     line.lineLocationCode ?? line.location ?? '',
+                    maxLines: 2,
                     style: TextStyle(
                       fontSize: 16.5,
                       fontWeight: FontWeight.w600,
@@ -335,6 +416,7 @@ class PicklistWidget extends StatelessWidget {
                 ),
                 Text(
                   '${line.pickAmount} (${line.product.unit})',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
                     color: fullyPicked ? white : black,

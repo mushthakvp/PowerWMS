@@ -2672,9 +2672,9 @@ class EEditableTextState extends State<EEditableText>
 
     final String text =
         renderEditable.text?.toPlainText(includeSemanticsLabels: false) ?? '';
-    final List<Rect> firstSelectionBoxes = renderEditable.getBoxesForSelection(
+    final List<ui.TextBox> firstSelectionBoxes = renderEditable.getBoxesForSelection(
         const TextSelection(baseOffset: 0, extentOffset: 1));
-    final Rect? firstRect =
+    final ui.TextBox? firstRect =
         firstSelectionBoxes.isNotEmpty ? firstSelectionBoxes.first : null;
     final ScrollDirection scrollDirection =
         _scrollController.position.userScrollDirection;
@@ -2692,7 +2692,7 @@ class EEditableTextState extends State<EEditableText>
             sizeChanged ||
             placeholderChanged)) {
       _cachedText = text;
-      _cachedFirstRect = firstRect;
+      _cachedFirstRect = firstRect as ui.Rect?;
       _cachedTextStyle = widget.style;
       _cachedSize = size;
       _cachedPlaceholder = _placeholderLocation;
@@ -2708,7 +2708,7 @@ class EEditableTextState extends State<EEditableText>
               TextSelection(
                   baseOffset: offset,
                   extentOffset: offset +
-                      _cachedText.characters.characterAt(i).string.length));
+                      _cachedText.characters.characterAt(i).string.length)).cast<ui.Rect>();
           if (boxes.isEmpty) return null;
 
           final SelectionRect selectionRect = SelectionRect(
@@ -3371,6 +3371,11 @@ class EEditableTextState extends State<EEditableText>
   @override
   void performSelector(String selectorName) {
     // TODO: implement performSelector
+  }
+
+  @override
+  void insertContent(KeyboardInsertedContent content) {
+    // TODO: implement insertContent
   }
 }
 

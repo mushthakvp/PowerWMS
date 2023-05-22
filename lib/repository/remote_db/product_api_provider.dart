@@ -43,9 +43,6 @@ class ProductApiProvider {
       '/product/${product.id}/units/${product.packagings.first.packagingUnitId}',
     )
         .then((response) {
-      print(response.data);
-      print(response.statusMessage);
-      print(response.statusCode);
     });
   }
 
@@ -71,12 +68,8 @@ class ProductApiProvider {
       },
     );
     if (response.statusCode == 200) {
-      print(json.encode(response.data));
-      print(response.statusMessage);
-      print(response.statusCode);
       return compute(parseProductStock, response.data! as Map<String, dynamic>);
     } else {
-      print("sdfkv");
       return ProductStock();
     }
   }
@@ -100,7 +93,6 @@ class ProductApiProvider {
       return compute(
           parseProductPrice, response.data[0]! as Map<String, dynamic>);
     } else {
-      print("badd errirr");
       return ProductPriceModel();
     }
   }
@@ -113,13 +105,9 @@ class ProductApiProvider {
     );
 
     if (response.statusCode == 200) {
-      print(json.encode(response.data));
-      print(response.statusMessage);
-      print(response.statusCode);
       return compute(
           parseProductDetail, response.data as Map<String, dynamic>);
     } else {
-      print("badd errirr");
       return ProductDetailModel();
     }
   }

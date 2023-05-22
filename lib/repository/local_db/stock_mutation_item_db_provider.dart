@@ -54,17 +54,12 @@ class StockMutationItemDbProvider {
     return _cancelledStore.record(item.id!).put(db, cancelled.toJson());
   }
 
-  Stream<List<CancelledStockMutationItem>> getCancelledStockMutationItemsStream(
-    int productId,
-  ) {
+  Future<List<CancelledStockMutationItem>> getCancelledStockMutationItems(
+      int productId,
+      ) async {
     var finder = Finder(filter: Filter.equals('productId', productId));
-    return _store.query(finder: finder).onSnapshots(db).transform(
-      StreamTransformer.fromHandlers(handleData: (snapshots, sink) {
-        sink.add(snapshots.map((element) {
-          return CancelledStockMutationItem.fromJson(element.value);
-        }).toList());
-      }),
-    );
+    var records = await _store.find(db, finder: finder);
+    return records.map((record) => CancelledStockMutationItem.fromJson(record.value)).toList();
   }
 
   Future<List<int>> getCancelledStockMutationItemIds() {

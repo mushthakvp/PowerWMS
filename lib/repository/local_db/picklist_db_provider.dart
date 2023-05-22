@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:scanner/models/picklist.dart';
-import 'package:scanner/resources/picklist_line_db_provider.dart';
+import 'package:scanner/repository/local_db/picklist_line_db_provider.dart';
 import 'package:sembast/sembast.dart';
 
 class PicklistDbProvider {

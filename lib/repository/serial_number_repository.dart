@@ -1,4 +1,4 @@
-import 'package:scanner/resources/serial_number_db_provider.dart';
+import 'package:scanner/repository/local_db/serial_number_db_provider.dart';
 import 'package:sembast/sembast.dart';
 
 class SerialNumberRepository {

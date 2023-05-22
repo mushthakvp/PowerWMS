@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:scanner/models/ProductDetailModel.dart';
 import 'package:scanner/models/product.dart';
 import 'package:scanner/models/product_stock.dart';
-import 'package:scanner/resources/product_repository.dart';
+import 'package:scanner/repository/product_repository.dart';
 import 'package:scanner/screens/product_screen/widgets/line_info.dart';
 import 'package:scanner/screens/product_screen/widgets/product_view.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
@@ -30,7 +30,6 @@ class _ProductScreenState extends State<ProductScreen> {
       productCode: widget._product.uid,
       unitCode: widget._product.unit,
     );
-    print(productStock);
   }
 
   getProductDetail() async {
@@ -39,7 +38,6 @@ class _ProductScreenState extends State<ProductScreen> {
       productCode: widget._product.uid,
       unitCode: widget._product.unit,
     );
-    print(productDetails);
   }
 
   @override
@@ -61,8 +59,6 @@ class _ProductScreenState extends State<ProductScreen> {
             child: FutureBuilder<ProductStock?>(
                 future: productStock,
                 builder: (context, AsyncSnapshot<ProductStock?> snapshot) {
-                  print(snapshot.hasError);
-                  print(snapshot.error);
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),

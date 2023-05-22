@@ -6,7 +6,7 @@ import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/providers/complete_picklist_provider.dart';
 import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
-import 'package:scanner/resources/stock_mutation_repository.dart';
+import 'package:scanner/repository/stock_mutation_repository.dart';
 import 'package:scanner/util/internet_state.dart';
 import 'package:scanner/util/widget/popup.dart';
 import 'package:scanner/widgets/dialogs/custom_snack_bar.dart';

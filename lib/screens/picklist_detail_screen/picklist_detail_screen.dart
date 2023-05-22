@@ -4,8 +4,8 @@ import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/providers/complete_stockmutation_provider.dart';
-import 'package:scanner/resources/picklist_repository.dart';
-import 'package:scanner/resources/stock_mutation_repository.dart';
+import 'package:scanner/repository/picklist_repository.dart';
+import 'package:scanner/repository/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_detail_screen/picklist_utilities/picklist_services.dart';
 import 'package:scanner/screens/picklist_detail_screen/picklist_utilities/success_alert.dart';
 import 'package:scanner/screens/picklist_detail_screen/widgets/picklist_footer.dart';
@@ -57,6 +57,8 @@ class _PicklistScreenState extends State<PicklistScreen>
 
   @override
   Widget build(BuildContext context) {
+    print('Current screen is: ${this.runtimeType}');
+
     return Scaffold(
       appBar: WMSAppBar(
         widget._picklist.uid,
@@ -68,7 +70,7 @@ class _PicklistScreenState extends State<PicklistScreen>
           icon: Icon(Icons.settings),
         ),
       ),
-      body: PicklistView(widget._picklist, this),
+      body: PicklistView(picklist: widget._picklist, delegate: this),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }

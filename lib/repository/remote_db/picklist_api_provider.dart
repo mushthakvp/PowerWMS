@@ -5,7 +5,6 @@ import 'package:scanner/models/picklist.dart';
 
 class PicklistApiProvider {
   Future<List<Picklist>> getPicklists(String search) {
-    print("getPicklists");
     return dio
         .post<Map<String, dynamic>>(
           '/picklist/list',
@@ -21,8 +20,6 @@ class PicklistApiProvider {
         )
         .catchError((error, _) {
           throw error;
-          print(error.toString());
-          throw Failure(error.toString());
         });
   }
 

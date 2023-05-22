@@ -74,7 +74,7 @@ class MutationProvider extends ChangeNotifier {
     return isBackorderRestProductAmount && backorderRestProductAmount != 0;
   }
 
-  getStockMutation() => StockMutation(
+  StockMutation getStockMutation() => StockMutation(
         line.warehouseId,
         line.picklistId,
         line.id,

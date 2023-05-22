@@ -46,8 +46,6 @@ extension PicklistLineColor on PicklistLine {
 
     // case 2: pickAmount = the amount of process product
     List<StockMutationItem> idleList = _getIdleAmount(prefs, this);
-    print("*****Picklist body 397 line*****");
-    print(idleList.length);
     if (idleList.length > 0) {
       context
           .read<StockMutationNeedToProcessProvider>()
@@ -57,7 +55,6 @@ extension PicklistLineColor on PicklistLine {
           .read<StockMutationNeedToProcessProvider>()
           .changePendingMutation(isPending: false);
     }
-    print("**********");
 
     // case 1: the pickAmount == pickedAmount
     if (this.isFullyPicked()) {

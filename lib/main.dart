@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:scanner/db.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/l10n/app_localizations.dart';
+import 'package:scanner/log.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
@@ -17,12 +18,12 @@ import 'package:scanner/providers/process_product_provider.dart';
 import 'package:scanner/providers/reversed_provider.dart';
 import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
-import 'package:scanner/resources/picklist_line_repository.dart';
-import 'package:scanner/resources/picklist_repository.dart';
-import 'package:scanner/resources/product_repository.dart';
-import 'package:scanner/resources/serial_number_repository.dart';
-import 'package:scanner/resources/stock_mutation_item_repository.dart';
-import 'package:scanner/resources/stock_mutation_repository.dart';
+import 'package:scanner/repository/picklist_line_repository.dart';
+import 'package:scanner/repository/picklist_repository.dart';
+import 'package:scanner/repository/product_repository.dart';
+import 'package:scanner/repository/serial_number_repository.dart';
+import 'package:scanner/repository/stock_mutation_item_repository.dart';
+import 'package:scanner/repository/stock_mutation_repository.dart';
 import 'package:scanner/screens/count_screen/count_screen.dart';
 import 'package:scanner/screens/count_screen/home_provider.dart';
 import 'package:scanner/screens/count_screen/resource/product_repository.dart'
@@ -48,7 +49,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  interceptErpDio();
+  interceptErpDio(); initLogs();
   // await UserLatestSession.ensureInitialized();
   await InternetState.shared.ensureInitialized();
   // initLogs();
@@ -68,8 +69,6 @@ class WMSApp extends StatelessWidget {
       future:
           Future.wait([Settings.fromMemory(), SharedPreferences.getInstance()]),
       builder: (context, snapshot) {
-        print(snapshot.error);
-        print(snapshot.hasError);
         if (snapshot.hasData) {
           final settings = snapshot.data![0] as Settings;
           final prefs = snapshot.data![1] as SharedPreferences;
@@ -182,6 +181,7 @@ class WMSApp extends StatelessWidget {
                   Map<String, dynamic> args = ModalRoute.of(context)!
                       .settings
                       .arguments as Map<String, dynamic>;
+                  printV((args['line'] as PicklistLine).toJson());
                   final line = args['line'] as PicklistLine;
                   double? totalStock = args['totalStock'] as double?;
                   return PicklistProductScreen(
@@ -198,7 +198,7 @@ class WMSApp extends StatelessWidget {
                       ModalRoute.of(context)!.settings.arguments as Picklist;
                   return PicklistScreen(picklist);
                 },
-                LogScreen.routeName: (context) => LogScreen(),
+                // LogScreen.routeName: (context) => LogScreen(),
               },
             ),
           );

@@ -71,7 +71,6 @@ class _BarcodeInputState extends State<BarcodeInput> {
               SystemChannels.textInput.invokeMethod<void>('TextInput.show');
             },
             onEditingComplete: () {
-              print("onEditingComplete");
               // _parse('');
             },
             onSubmitted: _parse,
