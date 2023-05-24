@@ -1516,7 +1516,6 @@ class EEditableTextState extends State<EEditableText>
     }
     final TextSelection selection = textEditingValue.selection;
     final String text = textEditingValue.text;
-    assert(selection != null);
     if (selection.isCollapsed) {
       return;
     }

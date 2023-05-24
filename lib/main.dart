@@ -29,7 +29,6 @@ import 'package:scanner/screens/count_screen/home_provider.dart';
 import 'package:scanner/screens/count_screen/resource/product_repository.dart'
     as productRepoCount;
 import 'package:scanner/screens/home_screen/home_screen.dart';
-import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
 import 'package:scanner/screens/picklist_detail_screen/picklist_detail_screen.dart';
 import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
