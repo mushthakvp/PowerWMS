@@ -109,7 +109,12 @@ class _PicklistViewState extends State<PicklistView>
                 create: (_) => AddProductProvider(),
               ),
               ChangeNotifierProvider<MutationProvider>(
-                create: (_) => MutationProvider.create(data.first, [], [], []),
+                create: (_) => MutationProvider.create(
+                  data.first,
+                  [],
+                  // [],
+                  [],
+                ),
               ),
               StreamProvider<Map<int, StockMutation>?>(
                 create: (_) => mutationRepository
@@ -146,7 +151,7 @@ class _PicklistViewState extends State<PicklistView>
                   return MutationProvider.create(
                     data.first,
                     idleItems,
-                    [],
+                    // [],
                     queuedMutations.values.toList(),
                   );
                 },

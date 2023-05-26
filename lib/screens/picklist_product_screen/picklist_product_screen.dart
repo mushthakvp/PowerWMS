@@ -86,13 +86,14 @@ class _PicklistProductScreenState extends State<PicklistProductScreen> {
   }
 
   CustomScrollView _buildCustomScrollView(
-      List<CancelledStockMutationItem>? data) {
+    List<CancelledStockMutationItem>? data,
+  ) {
     return CustomScrollView(
       slivers: <Widget>[
         LineInfo(newLine),
         ProductView(
           newLine,
-          data ?? [],
+          // data ?? [],
           totalStock: widget.totalStock,
         ),
         ReservedList(newLine, data ?? [], (PicklistLine line) {

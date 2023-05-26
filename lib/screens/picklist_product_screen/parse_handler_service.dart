@@ -12,9 +12,14 @@ import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/error_barcode.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
 
-parseHandler(BuildContext context, MutationProvider mutation, String ean,
-    GS1Barcode? barcode,
-    {required Function(bool) onParse, bool? isThrowError = false}) async {
+Future<void> parseHandler(
+  BuildContext context,
+  MutationProvider mutation,
+  String ean,
+  GS1Barcode? barcode, {
+  required Function(bool) onParse,
+  bool? isThrowError = false,
+}) async {
   print("_parseHandler");
   print(ean);
   final settings = context.read<ValueNotifier<Settings>>().value;

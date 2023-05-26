@@ -22,12 +22,17 @@ import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductView extends StatelessWidget {
-  const ProductView(this.line, this.cancelledItems, {Key? key, this.totalStock})
-      : super(key: key);
+  const ProductView(
+    this.line,
+    // this.cancelledItems,
+     {
+    Key? key,
+    this.totalStock,
+  }) : super(key: key);
 
   final PicklistLine line;
   final double? totalStock;
-  final List<CancelledStockMutationItem> cancelledItems;
+  // final List<CancelledStockMutationItem> cancelledItems;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +78,7 @@ class ProductView extends StatelessWidget {
             return MutationProvider.create(
               line,
               idleItems,
-              cancelledItems,
+              // cancelledItems,
               queuedMutations.values.toList(),
             );
           },
@@ -99,7 +104,8 @@ class ProductView extends StatelessWidget {
           return SliverList(
             delegate: SliverChildListDelegate([
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: <Widget>[
                     Column(
@@ -170,15 +176,15 @@ class ProductView extends StatelessWidget {
               _backorderProductAmount(provider, context),
 
               /// Barcode
-              ScanForm(
-                onParse: (process) {
-                  print("process");
-                  print(process);
-                  if (process && InternetState.shared.connectivityAvailable()) {
-                    _onProcessHandler(provider, context);
-                  }
-                },
-              ),
+              // ScanForm(
+              //   onParse: (process) {
+              //     print("process");
+              //     print(process);
+              //     if (process && InternetState.shared.connectivityAvailable()) {
+              //       _onProcessHandler(provider, context);
+              //     }
+              //   },
+              // ),
               SizedBox(height: 8),
               Divider(height: 1),
               ..._itemsBuilder(provider, context),
@@ -347,13 +353,11 @@ class ProductView extends StatelessWidget {
           showErrorAlert(message: value.message);
         }
       }
-    })
-        .catchError((error) {
+    }).catchError((error) {
       var response = error as BaseResponse;
       showErrorAlert(message: response.message);
     });
   }
-
 
   _itemsBuilder(MutationProvider mutation, BuildContext context) {
     return mutation.idleItems.map((item) {
@@ -386,5 +390,3 @@ class ProductView extends StatelessWidget {
     });
   }
 }
-
-

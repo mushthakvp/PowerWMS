@@ -17,7 +17,7 @@ class ScanForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<MutationProvider?>()!;
+    final provider = context.watch<MutationProvider>();
     final formKey = GlobalKey<FormState>();
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -43,16 +43,14 @@ class ScanForm extends StatelessWidget {
                       : () async {
                           // formKey.currentState?.save();
 
-                          String? ean = parseHandler(
+                          await parseHandler(
                             context,
                             provider,
                             context.read<AddProductProvider>().value ?? '',
                             null,
                             onParse: onParse,
                           );
-                          if (ean == null) {
-                            ean = '';
-                          }
+                          String ean = '';
                           if (ean.length == 13) {
                             String request = '0$ean';
                             try {

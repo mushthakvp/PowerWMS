@@ -23,6 +23,9 @@ import 'package:scanner/widgets/barcode_input.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../util/internet_state.dart';
+import '../../picklist_product_screen/widgets/scan_form.dart';
+
 class PicklistBody extends StatefulWidget {
   const PicklistBody(this.lines, this.delegate, {Key? key}) : super(key: key);
 
@@ -99,32 +102,14 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
       children: <Widget>[
         Column(
           children: [
-            ListTile(
-              title: BarcodeInput(
-                  onParse: (value, barcode) async {
-                    final lineList = scanFilter(value, widget.lines);
-                    if (lineList.length == 1) {
-                      await processPickList(value, barcode);
-                      _onProcessHandler(
-                        context,
-                        provider: provider,
-                        picklistLine: widget.lines.first,
-                      );
-                    } else {
-                      _search = '';
-                      if (lineList.isEmpty) {
-                        final snackBar = SnackBar(
-                          content: Text(
-                              AppLocalizations.of(context)!.productNotFound),
-                          duration: Duration(seconds: 2),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      }
-                    }
-                    setState(() {});
-                  },
-                  onBarCodeChanged: (String barcode) {},
-                  willShowKeyboardButton: false),
+            ScanForm(
+              onParse: (process) {
+                print("process");
+                print(process);
+                if (process && InternetState.shared.connectivityAvailable()) {
+                  _onProcessHandler(provider, context);
+                }
+              },
             ),
             Divider(),
           ],
@@ -240,25 +225,17 @@ class _PicklistBodyState extends State<PicklistBody> with RouteAware {
     }
   }
 
-  void _onProcessHandler(
-    BuildContext context, {
-    required MutationProvider provider,
-    required PicklistLine picklistLine,
-  }) async {
-    await context
+  void _onProcessHandler(MutationProvider provider, BuildContext context) {
+    context
         .read<StockMutationRepository>()
-        .saveMutation(
-          StockMutation(
-            picklistLine.warehouseId,
-            picklistLine.picklistId,
-            picklistLine.id,
-            true,
-            [],
-          ),
-        )
+        .saveMutation(provider.getStockMutation())
         .then((value) {
       if (value.success) {
-        // provider.clear();
+        provider.clear();
+        Navigator.of(context).pop();
+        context
+            .read<StockMutationNeedToProcessProvider>()
+            .changePendingMutation(isPending: false);
       } else {
         if (value.message == "No Internet") {
           showErrorAlert(
