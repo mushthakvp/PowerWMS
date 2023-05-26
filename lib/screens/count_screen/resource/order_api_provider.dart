@@ -35,7 +35,7 @@ class OrderApiProvider {
           }
         }
       }
-      return Tuple2(null, Failure(error.message));
+      return Tuple2(null, Failure(error.message ?? "Something went wrong"));
     }
   }
 }

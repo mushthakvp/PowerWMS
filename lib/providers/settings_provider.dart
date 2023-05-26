@@ -6,7 +6,7 @@ import 'package:scanner/models/settings.dart';
 import 'package:scanner/models/settings_remote.dart';
 import 'package:scanner/models/user_info.dart';
 import 'package:scanner/models/warehouse.dart';
-import 'package:scanner/resources/settings_api_provider.dart';
+import 'package:scanner/repository/remote_db/settings_api_provider.dart';
 import 'package:sembast/sembast.dart';
 
 enum PicklistSortType { warehouseLocation, productNumber, description }
@@ -169,8 +169,6 @@ class SettingProvider extends ChangeNotifier {
         userName: wholeSaleSettings!.userName ?? "",
         password: wholeSaleSettings!.password ?? "",
       );
-      print("wholeSaleSettings.toJson()");
-      print(wholeSaleSettings?.toJson());
       // await saveSettingInfo();
     }
 

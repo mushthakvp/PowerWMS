@@ -171,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ListTile(
               title: Text('Logs'),
               onTap: () {
-                Navigator.of(context).pushNamed(LogScreen.routeName);
+                // Navigator.of(context).pushNamed(LogScreen.routeName);
               },
             ),
           ],

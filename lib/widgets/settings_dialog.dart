@@ -174,8 +174,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
                   //             )
                   //           ],
                   //         ), onConfirm: () async {
-                  //       print("wholeSaleSettings.toJson()");
-                  //       print(wholeSaleSettings.toJson());
                   //       provider.wholeSaleSettings = wholeSaleSettings;
                   //       context.read<ValueNotifier<Settings>>().value =
                   //           provider.settingsLocal;

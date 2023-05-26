@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:scanner/resources/product_image_api_cached_provider.dart';
+import 'package:scanner/repository/remote_db/product_image_api_cached_provider.dart';
 
 class ProductImageRepository {
   final productImageApiCachedProvider = ProductImageApiCachedProvider();

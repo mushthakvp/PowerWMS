@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/l10n/app_localizations.dart';
@@ -13,7 +12,7 @@ import 'package:scanner/providers/add_product_provider.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/providers/process_product_provider.dart';
 import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
-import 'package:scanner/resources/stock_mutation_repository.dart';
+import 'package:scanner/repository/stock_mutation_repository.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/product_adjustment.dart';
 import 'package:scanner/screens/picklist_product_screen/widgets/scan_form.dart';
 import 'package:scanner/util/color_const.dart';
@@ -23,12 +22,17 @@ import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductView extends StatelessWidget {
-  const ProductView(this.line, this.cancelledItems, {Key? key, this.totalStock})
-      : super(key: key);
+  const ProductView(
+    this.line,
+    // this.cancelledItems,
+     {
+    Key? key,
+    this.totalStock,
+  }) : super(key: key);
 
   final PicklistLine line;
   final double? totalStock;
-  final List<CancelledStockMutationItem> cancelledItems;
+  // final List<CancelledStockMutationItem> cancelledItems;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +78,7 @@ class ProductView extends StatelessWidget {
             return MutationProvider.create(
               line,
               idleItems,
-              cancelledItems,
+              // cancelledItems,
               queuedMutations.values.toList(),
             );
           },
@@ -100,7 +104,8 @@ class ProductView extends StatelessWidget {
           return SliverList(
             delegate: SliverChildListDelegate([
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: <Widget>[
                     Column(
@@ -171,15 +176,15 @@ class ProductView extends StatelessWidget {
               _backorderProductAmount(provider, context),
 
               /// Barcode
-              ScanForm(
-                onParse: (process) {
-                  print("process");
-                  print(process);
-                  if (process && InternetState.shared.connectivityAvailable()) {
-                    _onProcessHandler(provider, context);
-                  }
-                },
-              ),
+              // ScanForm(
+              //   onParse: (process) {
+              //     print("process");
+              //     print(process);
+              //     if (process && InternetState.shared.connectivityAvailable()) {
+              //       _onProcessHandler(provider, context);
+              //     }
+              //   },
+              // ),
               SizedBox(height: 8),
               Divider(height: 1),
               ..._itemsBuilder(provider, context),
@@ -322,13 +327,11 @@ class ProductView extends StatelessWidget {
         : SizedBox();
   }
 
-  _onProcessHandler(MutationProvider provider, BuildContext context) {
+  void _onProcessHandler(MutationProvider provider, BuildContext context) {
     context
         .read<StockMutationRepository>()
         .saveMutation(provider.getStockMutation())
         .then((value) {
-          print("value");
-          print(value);
       if (value.success) {
         provider.clear();
         Navigator.of(context).pop();
@@ -337,34 +340,22 @@ class ProductView extends StatelessWidget {
             .changePendingMutation(isPending: false);
       } else {
         if (value.message == "No Internet") {
-          Future.delayed(const Duration(), () async {
-            bool? shouldGoBack = await showErrorAlert(
-                title: value.message,
-                message: 'Saving Locally',
-                onClose: () {
-                  provider.clear();
-                  Navigator.of(context).pop(true);
-                  Navigator.of(context).pop(true);
-                });
-            if (shouldGoBack ?? true) {
-              Navigator.of(context).pop();
-            }
-          });
+          showErrorAlert(
+            title: value.message,
+            message: 'Saving Locally',
+            onClose: () {
+              provider.clear();
+              Navigator.of(context).pop(true);
+              Navigator.of(context).pop(true);
+            },
+          );
         } else {
-          Future.delayed(const Duration(), () async {
-            await showErrorAlert(
-              message: value.message,
-            );
-          });
+          showErrorAlert(message: value.message);
         }
       }
-    }, onError: (error) {
+    }).catchError((error) {
       var response = error as BaseResponse;
-      print("response");
-      print(response);
-      Future.delayed(const Duration(), () async {
-        await showErrorAlert(message: response.message);
-      });
+      showErrorAlert(message: response.message);
     });
   }
 

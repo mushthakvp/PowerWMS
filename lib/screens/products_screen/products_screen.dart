@@ -11,7 +11,7 @@ import 'package:scanner/models/ProductDetailModel.dart';
 import 'package:scanner/models/product.dart';
 import 'package:scanner/models/product_stock.dart';
 import 'package:scanner/providers/settings_provider.dart';
-import 'package:scanner/resources/product_repository.dart';
+import 'package:scanner/repository/product_repository.dart';
 import 'package:scanner/screens/product_screen/product_screen.dart';
 import 'package:scanner/widgets/e_textfield.dart';
 import 'package:scanner/widgets/product_image.dart';
@@ -524,18 +524,13 @@ class _ProductsScreenState extends State<ProductsScreen> {
     setState(() {
       try {
         var barcode = parser.parse(value.trim());
-        print(barcode);
         if (barcode.hasAI('01')) {
           _result = barcode.getAIData('01');
-          print("_result");
-          print(_result);
         } else {
           _result = '';
         }
       } catch (e) {
         _result = value.trim();
-        print("error");
-        print(_result);
       }
     });
     focusNode.requestFocus();

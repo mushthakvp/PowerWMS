@@ -1,11 +1,10 @@
 import 'dart:async';
-
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
-import 'package:scanner/resources/stock_mutation_db_provider.dart';
-import 'package:scanner/resources/stock_mutation_item_db_provider.dart';
+import 'package:scanner/repository/local_db/stock_mutation_db_provider.dart';
+import 'package:scanner/repository/local_db/stock_mutation_item_db_provider.dart';
 import 'package:sembast/sembast.dart';
 
 class PicklistLineDbProvider {
@@ -60,16 +59,13 @@ class PicklistLineDbProvider {
   final _store = intMapStoreFactory.store(name);
   final Database db;
 
-  Stream<List<PicklistLine>> getPicklistLinesStream(int picklistId) {
+  Future<List<PicklistLine>> getPicklistLines(int picklistId) async {
     var finder = Finder(filter: Filter.equals('picklistId', picklistId));
-    return _store.query(finder: finder).onSnapshots(db).transform(
-        StreamTransformer.fromHandlers(handleData: (snapshotList, sink) {
-      sink.add(
-        snapshotList
-            .map((snapshot) => PicklistLine.fromJson(snapshot.value))
-            .toList(),
-      );
-    }));
+    var snapshotList = await _store.find(db, finder: finder);
+
+    return snapshotList
+        .map((snapshot) => PicklistLine.fromJson(snapshot.value))
+        .toList();
   }
 
   Future<PicklistLine> updatePicklistLinePickedAmount(PicklistLine line, StockMutationItem item) async {
@@ -91,7 +87,6 @@ class PicklistLineDbProvider {
   }
 
   Future<dynamic> savePicklistLines(List<PicklistLine> lines) {
-    print(lines.map<int>((line) => line.id));
     return _store
         .records(lines.map<int>((line) => line.id))
         .put(db, lines.map((line) => line.toJson()).toList());

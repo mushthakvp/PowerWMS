@@ -15,7 +15,7 @@ class MutationProvider extends ChangeNotifier {
   factory MutationProvider.create(
     PicklistLine line,
     List<StockMutationItem> idleItems,
-    List<CancelledStockMutationItem> cancelledItems,
+    // List<CancelledStockMutationItem> cancelledItems,
     List<StockMutation> queuedMutations,
   ) {
     Packaging? packaging;
@@ -26,7 +26,7 @@ class MutationProvider extends ChangeNotifier {
     final provider = MutationProvider._(
       line,
       idleItems,
-      cancelledItems,
+      // cancelledItems,
       queuedMutations,
       packaging,
     );
@@ -38,7 +38,7 @@ class MutationProvider extends ChangeNotifier {
   MutationProvider._(
     this.line,
     this.idleItems,
-    this.cancelledItems,
+    // this.cancelledItems,
     this.queuedMutations,
     this.packaging,
   ) {
@@ -48,7 +48,7 @@ class MutationProvider extends ChangeNotifier {
 
   final PicklistLine line;
   final List<StockMutationItem> idleItems;
-  final List<CancelledStockMutationItem> cancelledItems;
+  // final List<CancelledStockMutationItem> cancelledItems;
   final List<StockMutation> queuedMutations;
   final Packaging? packaging;
   bool? allowBelowZero;
@@ -74,7 +74,7 @@ class MutationProvider extends ChangeNotifier {
     return isBackorderRestProductAmount && backorderRestProductAmount != 0;
   }
 
-  getStockMutation() => StockMutation(
+  StockMutation getStockMutation() => StockMutation(
         line.warehouseId,
         line.picklistId,
         line.id,

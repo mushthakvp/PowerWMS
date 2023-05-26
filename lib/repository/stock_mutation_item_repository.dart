@@ -1,7 +1,7 @@
 import 'package:scanner/models/cancelled_stock_mutation_item.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
-import 'package:scanner/resources/stock_mutation_item_api_provider.dart';
-import 'package:scanner/resources/stock_mutation_item_db_provider.dart';
+import 'package:scanner/repository/local_db/stock_mutation_item_db_provider.dart';
+import 'package:scanner/repository/remote_db/stock_mutation_item_api_provider.dart';
 import 'package:sembast/sembast.dart';
 
 class StockMutationItemRepository {
@@ -35,9 +35,9 @@ class StockMutationItemRepository {
     await _dbProvider.saveCancelledItems(list);
   }
 
-  Stream<List<CancelledStockMutationItem>> getCancelledStockMutationItemsStream(
+  Future<List<CancelledStockMutationItem>> getCancelledStockMutationItems(
       int productId) {
-    return _dbProvider.getCancelledStockMutationItemsStream(productId);
+    return _dbProvider.getCancelledStockMutationItems(productId);
   }
 
   Future<dynamic> tryCancelItem(StockMutationItem item) async {

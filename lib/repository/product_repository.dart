@@ -3,8 +3,8 @@ import 'package:scanner/models/ProductDetailModel.dart';
 import 'package:scanner/models/product.dart';
 import 'package:scanner/models/product_price_model.dart';
 import 'package:scanner/models/product_stock.dart';
-import 'package:scanner/resources/product_api_provider.dart';
-import 'package:scanner/resources/product_db_provider.dart';
+import 'package:scanner/repository/remote_db/product_api_provider.dart';
+import 'package:scanner/repository/local_db/product_db_provider.dart';
 import 'package:sembast/sembast.dart';
 
 class ProductRepository {
@@ -20,14 +20,11 @@ class ProductRepository {
     List<Product> list;
 
     if (await _dbProvider.count() == 0) {
-      print("from REMOTE");
       list = await _apiProvider.getProducts(search);
       _dbProvider.saveProducts(list);
     } else {
-      print("from DB");
 
       list = await _dbProvider.getProducts(search);
-      print("list form db: ${list.length}");
     }
     return list;
   }
@@ -38,14 +35,9 @@ class ProductRepository {
 
   Future<ProductStock> fetchProductStock(
       {required String productCode, unitCode}) async {
-    if (kDebugMode) {
-      print('====== Fetch searched products from Local');
-    }
     ProductPriceModel priceModel = await _apiProvider.fetchProductPrice(
         productCode: productCode, unitCode: unitCode);
 
-    print("dfvd");
-    print(priceModel.price);
 
     ProductStock productStock = await _apiProvider.fetchProductStock(
         productCode: productCode, unitCode: unitCode);

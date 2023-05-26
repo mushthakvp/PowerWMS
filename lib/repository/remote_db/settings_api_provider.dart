@@ -49,8 +49,6 @@ class SettingsApiProvider {
     if (await connectivityAvailable()) {
       final response = await dio.post('/account/api');
       var result = SettingApi.fromJson(response.data);
-      print("getSettingApi");
-      print(response);
       return result;
     } else {
       print('NO INTERNET');
