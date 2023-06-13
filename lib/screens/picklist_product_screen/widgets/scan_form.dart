@@ -4,9 +4,9 @@ import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner/l10n/app_localizations.dart';
 import 'package:scanner/providers/add_product_provider.dart';
-import 'package:scanner/providers/mutation_provider.dart';
-import 'package:scanner/screens/picklist_product_screen/parse_handler_service.dart';
+import 'package:scanner/screens/pick_list_overview/provider/mutation.dart';
 import 'package:scanner/widgets/barcode_input.dart';
+import '../../pick_list_overview/provider/parse_handler.dart';
 
 final audio = Audio('assets/error.mp3');
 
@@ -17,7 +17,7 @@ class ScanForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<MutationProvider>();
+    final provider = context.watch<MutationProviderV2>();
     final formKey = GlobalKey<FormState>();
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -136,8 +136,8 @@ class ScanForm extends StatelessWidget {
                       return;
                     }
                     bool enableAddButton =
-                        provider.line.product.uid == barcode ||
-                            provider.line.product.ean == barcode;
+                        provider.line.product?.uid == barcode ||
+                            provider.line.product?.ean == barcode;
                     context.read<AddProductProvider>().canAdd = enableAddButton;
                     context.read<AddProductProvider>().value = barcode;
                   },

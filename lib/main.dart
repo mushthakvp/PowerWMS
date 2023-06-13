@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +29,7 @@ import 'package:scanner/screens/count_screen/resource/product_repository.dart'
     as productRepoCount;
 import 'package:scanner/screens/home_screen/home_screen.dart';
 import 'package:scanner/screens/login_screen.dart';
+import 'package:scanner/screens/pick_list_overview/provider/pick_list_overview_provider.dart';
 import 'package:scanner/screens/picklist_detail_screen/picklist_detail_screen.dart';
 import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
@@ -39,6 +39,8 @@ import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:sembast/sembast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'screens/pick_list_view/provider/hive_init.dart';
+import 'screens/pick_list_view/provider/pick_list_provider.dart';
 import 'screens/picklist_home_screen/picklists_home_screen.dart';
 import 'widgets/wms_app_bar.dart';
 
@@ -48,12 +50,13 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  interceptErpDio(); initLogs();
+  interceptErpDio();
+  initLogs();
   // await UserLatestSession.ensureInitialized();
   await InternetState.shared.ensureInitialized();
   // initLogs();
   final db = await createDb();
-
+  await HiveDB.initialize();
   runApp(WMSApp(db));
 }
 
@@ -74,6 +77,9 @@ class WMSApp extends StatelessWidget {
 
           return MultiProvider(
             providers: [
+              ChangeNotifierProvider(create: (context) => PickListProviderV2()),
+              ChangeNotifierProvider(
+                  create: (context) => PickListOverviewProvider()),
               ChangeNotifierProvider<ValueNotifier<Settings>>(
                 create: (_) => ValueNotifier<Settings>(settings),
               ),
@@ -167,6 +173,7 @@ class WMSApp extends StatelessWidget {
                     dio.options.headers = {
                       'authorization': 'Bearer ${prefs.getString('token')}',
                     };
+                    prefs.setBool('isExist', false);
                     return HomeScreen();
                   } else {
                     return LoginScreen(prefs: prefs);

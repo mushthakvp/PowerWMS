@@ -1,27 +1,26 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:scanner/models/packaging.dart';
-import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/models/stock_mutation_item.dart';
+import 'package:scanner/screens/pick_list_overview/model/pick_list_line_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum CacheProductStatus { set, get, remove }
 
-class MutationProvider extends ChangeNotifier {
-  factory MutationProvider.create(
-    PicklistLine line,
+class MutationProviderV2 extends ChangeNotifier {
+  factory MutationProviderV2.create(
+    PickListLineV2 line,
     List<StockMutationItem> idleItems,
     // List<CancelledStockMutationItem> cancelledItems,
     List<StockMutation> queuedMutations,
   ) {
     Packaging? packaging;
     try {
-      packaging = line.product.packagings
+      packaging = line.product!.packagings!
           .firstWhere((packaging) => packaging.packagingUnitId == 1);
     } catch (e) {}
-    final provider = MutationProvider._(
+    final provider = MutationProviderV2._(
       line,
       idleItems,
       // cancelledItems,
@@ -33,7 +32,7 @@ class MutationProvider extends ChangeNotifier {
     return provider;
   }
 
-  MutationProvider._(
+  MutationProviderV2._(
     this.line,
     this.idleItems,
     // this.cancelledItems,
@@ -44,7 +43,7 @@ class MutationProvider extends ChangeNotifier {
     handleProductBackorderAmount(CacheProductStatus.get);
   }
 
-  final PicklistLine line;
+  final PickListLineV2 line;
   final List<StockMutationItem> idleItems;
   // final List<CancelledStockMutationItem> cancelledItems;
   final List<StockMutation> queuedMutations;
@@ -73,9 +72,9 @@ class MutationProvider extends ChangeNotifier {
   }
 
   StockMutation getStockMutation() => StockMutation(
-        line.warehouseId,
-        line.picklistId,
-        line.id,
+        line.warehouseId ?? 0,
+        line.picklistId ?? 0,
+        line.id ?? 0,
         true,
         idleItems,
       );
@@ -85,15 +84,15 @@ class MutationProvider extends ChangeNotifier {
   }
 
   int get totalPickedAmount {
-    return line.pickedAmount.round();
+    return line.pickedAmount!.round();
   }
 
   int get maxAmountToPick {
-    return (line.pickAmount - totalPickedAmount).round();
+    return (line.pickAmount ?? 0 - totalPickedAmount).round();
   }
 
   int get toPickAmount {
-    return (line.pickAmount - totalPickedAmount).round() - totalAmount;
+    return (line.pickAmount ?? 0 - totalPickedAmount).round() - totalAmount;
   }
 
   int get showToPickAmount {
@@ -107,18 +106,18 @@ class MutationProvider extends ChangeNotifier {
   }
 
   int get askedAmount {
-    return line.pickAmount.round();
+    return line.pickAmount!.round();
   }
 
   int get toPickPackagingAmount {
     return packaging != null
-        ? max((toPickAmount / packaging!.defaultAmount).floor(), 0)
+        ? max((toPickAmount / packaging!.defaultAmount!).floor(), 0)
         : 0;
   }
 
   int get askedPackagingAmount {
     return packaging != null
-        ? max((askedAmount / packaging!.defaultAmount).floor(), 0)
+        ? max((askedAmount / packaging!.defaultAmount!).floor(), 0)
         : 0;
   }
 
@@ -142,8 +141,8 @@ class MutationProvider extends ChangeNotifier {
   }
 
   needToScan() {
-    return line.product.serialNumberField != null &&
-        line.product.serialNumberField == true;
+    return line.product!.serialNumberField != null &&
+        line.product!.serialNumberField == true;
   }
 
   addItem(StockMutationItem value) {
@@ -220,7 +219,7 @@ class MutationProvider extends ChangeNotifier {
 
   handleProductCancelAmount(CacheProductStatus status) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = '${line.id}_${line.product.id}';
+    final key = '${line.id}_${line.product!.id}';
     switch (status) {
       case CacheProductStatus.set:
         prefs.setInt(key, this.cancelRestProductAmount);
@@ -247,7 +246,7 @@ class MutationProvider extends ChangeNotifier {
 
   handleProductBackorderAmount(CacheProductStatus status) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = '${line.id}_${line.product.id}_backorder';
+    final key = '${line.id}_${line.product!.id}_backorder';
     switch (status) {
       case CacheProductStatus.set:
         prefs.setInt(key, this.backorderRestProductAmount);

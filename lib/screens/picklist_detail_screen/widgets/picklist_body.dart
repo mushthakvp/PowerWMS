@@ -7,7 +7,6 @@ import 'package:scanner/models/base_response.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/settings.dart';
-import 'package:scanner/models/stock_mutation.dart';
 import 'package:scanner/providers/mutation_provider.dart';
 import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/providers/stockmutation_needto_process_provider.dart';
@@ -19,7 +18,6 @@ import 'package:scanner/screens/picklist_detail_screen/picklist_utilities/pickli
 import 'package:scanner/screens/picklist_product_screen/parse_handler_service.dart';
 import 'package:scanner/screens/picklist_product_screen/picklist_product_screen.dart';
 import 'package:scanner/util/widget/popup.dart';
-import 'package:scanner/widgets/barcode_input.dart';
 import 'package:scanner/widgets/product_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -266,8 +264,14 @@ class PicklistWidget extends StatelessWidget {
   final Function moveToProduct;
   final Function isCurrentWarehouse;
 
-  PicklistWidget(this.isFinishAtBottom, this.lines, this.search, this.prefs,
-      this.moveToProduct, this.isCurrentWarehouse);
+  PicklistWidget(
+    this.isFinishAtBottom,
+    this.lines,
+    this.search,
+    this.prefs,
+    this.moveToProduct,
+    this.isCurrentWarehouse,
+  );
 
   @override
   Widget build(BuildContext context) {

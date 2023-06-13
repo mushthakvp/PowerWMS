@@ -26,7 +26,6 @@ class PicklistRepository {
       final list = await _apiProvider.getPicklists(search);
       _dbProvider.savePicklists(list);
     }
-
     yield* stream;
   }
 

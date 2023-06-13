@@ -53,6 +53,7 @@ class SettingsApiProvider {
     } else {
       print('NO INTERNET');
     }
+    return null;
   }
 
   Future<UserInfo?> _getUserInfoFromLocal() async {

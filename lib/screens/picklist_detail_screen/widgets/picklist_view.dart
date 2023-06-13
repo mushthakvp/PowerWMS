@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scanner/dio.dart';
 import 'package:scanner/l10n/app_localizations.dart';
-import 'package:scanner/log.dart';
 import 'package:scanner/models/picklist.dart';
 import 'package:scanner/models/picklist_line.dart';
 import 'package:scanner/models/stock_mutation.dart';

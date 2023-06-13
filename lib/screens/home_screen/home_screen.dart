@@ -9,12 +9,13 @@ import 'package:scanner/models/settings.dart';
 import 'package:scanner/providers/settings_provider.dart';
 import 'package:scanner/screens/count_screen/count_screen.dart';
 import 'package:scanner/screens/home_screen/widgets/grid_item.dart';
-import 'package:scanner/screens/log_screen/log_screen.dart';
 import 'package:scanner/screens/picklist_home_screen/picklists_home_screen.dart';
 import 'package:scanner/screens/products_screen/products_screen.dart';
 import 'package:scanner/screens/serial_number_homescreen/seriel_number_home_screen.dart';
 import 'package:scanner/widgets/settings_dialog.dart';
 import 'package:scanner/widgets/wms_app_bar.dart';
+
+import '../pick_list_view/view/pick_list_view.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -137,7 +138,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                     item['title'](context),
                     item['icon'],
                     onTap: () {
-                      Navigator.pushNamed(context, item['route']);
+                      index == 1
+                          ? Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => PickListViewV2()))
+                          : Navigator.pushNamed(context, item['route']);
                     },
                   );
                 },

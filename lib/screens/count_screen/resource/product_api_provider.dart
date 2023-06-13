@@ -118,12 +118,9 @@ class ProductApiProvider {
         print(response.statusCode);
         return compute(
             parseProductStock, response.data! as Map<String, dynamic>);
-      } else {
-        print("sdfkv");
-      }
-    } catch (e) {
-      print("sdfkv");
-    }
+      } else {}
+    } catch (e) {}
+    return null;
   }
 
   Future<ProductPriceModel> fetchProductPrice(
@@ -149,7 +146,6 @@ class ProductApiProvider {
       return compute(
           parseProductPrice, response.data[0]! as Map<String, dynamic>);
     } else {
-      print("badd errirr");
       return ProductPriceModel();
     }
   }
